@@ -21,7 +21,7 @@
 --- Zone size: 390x172 1/1
 --- Zone size: 460x252 1/1 (no sliders/trim/topbar)
 
-local unitToString = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "km/h", "mph", "m", "m", "f", "�C", "�C", "�F", "%", "mAh", "W", "mW", "dB", "rpms", "g", "�", "Rad" }
+local unitToString = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "km/h", "mph", "m", "m", "f", "°C", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpms", "g", "°", "Rad" }
 
 local _options = {
 	{ "Source"      , SOURCE,   1 },
@@ -31,7 +31,7 @@ local _options = {
 }
 
 
-function getFieldUnits(Source)
+local function getFieldUnits(Source)
 	local fieldinfo = getFieldInfo(Source)
 	if (fieldinfo == nil) then
 	  print(string.format("getFieldInfo(%s)==nil", Source))
@@ -65,7 +65,7 @@ function getFieldUnits(Source)
 end
 
 
-function create(zone, options)
+local function  create(zone, options)
 	-- calculate image file name
 	local imageFileHighAsRed   = "/WIDGETS/Gauge2/img/h_"          .. zone.h .. ".png"
 	local imageFileHighAsGreen = "/WIDGETS/Gauge2/img/h_"          .. zone.h .. "_op.png"
@@ -94,7 +94,7 @@ function create(zone, options)
 
 end
 
-function printSomeInfo(wgt)
+local function printSomeInfo(wgt)
 
 	local filedKey = wgt.options.Source
 	print("wgt.options.Source:" .. wgt.options.Source)
@@ -128,7 +128,7 @@ function printSomeInfo(wgt)
 
 end
 
-function getPrecentegeValue(wgt)
+local function getPrecentegeValue(wgt)
 
 	printSomeInfo(wgt)
 
@@ -157,7 +157,7 @@ function getPrecentegeValue(wgt)
 
 end
 
-function drawGauge(wgt)
+local function drawGauge(wgt)
 
 	lcd.drawBitmap(wgt.bgImage, wgt.zone.x, wgt.zone.y)
 
@@ -217,12 +217,16 @@ function drawGauge(wgt)
 
 end
 
-function update(wgt, options)
+local function update(wgt, options)
 	wgt.options = options
 end
 
-function refresh(wgt)
+local function refresh(wgt)
+	if (wgt         == nil) then return end
+	if (wgt.options == nil) then return end
+	if (wgt.zone    == nil) then return end
 	drawGauge(wgt)
+	lcd.drawText(wgt.zone.x+100, wgt.zone.y, string.format("%d%%", getUsage()), SMLSIZE + CUSTOM_COLOR) -- ???
 end
 
 return { name="Gauge2", options=_options, create=create, update=update, refresh=refresh }
