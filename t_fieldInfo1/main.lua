@@ -191,4 +191,4 @@ local function refresh(wgt)
   end
 end
 
-return { name = "test_fieldInfo", options = options, create = create, update = update, background = background, refresh = refresh }
+return { name = "t_fieldInfo1", options = options, create = create, update = update, background = background, refresh = refresh }
