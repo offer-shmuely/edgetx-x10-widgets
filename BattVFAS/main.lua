@@ -16,7 +16,7 @@
 ---- #                                                                       #
 ---- #########################################################################
 
--- Horus Widget to display the levels of single voltage lipo battery
+-- Horus Widget to display the levels of lipo battery by VFAS sensor
 -- 3djc & Offer Shmuely
 -- Date: 2020
 -- ver: 0.1
@@ -27,6 +27,9 @@ local _options = {
   { "Shadow",     BOOL,   0     },
   { "LowestCell", BOOL,   1     }   -- 0=main voltage display shows all-cell-voltage, 1=main voltage display shows lowest-cell
 }
+
+-- Data gathered from commercial lipo sensors
+local myArrayPercentList = { {3,0},{3.093,1},{3.196,2},{3.301,3},{3.401,4},{3.477,5},{3.544,6},{3.601,7},{3.637,8},{3.664,9},{3.679,10},{3.683,11},{3.689,12},{3.692,13},{3.705,14},{3.71,15},{3.713,16},{3.715,17},{3.72,18},{3.731,19},{3.735,20},{3.744,21},{3.753,22},{3.756,23},{3.758,24},{3.762,25},{3.767,26},{3.774,27},{3.78,28},{3.783,29},{3.786,30},{3.789,31},{3.794,32},{3.797,33},{3.8,34},{3.802,35},{3.805,36},{3.808,37},{3.811,38},{3.815,39},{3.818,40},{3.822,41},{3.825,42},{3.829,43},{3.833,44},{3.836,45},{3.84,46},{3.843,47},{3.847,48},{3.85,49},{3.854,50},{3.857,51},{3.86,52},{3.863,53},{3.866,54},{3.87,55},{3.874,56},{3.879,57},{3.888,58},{3.893,59},{3.897,60},{3.902,61},{3.906,62},{3.911,63},{3.918,64},{3.923,65},{3.928,66},{3.939,67},{3.943,68},{3.949,69},{3.955,70},{3.961,71},{3.968,72},{3.974,73},{3.981,74},{3.987,75},{3.994,76},{4.001,77},{4.007,78},{4.014,79},{4.021,80},{4.029,81},{4.036,82},{4.044,83},{4.052,84},{4.062,85},{4.074,86},{4.085,87},{4.095,88},{4.105,89},{4.111,90},{4.116,91},{4.12,92},{4.125,93},{4.129,94},{4.135,95},{4.145,96},{4.176,97},{4.179,98},{4.193,99},{4.2,100} }
 
 -- This function is run once at the creation of the widget
 local function create(zone, options)
@@ -84,7 +87,9 @@ local function onTelemetryResetEvent(wgt)
   wgt.telemResetCount = wgt.telemResetCount + 1
 
   wgt.cellDataLive = {0,0,0,0,0,0}
+  wgt.cellDataLivePercent = {0,0,0,0,0,0}
   wgt.cellDataHistoryLowest = {5,5,5,5,5,5}
+  wgt.cellDataHistoryLowestPercent = {5,5,5,5,5,5}
   wgt.cellDataHistoryCellLowest = 5
 end
 
@@ -130,9 +135,6 @@ local function getCellPercent(cellValue)
     return 100
   end
 
-  -- Data gathered from commercial lipo sensors
-  local myArrayPercentList = { {3,0},{3.093,1},{3.196,2},{3.301,3},{3.401,4},{3.477,5},{3.544,6},{3.601,7},{3.637,8},{3.664,9},{3.679,10},{3.683,11},{3.689,12},{3.692,13},{3.705,14},{3.71,15},{3.713,16},{3.715,17},{3.72,18},{3.731,19},{3.735,20},{3.744,21},{3.753,22},{3.756,23},{3.758,24},{3.762,25},{3.767,26},{3.774,27},{3.78,28},{3.783,29},{3.786,30},{3.789,31},{3.794,32},{3.797,33},{3.8,34},{3.802,35},{3.805,36},{3.808,37},{3.811,38},{3.815,39},{3.818,40},{3.822,41},{3.825,42},{3.829,43},{3.833,44},{3.836,45},{3.84,46},{3.843,47},{3.847,48},{3.85,49},{3.854,50},{3.857,51},{3.86,52},{3.863,53},{3.866,54},{3.87,55},{3.874,56},{3.879,57},{3.888,58},{3.893,59},{3.897,60},{3.902,61},{3.906,62},{3.911,63},{3.918,64},{3.923,65},{3.928,66},{3.939,67},{3.943,68},{3.949,69},{3.955,70},{3.961,71},{3.968,72},{3.974,73},{3.981,74},{3.987,75},{3.994,76},{4.001,77},{4.007,78},{4.014,79},{4.021,80},{4.029,81},{4.036,82},{4.044,83},{4.052,84},{4.062,85},{4.074,86},{4.085,87},{4.095,88},{4.105,89},{4.111,90},{4.116,91},{4.12,92},{4.125,93},{4.129,94},{4.135,95},{4.145,96},{4.176,97},{4.179,98},{4.193,99},{4.2,100} }
-
   for i, v in ipairs(myArrayPercentList) do
     if v[1] >= cellValue then
       result = v[2]
@@ -155,7 +157,6 @@ local function fillDataForSingleVoltage(wgt, singleVoltage)
   return {singleVoltage}
 end
 
-
 --- This function returns a table with cels values
 local function calculateBatteryData(wgt)
 
@@ -163,6 +164,10 @@ local function calculateBatteryData(wgt)
 
   if type(newCellData) == "table" then
     -- multi cell values using FLVSS liPo Voltage Sensor
+    if (#newCellData > 1) then
+      wgt.isDataAvailable = false
+      return
+    end
 
   elseif newCellData ~= nil and newCellData >= 1 then
     -- single cell or VFAS lipo sensor
@@ -178,7 +183,7 @@ local function calculateBatteryData(wgt)
 
   -- this is necessary for simu where cell-count can change
   if #wgt.cellDataHistoryLowest ~= #newCellData then
-    wgt.cellDataHistoryLowest = {}
+    wgt.cellDataHistoryLowest = {5,5,5,5,5,5}
     for k, v in pairs(newCellData) do
       wgt.cellDataHistoryLowest[k] = 5 -- invalid reading, set high value so the min() will update it soon
     end
@@ -267,6 +272,7 @@ end
 local function getRangeColor(value, green_value, red_value)
   local range = math.abs(green_value - red_value)
   if range==0 then return lcd.RGB(0, 0xdf, 0) end
+  if value==nil then return lcd.RGB(0, 0xdf, 0) end
 
   if green_value > red_value then
     if value > green_value then return lcd.RGB(0, 0xdf, 0) end
@@ -336,10 +342,6 @@ local function refreshZoneMedium(wgt)
   -- more info if 1/4 is high enough (without trim & slider)
   if wgt.zone.h > 80 then
     lcd.drawText(wgt.zone.x     , wgt.zone.y + 70, string.format("Min %2.2fV", wgt.cellDataHistoryCellLowest), SMLSIZE + CUSTOM_COLOR + wgt.no_telem_blink)
-    if (wgt.cellCount > 1) then
-      lcd.drawText(wgt.zone.x     , wgt.zone.y + 84, string.format("%2.2fV"   , wgt.secondaryValue), SMLSIZE + CUSTOM_COLOR + wgt.no_telem_blink)
-      lcd.drawText(wgt.zone.x + 50, wgt.zone.y + 84, string.format("dV %2.2fV", wgt.cellMax - wgt.cellMin), SMLSIZE + CUSTOM_COLOR + wgt.no_telem_blink)
-    end
   end
 
   -- fill batt
@@ -493,6 +495,7 @@ end
 local function refresh(wgt)
 
   if (wgt         == nil) then return end
+  if type(wgt) ~= "table" then return end
   if (wgt.options == nil) then return end
   if (wgt.zone    == nil) then return end
   if (wgt.options.LowestCell == nil) then return end
@@ -520,8 +523,7 @@ local function refresh(wgt)
   elseif wgt.zone.w  > 150 and wgt.zone.h >  28 then refreshZoneSmall(wgt)
   elseif wgt.zone.w  >  65 and wgt.zone.h >  35 then refreshZoneTiny(wgt)
   end
-  lcd.drawText(wgt.zone.x, wgt.zone.y, string.format("r:%d", wgt.telemResetCount), SMLSIZE + CUSTOM_COLOR + RIGHT) -- ?????????????????????????
 
 end
 
-return { name="BattCheckSingleVoltage", options=_options, create=create, update=update, background=background, refresh=refresh }
+return { name="BattVFAS", options=_options, create=create, update=update, background=background, refresh=refresh }
