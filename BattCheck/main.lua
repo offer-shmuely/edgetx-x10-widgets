@@ -267,14 +267,6 @@ local function calculateBatteryData(wgt)
     return
   end
 
-  -- this is necessary for simu where cell-count can change
-  if #wgt.cellDataHistoryLowest ~= #newCellData then
-    wgt.cellDataHistoryLowest = {5,5,5,5,5,5}
-    for k, v in pairs(newCellData) do
-      wgt.cellDataHistoryLowest[k] = 5 -- invalid reading, set high value so the min() will update it soon
-    end
-  end
-
   local cellMax = 0
   local cellMin = 5
   local cellSum = 0
