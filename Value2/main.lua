@@ -4,9 +4,10 @@
 -- ver: 0.1
 
 local unitToString = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "km/h", "mph", "m", "m", "f", "°C", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpms", "g", "°", "Rad" }
+local unitToString = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "km/h", "mph", "m", "m", "f", "°C", "°C", "°F", "%", "dB", "mAh", "W", "mW",  "rpms", "g", "°", "Rad" }
 
 local options = {
-  { "Source", SOURCE, 1 },
+  { "Source", SOURCE, 251 }, -- RSSI
   { "TextColor", COLOR, YELLOW }
 }
 
@@ -28,7 +29,9 @@ local function update(wgt, options)
 end
 
 local function getWidgetValue(wgt)
-  local currentValue = getValue(wgt.options.Source) / 10.24
+  local currentValue = getValue(wgt.options.Source)
+
+  --local currentValue = getValue(wgt.options.Source) / 10.24
   print(string.format("%2.1fV", currentValue)) -- ???
   print("Source: " .. wgt.options.Source .. ",currentValue: " .. currentValue)
 
@@ -38,14 +41,14 @@ local function getWidgetValue(wgt)
   else
     local txt = fieldinfo['name'] .. "(id:" .. fieldinfo['id']
       .. ")"
-      .. "=" .. fieldValue
-      .. txtUnit
-      .. " [desc: " .. fieldinfo['desc'] .. "]"
+      --.. "=" .. fieldValue
+      --.. txtUnit
+      --.. " [desc: " .. fieldinfo.desc .. "]"
 
 
     print("getFieldInfo()="   .. txt)
-    --print("getFieldInfo().name:" .. fieldinfo.name)
-    --print("getFieldInfo().desc:" .. fieldinfo.desc)
+    print("getFieldInfo().name:" .. fieldinfo.name)
+    print("getFieldInfo().desc:" .. fieldinfo.desc)
 
     local txtUnit = "---"
     if (fieldinfo['unit']) then
@@ -130,9 +133,9 @@ end
 --- Size is 390x172 1/1
 --- Size is 460x252 1/1 (no sliders/trim/topbar)
 local function refreshZoneXLarge(wgt)
-  lcd.drawSource(wgt.zone.x, wgt.zone.y + 15, wgt.options.Source, CUSTOM_COLOR)
+  lcd.drawSource(wgt.zone.x, wgt.zone.y + 15, wgt.options.Source, MIDSIZE + BLUE)
   --lcd.drawNumber(wgt.zone.x, wgt.zone.y + 75, getWidgetValue(wgt), XXLSIZE + CUSTOM_COLOR)
-  lcd.drawText(wgt.zone.x, wgt.zone.y + 75, getWidgetValue(wgt), XXLSIZE + CUSTOM_COLOR)
+  lcd.drawText(wgt.zone.x, wgt.zone.y + 75, getWidgetValue(wgt), XXLSIZE + YELLOW)
 end
 
 function refresh(wgt)
@@ -140,8 +143,9 @@ function refresh(wgt)
   if (wgt == nil) then return end
   if (wgt.options == nil) then return end
 
-  lcd.setColor(CUSTOM_COLOR, wgt.options.TextColor)
+  --lcd.setColor(CUSTOM_COLOR, wgt.options.TextColor)
 
+  --lcd.drawText(10,10, "getWidgetValue(wgt)", XXLSIZE + BLACK)
   calculateData(wgt)
 
   if     wgt.zone.w > 380 and wgt.zone.h > 165 then refreshZoneXLarge(wgt)
