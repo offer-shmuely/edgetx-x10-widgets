@@ -135,6 +135,9 @@ local function testPrint(wgt)
   showField(wgt, 'mAH', 100)
   showField(wgt, 'Cel1', 120)
   showField(wgt, 'Bat1', 140)
+  showField(wgt, 'Tmr1', 150)
+  showField(wgt, 'TMR1', 160)
+  showField(wgt, 'timer1', 170)
   return
 end
 

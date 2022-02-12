@@ -97,6 +97,7 @@ function refresh(wgt)
   showField(wgt, 'RSSI', 50)
   showField(wgt, 'RSSI-', 65)
   showField(wgt, 'RSSI+', 80)
+  showField(wgt, 'ALT', 100)
 
 
 end
