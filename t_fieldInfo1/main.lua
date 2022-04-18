@@ -12,29 +12,12 @@ local options = {
 -- workaround for companion simulator issues
 local function isWidgetInvalid(wgt)
 
-  if (wgt == nil) then
-    return false
-  end
-
-  if type(wgt) ~= "table" then
-    return false
-  end
-
-  if (wgt.options == nil) then
-    return false
-  end
-
-  if type(wgt.options) ~= "table" then
-    return false
-  end
-
-  if (wgt.zone == nil) then
-    return false
-  end
-
-  if type(wgt.zone) ~= "table" then
-    return false
-  end
+  if (wgt == nil) then return false end
+  if type(wgt) ~= "table" then return false end
+  if (wgt.options == nil) then return false end
+  if type(wgt.options) ~= "table" then return false end
+  if (wgt.zone == nil) then return false end
+  if type(wgt.zone) ~= "table" then return false end
   --print("aaaaa create::wgt=" .. type(wgt))
   --print("aaaaa create::options=" .. type(options))
 end

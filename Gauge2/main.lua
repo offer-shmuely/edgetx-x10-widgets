@@ -1,232 +1,290 @@
 -- Gauge widget, to provide real-time gauge
 -- Possible usages are: Temp / rpm / batt-capacity visualizing.
--- Version        : 2.0
--- Original Author: Herman Kruisman (herman@ccme.nl, Tadango online)
+-- Version        : 0.1
 -- Author         : Offer Shmuely
--- Option         : Source, min / max value
+-- Option         : Source, min / max value / HighAsGreen
 
-
--- Zone sizes WxH(wo menu / w menu):
--- 2x4 = 160x32
--- 2x2 = 225x122/98
--- 2x1 = 225x252/207
--- 2+1 = 192x152 & 180x70
--- 1x1 = 460/390x252/217/172
---Heights: 32,70,98,122,152,172,207,217,252
-
---- Zone size: 160x32 1/8th
---- Zone size: 180x70 1/4th  (with sliders/trim)
---- Zone size: 225x98 1/4th  (no sliders/trim)
---- Zone size: 192x152 1/2
---- Zone size: 390x172 1/1
---- Zone size: 460x252 1/1 (no sliders/trim/topbar)
-
-local unitToString = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "km/h", "mph", "m", "m", "f", "°C", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpms", "g", "°", "Rad" }
+local value1 = { 0, 0, 100, -1 }
+local value2 = { 95, 0, 100, -1 }
+local cx = { 200, 197, 203, 1 }
+local cy = { 100, 99, 101, 0 }
+local cr = { 60, 55, 90, 1 }
 
 local _options = {
-	{ "Source"      , SOURCE,   1 },
-	{ "Min"         , VALUE ,   0 , -1024, 1024 },
-	{ "Max"         , VALUE , 100 , -1024, 1024 },
-	{ "HighAsGreen" , BOOL  ,   1 }
+  { "Source", SOURCE, 1 },
+  { "Min", VALUE, 0, -1024, 1024 },
+  { "Max", VALUE, 100, -1024, 1024 },
+  { "HighAsGreen", BOOL, 1 }
 }
 
-
-local function getFieldUnits(Source)
-	local fieldinfo = getFieldInfo(Source)
-	if (fieldinfo == nil) then
-	  print(string.format("getFieldInfo(%s)==nil", Source))
-	else
-	  local txt = fieldinfo['name'] .. "(id:" .. fieldinfo['id']
-		.. ")"
-		.. "=" .. fieldValue
-		.. txtUnit
-		.. " [desc: " .. fieldinfo['desc'] .. "]"
-  
-  
-		print("getFieldInfo()="   .. txt)
-		--print("getFieldInfo().name:" .. fieldinfo.name)
-		--print("getFieldInfo().desc:" .. fieldinfo.desc)
-  
-		local txtUnit = "---"
-		if (fieldinfo['unit']) then
-			local idUnit = fieldinfo['unit']
-
-			if (idUnit > 0 and idUnit < #unitToString) then
-				print("idUnit: " .. idUnit)
-				txtUnit = unitToString[idUnit]
-				print("txtUnit: " .. txtUnit)
-				return txtUnit
-			end
-		end
-	end
-	
-	return 'no-units'
-
+--------------------------------------------------------------
+local function log(s)
+  --return;
+  print("Gauge2: " .. s)
 end
+--------------------------------------------------------------
 
+local function create(zone, options)
+  local wgt = {
+    zone = zone,
+    options = options
+  }
 
-local function  create(zone, options)
-	-- calculate image file name
-	local imageFileHighAsRed   = "/WIDGETS/Gauge2/img/h_"          .. zone.h .. ".png"
-	local imageFileHighAsGreen = "/WIDGETS/Gauge2/img/h_"          .. zone.h .. "_op.png"
-	local circleFile           = "/WIDGETS/Gauge2/img/arm_circle_" .. zone.h .. ".png"
-	local highAsGreen = options.HighAsGreen % 2 -- modulo due to bug that cause the value to be other than 0|1
-	local imgBg = Bitmap.open(imageFileHighAsRed)
-	if (highAsGreen == 1) then
-		imgBg = Bitmap.open(imageFileHighAsGreen)
-	end
-
-	local units = getFieldUnits(options.Source)
-
-	-- 
-	local wgt = {
-		zone=zone,
-		options=options,
-		bgImage=imgBg,
-		circleImage = Bitmap.open(circleFile),
-		units=units
-	}
-
-	-- cleanup
-	imageFileHighAsRed = nil
-	imageFileHighAsGreen = nil
-	return wgt
-
-end
-
-local function printSomeInfo(wgt)
-
-	local filedKey = wgt.options.Source
-	print("wgt.options.Source:" .. wgt.options.Source)
-	print("filedKey:" .. filedKey)
-	
-	local fieldInfo = getFieldInfo('alt')
-	if fieldInfo == nil then
-		print("fieldInfo:" .. 'nil')
-	else
-		print("fieldInfo:" .. fieldInfo)
-	end
-
-	local fieldInfo1 = getFieldInfo(filedKey)
-	if fieldInfo1 == nil then
-		print("fieldInfo1:" .. 'nil')
-	else
-		print("fieldInfo1:" .. fieldInfo1)
-	end
-
-	--local fieldInfo1 = getFieldInfo(filedKey).id
-	--print("getFieldInfo().id:" .. getFieldInfo(filedKey).id)
-	--print("getFieldInfo().name:" .. getFieldInfo(filedKey).name)
-	--print("getFieldInfo().desc:" .. getFieldInfo(filedKey).desc)
-	--if (getFieldInfo(filedKey).unit) then
-	--	print("getFieldInfo().unit:" .. getFieldInfo(filedKey).unit)
-	--
-	--end
-
-	local units = getFieldUnits(wgt.options.Source)
-	print("units:" .. units)
-
-end
-
-local function getPrecentegeValue(wgt)
-
-	printSomeInfo(wgt)
-
-	local valStr = 'N/A' .. wgt.units
-	--value = 60
-	local value = getValue(wgt.options.Source)
-
-	if(value == nil) then
-		return nil,nil
-	end
-	
-	-- local valStr = string.format("%2.1fV %s", value, getFieldInfo(filedKey).name)
-
-	--Value from source in percentage
-	local percentageValue = value * 10 - wgt.options.Min;
-
-	percentageValue = (percentageValue / (wgt.options.Max - wgt.options.Min)) * 100
-
-	if percentageValue > 100 then
-		percentageValue = 100
-	elseif percentageValue < 0 then
-		percentageValue = 0
-	end
-
-	return percentageValue, valStr
-
-end
-
-local function drawGauge(wgt)
-
-	lcd.drawBitmap(wgt.bgImage, wgt.zone.x, wgt.zone.y)
-
-
-	percentageValue, valStr = getPrecentegeValue(wgt)
-
-	--min = 5.54
-	--max = 0.8
-	local degrees = 5.51 - (percentageValue / (100 / 4.74));
-
-	local x2 = math.floor(wgt.zone.x + (wgt.zone.h/2) + (math.sin(degrees) * (wgt.zone.h/2.3)))
-	local y2 = math.floor(wgt.zone.y + (wgt.zone.h/2) + (math.cos(degrees) * (wgt.zone.h/2.3)))
-
-	lcd.setColor(CUSTOM_COLOR, lcd.RGB(0,0,255))
-	lcd.setColor(CUSTOM_COLOR, lcd.RGB(255,255,255))
-	for deg = 0, 3, 0.05 do
-		local x1 = math.floor(wgt.zone.x + (wgt.zone.h/2) - (math.sin(deg) * (20/2.3)))
-		local y1 = math.floor(wgt.zone.y + (wgt.zone.h/2) - (math.cos(deg) * (20/2.3)))
-		lcd.drawLine(x1, y1, x2, y2, SOLID, CUSTOM_COLOR)
-	end
-
-	lcd.setColor(CUSTOM_COLOR, lcd.RGB(255,255,255))
-	lcd.drawBitmap(wgt.circleImage, wgt.zone.x, wgt.zone.y )
-
-	local flags1 = DBLSIZE +RIGHT + TEXT_COLOR
-
-
-	if wgt.zone.w < 100 or wgt.zone.h < 60 then
-		flags1 = flags1 + SMLSIZE
-	end
-
-	if     wgt.zone.w  > 380 and wgt.zone.h > 165 then
-		-- 1/1
-		lcd.drawSource(wgt.zone.x + wgt.zone.w, wgt.zone.y + 1, wgt.options.Source, DBLSIZE +RIGHT + TEXT_COLOR)
-		lcd.drawText  (wgt.zone.x + wgt.zone.w, wgt.zone.y + 50, valStr, XXLSIZE +RIGHT + TEXT_COLOR)
-	elseif wgt.zone.w  > 180 and wgt.zone.h > 145 then
-		--1/2
-		lcd.drawSource(wgt.zone.x + wgt.zone.w, wgt.zone.y + 1, wgt.options.Source, DBLSIZE +RIGHT + TEXT_COLOR)
-		lcd.drawText  (wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 19, valStr, flags1)
-	elseif wgt.zone.w  > 170 and wgt.zone.h >  65 then
-		--1/4
-		lcd.drawSource(wgt.zone.x + 120, wgt.zone.y + 1, wgt.options.Source, MIDSIZE + TEXT_COLOR)
-		lcd.drawText  (wgt.zone.x + 120, wgt.zone.y + 40, valStr,            MIDSIZE + TEXT_COLOR)
-	elseif wgt.zone.w  > 150 and wgt.zone.h >  28 then
-		--1/8
-		lcd.drawSource(wgt.zone.x + 70, wgt.zone.y + 1, wgt.options.Source, SMLSIZE + TEXT_COLOR)
-		lcd.drawText  (wgt.zone.x + 110, wgt.zone.y + 1, valStr, SMLSIZE +TEXT_COLOR)
-	elseif wgt.zone.w  >  65 and wgt.zone.h >  35 then
-		--tobbar
-	end
-
-	--if wgt.zone.w > wgt.zone.h * 1.6 or wgt.zone.h > 100 then
-	--	lcd.drawSource(wgt.zone.x + wgt.zone.w, wgt.zone.y + 1, wgt.options.Source, flags1)
-	--	--lcd.drawNumber(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 19, value, flags1)
-	--	lcd.drawText  (wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 19, valStr, flags1)
-	--end
-
+  return wgt
 end
 
 local function update(wgt, options)
-	wgt.options = options
+  wgt.options = options
 end
 
-local function refresh(wgt)
-	if (wgt         == nil) then return end
-	if (wgt.options == nil) then return end
-	if (wgt.zone    == nil) then return end
-	drawGauge(wgt)
-	lcd.drawText(wgt.zone.x+100, wgt.zone.y, string.format("%d%%", getUsage()), SMLSIZE + CUSTOM_COLOR) -- ???
+local function drawArm(armX, armY, armR, percentageValue, color)
+  --min = 5.54
+  --max = 0.8
+  local degrees = 5.51 - (percentageValue / (100 / 4.74));
+  local xh = math.floor(armX + (math.sin(degrees) * armR))
+  local yh = math.floor(armY + (math.cos(degrees) * armR))
+
+  --lcd.setColor(CUSTOM_COLOR, lcd.RGB(0, 0, 255))
+  --lcd.setColor(CUSTOM_COLOR, lcd.RGB(255, 255, 255))
+  lcd.setColor(CUSTOM_COLOR, color)
+
+  local x1 = math.floor(armX - (math.sin(0) * (20 / 2.3)))
+  local y1 = math.floor(armY - (math.cos(0) * (20 / 2.3)))
+  local x2 = math.floor(armX - (math.sin(3) * (20 / 2.3)))
+  local y2 = math.floor(armY - (math.cos(3) * (20 / 2.3)))
+  lcd.drawFilledTriangle(x1, y1, x2, y2, xh, yh, CUSTOM_COLOR)
 end
 
-return { name="Gauge2", options=_options, create=create, update=update, refresh=refresh }
+-- This function returns green at gvalue, red at rvalue and graduate in between
+local function getRangeColor(value, red_value, green_value)
+  local range = math.abs(green_value - red_value)
+  if range == 0 then
+    return lcd.RGB(0, 0xdf, 0)
+  end
+  if value == nil then
+    return lcd.RGB(0, 0xdf, 0)
+  end
+
+  if green_value > red_value then
+    if value > green_value then
+      return lcd.RGB(0, 0xdf, 0)
+    end
+    if value < red_value then
+      return lcd.RGB(0xdf, 0, 0)
+    end
+    g = math.floor(0xdf * (value - red_value) / range)
+    r = 0xdf - g
+    return lcd.RGB(r, g, 0)
+  else
+    if value < green_value then
+      return lcd.RGB(0, 0xdf, 0)
+    end
+    if value > red_value then
+      return lcd.RGB(0xdf, 0, 0)
+    end
+    r = math.floor(0xdf * (value - green_value) / range)
+    g = 0xdf - r
+    return lcd.RGB(r, g, 0)
+  end
+end
+
+local function drawGauge(wgt, centerX, centerY, centreR, percentageValue, percentageValueMin, percentageValueMax, txt1, txt2)
+  local fender = 4
+  local tickWidth = 9
+  local armCenterR = centreR / 2.5
+  local armR = centreR - 8
+  local txtSize = DBLSIZE
+  if centreR < 65 then
+    txtSize = MIDSIZE
+  end
+  if centreR < 30 then
+    txtSize = SMLSIZE
+  end
+
+  -- main gauge background
+  lcd.drawFilledCircle(centerX, centerY, centreR, lcd.RGB(0x1A1A1A))
+
+  -- fender
+  lcd.drawAnnulus(centerX, centerY, centreR - fender, centreR, 0, 360, BLACK)
+
+  -- ticks
+  --lcd.drawAnnulus(centerX, centerY, centreR - fender-3 - tickWidth, centreR - fender -3 ,  270 ,270 + 8, YELLOW)
+  --lcd.drawAnnulus(centerX, centerY, centreR - fender-3 - tickWidth, centreR - fender -3 ,  278 + 2 ,278 + 2 + 8, YELLOW)
+  --lcd.drawAnnulus(centerX, centerY, centreR - fender-3 - tickWidth, centreR - fender -3 ,  288 + 2 ,288 + 2 + 8, YELLOW)
+
+  for i = 0, 210, 10 do
+    --log("wgt.options.HighAsGreen: " .. wgt.options.HighAsGreen)
+    if (wgt.options.HighAsGreen == 1) then
+      lcd.setColor(CUSTOM_COLOR, getRangeColor(i, 0, 210 - 10))
+    else
+      lcd.setColor(CUSTOM_COLOR, getRangeColor(i, 210 - 10, 0))
+      --lcd.setColor(CUSTOM_COLOR, getRangeColor(i, 120 , 30))
+    end
+    lcd.drawAnnulus(centerX, centerY, centreR - fender - 3 - tickWidth, centreR - fender - 3, 250 + i, 250 + i + 7, CUSTOM_COLOR)
+    --lcd.drawAnnulus(centerX, centerY, centreR -fender -3 -tickWidth,     centreR -fender -3 , 250 +i, 250 +i +7, YELLOW)
+    --lcd.drawAnnulus(centerX, centerY, centreR -fender -3 -tickWidth -15, centreR -fender -3 -tickWidth -4 , 250 +i, 250 +i +7, RED)
+  end
+  --lcd.drawPie(centerX,centerY,centreR - fender, 0,20)
+
+  local armColor = lcd.RGB(255, 255, 255)
+  local armColorMin, armColorMax
+  if (wgt.options.HighAsGreen == 1) then
+    armColorMin = lcd.RGB(100, 0, 0)
+    armColorMax = lcd.RGB(0, 100, 0)
+  else
+    armColorMin = lcd.RGB(0, 100, 0)
+    armColorMax = lcd.RGB(100, 0, 0)
+  end
+
+  if percentageValueMin ~= nil and percentageValueMax ~= nil then
+    drawArm(centerX, centerY, armR, percentageValueMin, armColorMin)
+    drawArm(centerX, centerY, armR, percentageValueMax, armColorMax)
+  end
+  drawArm(centerX, centerY, armR, percentageValue, armColor)
+
+  -- hide the base of the arm
+  lcd.drawFilledCircle(centerX, centerY, armCenterR, BLACK)
+
+  lcd.drawText(centerX + 7, centerY - 10, txt2, CENTER + SMLSIZE + WHITE) -- XXLSIZE/DBLSIZE/MIDSIZE/SMLSIZE
+  lcd.drawText(centerX + 10, centerY + 30, txt1, CENTER + txtSize + WHITE)
+
+end
+
+-- -----------------------------------------------------------------------------------------------------
+
+local function getPercentageValue(value, options_min, options_max)
+  if value == nil then
+    return nil
+  end
+
+  local percentageValue = value - options_min;
+  percentageValue = (percentageValue / (options_max - options_min)) * 100
+  percentageValue = tonumber(percentageValue)
+  percentageValue = math.floor( percentageValue )
+
+  if percentageValue > 100 then
+    percentageValue = 100
+  elseif percentageValue < 0 then
+    percentageValue = 0
+  end
+
+  log("getPercentageValue(" .. value .. ", " .. options_min .. ", " .. options_max .. ")-->" .. percentageValue)
+  return percentageValue
+end
+
+local function getWidgetValue(wgt)
+  local currentValue = getValue(wgt.options.Source)
+  local sourceName = getSourceName(wgt.options.Source)
+  sourceName = string.sub(sourceName,2,-1) -- ???? why?
+  log("Source: " .. wgt.options.Source .. ",name: " .. sourceName)
+
+  --local currentValue = getValue(wgt.options.Source) / 10.24
+  log(string.format("%2.1fV", currentValue)) -- ???
+  log("Source: " .. wgt.options.Source .. ",currentValue: " .. currentValue)
+
+  local fieldinfo = getFieldInfo(wgt.options.Source)
+  if (fieldinfo == nil) then
+    log(string.format("getFieldInfo(%s)==nil", wgt.options.Source))
+  else
+    local txt = fieldinfo['name'] .. "(id:" .. fieldinfo['id']
+      .. ")"
+    --.. "=" .. fieldValue
+    --.. txtUnit
+    --.. " [desc: " .. fieldinfo.desc .. "]"
+
+
+    log("getFieldInfo()=" .. txt)
+    log("getFieldInfo().name:" .. fieldinfo.name)
+    log("getFieldInfo().desc:" .. fieldinfo.desc)
+
+    local txtUnit = "---"
+    if (fieldinfo['unit']) then
+      local idUnit = fieldinfo['unit']
+
+      --if (idUnit > 0 and idUnit < #unitToString) then
+      --  log("idUnit: " .. idUnit)
+      --  txtUnit = unitToString[idUnit]
+      --  log("txtUnit: " .. txtUnit)
+      --  wgt.unit = txtUnit
+      --end
+    else
+      local idUnit = -1
+    end
+  end
+
+  local minValue = getValue(sourceName .. "-")
+  local maxValue = getValue(sourceName .. "+")
+  log("min/max: " .. minValue .. " < " .. currentValue .. " < " .. maxValue)
+
+  if (currentValue == nil)
+  then
+    --return fieldinfo.name, string.format("%2.1f %s", wgt.lastValue, wgt.unit)
+    return fieldinfo.name, wgt.lastValue, minValue, maxValue, idUnit
+  end
+  --return fieldinfo.name, string.format("%2.1f %s", currentValue, wgt.unit)
+  --return fieldinfo.name, currentValue, minValue, maxValue, idUnit
+  return sourceName, currentValue, minValue, maxValue, idUnit
+end
+
+local function refresh(wgt, event, touchState)
+  if (wgt == nil) then
+    return
+  end
+  if (wgt.options == nil) then
+    return
+  end
+  if (wgt.zone == nil) then
+    return
+  end
+
+  local ver, radio, maj, minor, rev, osname = getVersion()
+  log("version: " .. ver)
+  if maj == 2 and minor < 6 then
+    log("this widget is NOT SUPPORTED at this version")
+  end
+
+  if osname ~= "EdgeTX" then
+    log("this widget is supported only on EdgeTX:" .. osname)
+  end
+
+  local w_name, value, minValue, maxValue, w_unit = getWidgetValue(wgt)
+  if (value == nil) then
+    return
+  end
+
+  local zone_x
+  local zone_y
+  local zone_w
+  local zone_h
+
+  if (event ~= nil) then
+    -- full screen
+    --font_size = XXLSIZE
+    --font_size_header = DBLSIZE
+    zone_x = 0
+    zone_y = 0
+    zone_w = 460
+    zone_h = 252
+  else
+    zone_x = wgt.zone.x
+    zone_y = wgt.zone.y
+    zone_w = wgt.zone.w
+    zone_h = wgt.zone.h
+  end
+  local centerX = zone_x + (zone_w / 2)
+  local centerY = zone_y + (zone_h / 2)
+  local centerR = math.min(zone_h, zone_w) / 2
+
+  local percentageValue = getPercentageValue(value, wgt.options.Min, wgt.options.Max)
+  local percentageValueMin = getPercentageValue(minValue, wgt.options.Min, wgt.options.Max)
+  local percentageValueMax = getPercentageValue(maxValue, wgt.options.Min, wgt.options.Max)
+  --drawGauge(wgt, centerX, centerY, centerR, percentageValue, percentageValue .. "%", "Fuel\n  %")
+
+  drawGauge(wgt, centerX, centerY, centerR, percentageValue, percentageValueMin, percentageValueMax, percentageValue .. "%", w_name)
+
+  -- widget load (debugging)
+  lcd.drawText(zone_x + 10, zone_y, string.format("load: %d%%", getUsage()), SMLSIZE, LIGHTGREY) -- ???
+  lcd.drawText(zone_x + 10, zone_y + 10, string.format("R: %d", cr[1]), SMLSIZE, LIGHTGREY) -- ???
+end
+
+return { name = "Gauge2", options = _options, create = create, update = update, refresh = refresh }
