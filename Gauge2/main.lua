@@ -3,6 +3,7 @@
 -- Version        : 0.1
 -- Author         : Offer Shmuely
 
+local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
 
 local _options = {
   { "Source", SOURCE, 1 },
@@ -64,11 +65,9 @@ local function getWidgetValue(wgt)
   local currentValue = getValue(wgt.options.Source)
   local sourceName = getSourceName(wgt.options.Source)
   sourceName = string.sub(sourceName,2,-1) -- ???? why?
-  log("Source: " .. wgt.options.Source .. ",name: " .. sourceName)
+  --log("Source: " .. wgt.options.Source .. ",name: " .. sourceName)
 
   --local currentValue = getValue(wgt.options.Source) / 10.24
-  log(string.format("%2.1fV", currentValue)) -- ???
-  log("Source: " .. wgt.options.Source .. ",currentValue: " .. currentValue)
 
   local fieldinfo = getFieldInfo(wgt.options.Source)
   if (fieldinfo == nil) then
@@ -76,24 +75,28 @@ local function getWidgetValue(wgt)
     return sourceName, -1, nil, nil, ""
   end
 
+  log("")
   local txtUnit = "-"
   if (fieldinfo.unit) then
     log("have unit")
-    log("idUnit: " .. fieldinfo.unit)
-    txtUnit = "??" -- ???
-    --if (idUnit > 0 and idUnit < #unitToString) then
-    --  txtUnit = unitToString[idUnit]
-    --  log("txtUnit: " .. txtUnit)
-    --end
+    if (fieldinfo.unit > 0 and fieldinfo.unit < #UNIT_ID_TO_STRING) then
+      txtUnit = UNIT_ID_TO_STRING[fieldinfo.unit]
+    end
   end
 
-  log(string.format("  id: %s", fieldinfo.id))
-  log(string.format("  name: %s (sourceName: %s)", fieldinfo.name, sourceName))
+  log(string.format("id: %s", fieldinfo.id))
+  log(string.format("  sourceName: %s", sourceName))
+  log(string.format("  curr: %2.1f", currentValue))
+  log(string.format("  name: %s", fieldinfo.name))
   log(string.format("  desc: %s", fieldinfo.desc))
   log(string.format("  idUnit: %s", fieldinfo.unit))
   log(string.format("  txtUnit: %s", txtUnit))
 
+  --for i=1, #UNIT_ID_TO_STRING, 1 do
+  --  log(string.format("  unit %d: %s", i, UNIT_ID_TO_STRING[i]))
+  --end
   -- try to get min/max value (if exist)
+
   local minValue = getValue(sourceName .. "-")
   local maxValue = getValue(sourceName .. "+")
   --log("min/max: " .. minValue .. " < " .. currentValue .. " < " .. maxValue)

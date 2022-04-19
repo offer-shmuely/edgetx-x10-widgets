@@ -10,8 +10,7 @@ local options = {
   { "TextColor", COLOR, YELLOW }
 }
 
-local unitToString = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "km/h", "mph", "m", "m", "f", "°C", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpms", "g", "°", "Rad" }
-local unitToString = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "km/h", "mph", "m", "m", "f", "°C", "°C", "°F", "%", "dB", "mAh", "W", "mW",  "rpms", "g", "°", "Rad" }
+local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
 
 --------------------------------------------------------------
 local function log(s)
@@ -88,16 +87,22 @@ local function getWidgetValue(wgt)
     log("getFieldInfo().desc:" .. fieldinfo.desc)
 
     local txtUnit = "---"
-    if (fieldinfo['unit']) then
-      local idUnit = fieldinfo['unit']
+    if (fieldinfo.unit) then
 
-      if (idUnit > 0 and idUnit < #unitToString) then
-        log("idUnit: " .. idUnit)
-        txtUnit = unitToString[idUnit]
+      if (fieldinfo.unit > 0 and fieldinfo.unit < #UNIT_ID_TO_STRING) then
+        log("idUnit: " .. fieldinfo.unit)
+        txtUnit = UNIT_ID_TO_STRING[fieldinfo.unit]
         log("txtUnit: " .. txtUnit)
         wgt.unit = txtUnit
       end
     end
+    log(string.format("id: %s", fieldinfo.id))
+    log(string.format("  sourceName: %s", sourceName))
+    log(string.format("  curr: %2.1f", currentValue))
+    log(string.format("  name: %s", fieldinfo.name))
+    log(string.format("  desc: %s", fieldinfo.desc))
+    log(string.format("  idUnit: %s", fieldinfo.unit))
+    log(string.format("  txtUnit: %s", txtUnit))
 
 
   end

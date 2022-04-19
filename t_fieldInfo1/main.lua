@@ -1,6 +1,6 @@
 -- test_getFieldInfo
 
-local unitToString = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "km/h", "mph", "m", "m", "f", "°C", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpms", "g", "°", "Rad" }
+local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
 
 local options = {
   { "Sensor", SOURCE, 0 },
@@ -82,9 +82,9 @@ local function showField(wgt, fieldName, offsetY)
     end
     --print ("aaaa unit1: " .. txtUnit)
     local txtUnit = "---"
-    if (idUnit > 0 and idUnit < #unitToString) then
-      print("idUnit: " .. idUnit)
-      txtUnit = unitToString[idUnit]
+    if (fieldinfo.unit > 0 and fieldinfo.unit < #UNIT_ID_TO_STRING) then
+      print("idUnit: " .. fieldinfo.unit)
+      txtUnit = UNIT_ID_TO_STRING[fieldinfo.unit]
       print("txtUnit: " .. txtUnit)
     end
 
