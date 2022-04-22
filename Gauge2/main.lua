@@ -1,15 +1,58 @@
--- Gauge widget, to provide real-time fancy gauge display with needle
--- Possible  visualizing usages: RSSI, Temp, rpm, fuel, vibration, batt-capacity
--- Version        : 0.1
--- Author         : Offer Shmuely
+---- #########################################################################
+---- #                                                                       #
+---- # Telemetry Widget script for FrSky Horus/Radio Master TX16s            #
+---- # Copyright (C) OpenTX                                                  #
+-----#                                                                       #
+---- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
+---- #                                                                       #
+---- # This program is free software; you can redistribute it and/or modify  #
+---- # it under the terms of the GNU General Public License version 2 as     #
+---- # published by the Free Software Foundation.                            #
+---- #                                                                       #
+---- # This program is distributed in the hope that it will be useful        #
+---- # but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+---- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+---- # GNU General Public License for more details.                          #
+---- #                                                                       #
+---- #########################################################################
+
+-- This Gauge2 widget display a fancy old analog gauge with needle
+-- if the min & max input value are -1, it will automatically select min/max based on the source name.
+-- common sources are:
+--   * RSSI
+--   * Temp
+--   * rpm
+--   * fuel
+--   * vibration (heli)
+--   * Transmitter Battery
+--   * batt-capacity
+--   * A1/A2 analog voltage
+
+-- Version: 0.1
+-- Author : Offer Shmuely
 
 local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
+local DEFAULT_MIN_MAX = {
+  {"RSSI" ,  0, 100, 0},
+  {"RxBt" ,  4,  10, 1},
+  {"TxBt" ,  6, 8.4, 1},
+  {"Batt" ,  6, 8.4, 1},
+  {"cell" ,3.5, 4.2, 1},
+  {"Fuel" ,  0, 100, 0},
+  {"Vibr" ,  0, 100, 0},
+  {"Temp" ,  30,120, 0},
+  {"Tmp1" ,  30,120, 0},
+  {"Tmp2" ,  30,120, 0},
+}
 
 local _options = {
-  { "Source", SOURCE, 1 },
-  { "Min", VALUE, 0, -1024, 1024 },
-  { "Max", VALUE, 100, -1024, 1024 },
-  { "HighAsGreen", BOOL, 1 }
+  --{ "Source", SOURCE, 253 }, -- RSSI
+  --{ "Source", SOURCE, 243 }, -- TxBt
+  { "Source", SOURCE, 256 }, -- RxBt
+  { "Min", VALUE, -1, -1024, 1024 },
+  { "Max", VALUE, -1, -1024, 1024 },
+  { "HighAsGreen", BOOL, 1 },
+  { "Precision", VALUE, 1 , 0 , 1}
 }
 
 --------------------------------------------------------------
@@ -19,23 +62,58 @@ local function log(s)
 end
 --------------------------------------------------------------
 
+local function setAutoMinMax(wgt)
+  --if wgt.options.Min ~= -1 and wgt.options.Max ~= -1 then
+  --if wgt.options.Min ~= wgt.options.Max then
+  --  print("Gauge2-setting: " .. "no need for AutoMinMax")
+  --  return
+  --end
+
+  print("Gauge2-setting: " .. "AutoMinMax")
+  local sourceName = getSourceName(wgt.options.Source)
+  sourceName = string.sub(sourceName,2,-1) -- ???? why?
+  print("Gauge2-setting: " .. "AutoMinMax, source:" .. sourceName)
+
+  for i=1, #DEFAULT_MIN_MAX, 1 do
+    local def_key = DEFAULT_MIN_MAX[i][1]
+    local def_min = DEFAULT_MIN_MAX[i][2]
+    local def_max = DEFAULT_MIN_MAX[i][3]
+    local def_precision = DEFAULT_MIN_MAX[i][4]
+
+    if def_key == sourceName then
+      log(string.format("setting min-max from default: %s: min:%d, max:%d, precision:%d", def_key, def_min, def_max, def_precision))
+      wgt.options.Min = def_min
+      wgt.options.Max = def_max
+      wgt.options.precision = def_precision
+      break
+    end
+  end
+
+  if wgt.options.Min == wgt.options.Max then
+    print("Gauge2-setting: " .. "AutoMinMax else")
+    wgt.options.Min = 0
+    wgt.options.Max = 100
+  end
+
+end
+
 local function create(zone, options)
+  local GaugeClass = loadScript("/WIDGETS/Gauge2/gauge_core.lua")
 
   local wgt = {
     zone = zone,
     options = options,
-    --gauge1 = GaugeClass(1, 2)
-
+    gauge1 = GaugeClass(options.HighAsGreen, 2)
   }
-  local GaugeClass = loadScript("/WIDGETS/Gauge2/gauge_core.lua")
-  wgt.gauge1 = GaugeClass(wgt.options.HighAsGreen, 2)
 
+  setAutoMinMax(wgt)
 
   return wgt
 end
 
 local function update(wgt, options)
   wgt.options = options
+  setAutoMinMax(wgt)
   wgt.gauge1.HighAsGreen = wgt.options.HighAsGreen
 end
 
@@ -57,14 +135,20 @@ local function getPercentageValue(value, options_min, options_max)
     percentageValue = 0
   end
 
-  --log("getPercentageValue(" .. value .. ", " .. options_min .. ", " .. options_max .. ")-->" .. percentageValue)
+  log("getPercentageValue(" .. value .. ", " .. options_min .. ", " .. options_max .. ")-->" .. percentageValue)
   return percentageValue
 end
 
 local function getWidgetValue(wgt)
   local currentValue = getValue(wgt.options.Source)
   local sourceName = getSourceName(wgt.options.Source)
-  sourceName = string.sub(sourceName,2,-1) -- ???? why?
+  log("aaaaaa:  "..  sourceName)
+  log("aaaaaa:  ".. sourceName .. ": " .. string.byte(string.sub(sourceName, 1, 1)))
+
+  -- workaround for bug in getFiledInfo()
+  if string.byte(string.sub(sourceName,1,1)) > 127 then
+    sourceName = string.sub(sourceName,2,-1) -- ???? why?
+  end
   --log("Source: " .. wgt.options.Source .. ",name: " .. sourceName)
 
   --local currentValue = getValue(wgt.options.Source) / 10.24
@@ -75,15 +159,15 @@ local function getWidgetValue(wgt)
     return sourceName, -1, nil, nil, ""
   end
 
-  log("")
   local txtUnit = "-"
   if (fieldinfo.unit) then
-    log("have unit")
+    --log("have unit")
     if (fieldinfo.unit > 0 and fieldinfo.unit < #UNIT_ID_TO_STRING) then
       txtUnit = UNIT_ID_TO_STRING[fieldinfo.unit]
     end
   end
 
+  log("")
   log(string.format("id: %s", fieldinfo.id))
   log(string.format("  sourceName: %s", sourceName))
   log(string.format("  curr: %2.1f", currentValue))
@@ -92,11 +176,7 @@ local function getWidgetValue(wgt)
   log(string.format("  idUnit: %s", fieldinfo.unit))
   log(string.format("  txtUnit: %s", txtUnit))
 
-  --for i=1, #UNIT_ID_TO_STRING, 1 do
-  --  log(string.format("  unit %d: %s", i, UNIT_ID_TO_STRING[i]))
-  --end
   -- try to get min/max value (if exist)
-
   local minValue = getValue(sourceName .. "-")
   local maxValue = getValue(sourceName .. "+")
   --log("min/max: " .. minValue .. " < " .. currentValue .. " < " .. maxValue)
@@ -104,7 +184,7 @@ local function getWidgetValue(wgt)
   return sourceName, currentValue, minValue, maxValue, txtUnit
 end
 
-local function refresh_full_screen(wgt, event, touchState, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
+local function refresh_app_mode(wgt, event, touchState, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
   local zone_w = 460
   local zone_h = 252
 
@@ -151,13 +231,19 @@ local function refresh(wgt, event, touchState)
 
   if (event ~= nil) then
     -- full screen (app mode)
-    refresh_full_screen(wgt, event, touchState, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
+    refresh_app_mode(wgt, event, touchState, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
   else
     -- regular screen
     local centerX = wgt.zone.x + (wgt.zone.w / 2)
     local centerY = wgt.zone.y + (wgt.zone.h / 2)
     local centerR = math.min(wgt.zone.h, wgt.zone.w) / 2
-    wgt.gauge1.drawGauge(centerX, centerY, centerR, percentageValue, percentageValueMin, percentageValueMax, percentageValue .. w_unit, w_name)
+    local value_fmt = ""
+    if wgt.options.precision == 0 then
+      value_fmt = string.format("%2.0f%s", value, w_unit)
+    else
+      value_fmt = string.format("%2.1f%s", value, w_unit)
+    end
+    wgt.gauge1.drawGauge(centerX, centerY, centerR, percentageValue, percentageValueMin, percentageValueMax, value_fmt, w_name)
   end
 
   -- widget load (debugging)

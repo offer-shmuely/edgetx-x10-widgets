@@ -118,8 +118,10 @@ function self.drawGauge(centerX, centerY, centreR, percentageValue, percentageVa
   -- hide the base of the arm
   lcd.drawFilledCircle(centerX, centerY, armCenterR, BLACK)
 
-  lcd.drawText(centerX + 7, centerY - 10, txt2, CENTER + SMLSIZE + WHITE) -- XXLSIZE/DBLSIZE/MIDSIZE/SMLSIZE
-  lcd.drawText(centerX + 10, centerY + 30, txt1, CENTER + txtSize + WHITE)
+  -- text in center
+  lcd.drawText(centerX + 0, centerY - 8, txt2, CENTER + SMLSIZE + WHITE) -- XXLSIZE/DBLSIZE/MIDSIZE/SMLSIZE
+  -- text below
+  lcd.drawText(centerX + 8, centerY + 30, txt1, CENTER + txtSize + WHITE)
 
 end
 

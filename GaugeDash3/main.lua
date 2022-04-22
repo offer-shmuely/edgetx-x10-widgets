@@ -19,13 +19,13 @@ end
 --------------------------------------------------------------
 
 local function create(zone, options)
+  local GaugeClass = loadScript("/WIDGETS/".. app_name .. "/gauge_core.lua")
   local wgt = {
     zone = zone,
     options = options,
-    bgImage = imgBg
+    bgImage = imgBg,
+    gauge1 = GaugeClass(options.HighAsGreen, 2)
   }
-  local GaugeClass = loadScript("/WIDGETS/".. app_name .. "/gauge_core.lua")
-  wgt.gauge1 = GaugeClass(wgt.options.HighAsGreen, 2)
 
   return wgt
 end
