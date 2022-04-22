@@ -136,7 +136,8 @@ local function refresh(wgt, event, touchState)
   end
 
   font_size_header = SMLSIZE
-  if (event ~= nil) then -- full screen
+  if (event ~= nil) then
+    -- app mode (full screen)
     font_size = XXLSIZE
     font_size_header = DBLSIZE
     zone_w = 460

@@ -497,7 +497,7 @@ local function refreshZoneLarge(wgt)
 
 end
 
-local function refreshFullScreenImpl(wgt, x, w, y, h)
+local function refreshAppModeImpl(wgt, x, w, y, h)
 
   local myBatt = { ["x"] = 10, ["y"] = 20, ["w"] = 80, ["h"] = 121, ["segments_h"] = 30, ["color"] = WHITE, ["cath_w"] = 30, ["cath_h"] = 10 }
 
@@ -564,17 +564,17 @@ local function refreshZoneXLarge(wgt)
   local y = wgt.zone.y
   local h = wgt.zone.h
 
-  refreshFullScreenImpl(wgt, x, w, y, h)
+  refreshAppModeImpl(wgt, x, w, y, h)
 end
 
 
---- Zone size: 460x252 (full screen app mode)
-local function refreshFullScreen(wgt, event, touchState)
+--- Zone size: 460x252 - app mode (full screen)
+local function refreshAppMode(wgt, event, touchState)
   local x = 0
   local w = 460
   local y = 0
   local h = 252
-  refreshFullScreenImpl(wgt, x, w, y, h)
+  refreshAppModeImpl(wgt, x, w, y, h)
 end
 
 
@@ -621,7 +621,7 @@ local function refresh(wgt, event, touchState)
 
   local t4 = getUsage();
   if (event ~= nil) then
-    refreshFullScreen(wgt, event, touchState)
+    refreshAppMode(wgt, event, touchState)
   elseif wgt.zone.w > 380 and wgt.zone.h > 165 then   refreshZoneXLarge(wgt)
   elseif wgt.zone.w > 180 and wgt.zone.h > 145 then   refreshZoneLarge(wgt)
   elseif wgt.zone.w > 170 and wgt.zone.h > 65 then    refreshZoneMedium(wgt)
