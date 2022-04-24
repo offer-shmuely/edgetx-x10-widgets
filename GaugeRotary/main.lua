@@ -189,12 +189,12 @@ local function refresh_app_mode(wgt, event, touchState, w_name, value, minValue,
   local zone_h = 252
 
   local centerX = zone_w / 2
-  wgt.gauge1.drawGauge(centerX, 120, 110, percentageValue, percentageValueMin, percentageValueMax, percentageValue .. w_unit, w_name)
+  wgt.gauge1.drawGauge(centerX, 120, 110, false, percentageValue, percentageValueMin, percentageValueMax, percentageValue .. w_unit, w_name)
   lcd.drawText(10, 10, string.format("%d%s", percentageValue, w_unit), XXLSIZE + YELLOW)
 
   -- min / max
-  wgt.gauge1.drawGauge(100, 180, 50, percentageValueMin, nil, nil, "", w_name)
-  wgt.gauge1.drawGauge(zone_w - 100, 180, 50, percentageValueMax, nil, nil, "", w_name)
+  wgt.gauge1.drawGauge(100, 180, 50, false, percentageValueMin, nil, nil, "", w_name)
+  wgt.gauge1.drawGauge(zone_w - 100, 180, 50, false, percentageValueMax, nil, nil, "", w_name)
   lcd.drawText(50, 230, string.format("Min: %d%s", percentageValueMin, w_unit), MIDSIZE)
   lcd.drawText(350, 230, string.format("Max: %d%s", percentageValueMax, w_unit), MIDSIZE)
 
@@ -204,6 +204,8 @@ local function refresh(wgt, event, touchState)
   if (wgt == nil) then return end
   if (wgt.options == nil) then return end
   if (wgt.zone == nil) then return end
+
+  --lcd.drawRectangle(wgt.zone.x, wgt.zone.y, wgt.zone.w, wgt.zone.h, BLACK)
 
   local ver, radio, maj, minor, rev, osname = getVersion()
   --log("version: " .. ver)
@@ -234,20 +236,45 @@ local function refresh(wgt, event, touchState)
     refresh_app_mode(wgt, event, touchState, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
   else
     -- regular screen
-    local centerX = wgt.zone.x + (wgt.zone.w / 2)
-    local centerY = wgt.zone.y + (wgt.zone.h / 2)
-    local centerR = math.min(wgt.zone.h, wgt.zone.w) / 2
     local value_fmt = ""
     if wgt.options.precision == 0 then
       value_fmt = string.format("%2.0f%s", value, w_unit)
     else
       value_fmt = string.format("%2.1f%s", value, w_unit)
     end
-    wgt.gauge1.drawGauge(centerX, centerY, centerR, percentageValue, percentageValueMin, percentageValueMax, value_fmt, w_name)
+
+    -- calculate low-profile or full-circle
+    local isFull = true
+    if wgt.zone.h < 60 then
+      lcd.drawText(wgt.zone.x + 10, wgt.zone.y, "too small for Gauge2", SMLSIZE + RED)
+      return
+    elseif wgt.zone.h < 90 then
+      log("widget too low (" .. wgt.zone.h .. ")")
+      if wgt.zone.w * 1.2 > wgt.zone.h then
+        log("wgt wider then height, use low profile ")
+        isFull = false
+      end
+    end
+
+    local centerR, centerX, centerY
+
+    if isFull then
+      centerR = math.min(wgt.zone.h, wgt.zone.w) / 2
+      --local centerX = wgt.zone.x + (wgt.zone.w / 2)
+      centerX = wgt.zone.x + wgt.zone.w - centerR
+      centerY = wgt.zone.y + (wgt.zone.h / 2)
+    else
+      centerR = wgt.zone.h - 20
+      centerX = wgt.zone.x + wgt.zone.w - centerR
+      centerY = wgt.zone.y + wgt.zone.h - 20
+    end
+
+    wgt.gauge1.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, value_fmt, w_name)
+    --lcd.drawText(wgt.zone.x, wgt.zone.y, value_fmt, XXLSIZE + YELLOW)
   end
 
   -- widget load (debugging)
   lcd.drawText(wgt.zone.x + 10, wgt.zone.y, string.format("load: %d%%", getUsage()), SMLSIZE + GREY) -- ???
 end
 
-return { name = "Gauge2", options = _options, create = create, update = update, refresh = refresh }
+return { name = "GaugeRotary", options = _options, create = create, update = update, refresh = refresh }
