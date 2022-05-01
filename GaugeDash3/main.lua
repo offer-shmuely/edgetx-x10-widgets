@@ -1,8 +1,8 @@
 local app_name = "GaugeDash3"
 local value2 = { 95, 0, 100 , -1}
-local cx = { 200, 197, 203, 1}
-local cy = { 100, 99, 101, 0 }
-local cr = { 60, 55, 90, 1 }
+local cx = { 200, 197, 400, 1}
+local cy = { 100, 90, 121, 0 }
+local cr = { 60, 40, 90, 1 }
 
 local _options = {
   { "Source", SOURCE, 1 },
@@ -90,14 +90,15 @@ local function refresh(wgt)
   update_randomizer(cr)
 
   percentageValue2 = getPercentageValue(value2[1], value2[2], value2[3])
-  wgt.gauge1.drawGauge(100, 84, 78, percentageValue2, 0,0,percentageValue2 .. "%", "Fuel\n  %")
-  wgt.gauge1.drawGauge(cx[1], cy[1], cr[1], percentageValue2, 0,0,percentageValue2 .. "%", "Fuel\n  %")
-  wgt.gauge1.drawGauge(300, 150, 60, percentageValue2, 0,0,percentageValue2, "V")
+  wgt.gauge1.drawGauge(100, 84, 78, true, percentageValue2, 0,0,percentageValue2 .. "%", "Fuel\n  %")
+  wgt.gauge1.drawGauge(cx[1], cy[1], cr[1], true, percentageValue2, 0,0,percentageValue2 .. "%", "Fuel\n  %")
+  wgt.gauge1.drawGauge(300, 150, 60, true, percentageValue2, 0,0,percentageValue2, "V")
 
 
   -- widget load (debugging)
-  lcd.drawText(wgt.zone.x +10, wgt.zone.y, string.format("load: %d%%", getUsage()), SMLSIZE +WHITE) -- ???
-  lcd.drawText(wgt.zone.x +200, wgt.zone.y, string.format("R: %d", cr[1]), SMLSIZE +WHITE) -- ???
+  lcd.drawText(wgt.zone.x + 10,  wgt.zone.y, string.format("load: %d%%", getUsage()), SMLSIZE +WHITE) -- ???
+  lcd.drawText(wgt.zone.x + 300, wgt.zone.y, string.format("R: %d", cr[1]), MIDSIZE +WHITE) -- ???
+
 end
 
 return { name = app_name, options = _options, create = create, update = update, refresh = refresh }

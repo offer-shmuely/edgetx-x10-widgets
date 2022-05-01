@@ -1,7 +1,7 @@
 ---- #########################################################################
 ---- #                                                                       #
----- # Telemetry Widget script for FrSky Horus/Radio Master TX16s            #
----- # Copyright (C) OpenTX                                                  #
+---- # Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
+---- # Copyright (C) EdgeTX                                                  #
 -----#                                                                       #
 ---- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
 ---- #                                                                       #
@@ -16,17 +16,21 @@
 ---- #                                                                       #
 ---- #########################################################################
 
--- This Gauge2 widget display a fancy old analog gauge with needle
--- if the min & max input value are -1, it will automatically select min/max based on the source name.
--- common sources are:
---   * RSSI
---   * Temp
---   * rpm
---   * fuel
---   * vibration (heli)
---   * Transmitter Battery
---   * batt-capacity
---   * A1/A2 analog voltage
+--  This Rotary Gauge widget display a fancy old style analog gauge with needle
+--  Options:
+--    HighAsGreen: [checked] for sensor that high values is good (RSSI/Fuel/...)
+--      [checked] for sensor that high values is good (RSSI/Fuel/...)
+--      [un-checked] for sensor that low values is good (Temp/Battery/...)
+--  Note: if the min & max input value are -1, widget will automatically select min/max based on the source name.
+--  common sources are:
+--    * RSSI
+--    * Temp
+--    * rpm
+--    * fuel
+--    * vibration (heli)
+--    * Transmitter Battery
+--    * batt-capacity
+--    * A1/A2 analog voltage
 
 -- Version: 0.1
 -- Author : Offer Shmuely
@@ -46,9 +50,9 @@ local DEFAULT_MIN_MAX = {
 }
 
 local _options = {
-  --{ "Source", SOURCE, 253 }, -- RSSI
+  { "Source", SOURCE, 253 }, -- RSSI
   --{ "Source", SOURCE, 243 }, -- TxBt
-  { "Source", SOURCE, 256 }, -- RxBt
+  --{ "Source", SOURCE, 256 }, -- RxBt
   { "Min", VALUE, -1, -1024, 1024 },
   { "Max", VALUE, -1, -1024, 1024 },
   { "HighAsGreen", BOOL, 1 },
@@ -57,22 +61,25 @@ local _options = {
 
 --------------------------------------------------------------
 local function log(s)
-  --return;
-  print("Gauge2: " .. s)
+  return;
+  --print("GaugeRotary: " .. s)
 end
 --------------------------------------------------------------
 
 local function setAutoMinMax(wgt)
-  --if wgt.options.Min ~= -1 and wgt.options.Max ~= -1 then
+  if wgt.options.Min ~= -1 and wgt.options.Max ~= -1 then
   --if wgt.options.Min ~= wgt.options.Max then
-  --  print("Gauge2-setting: " .. "no need for AutoMinMax")
-  --  return
-  --end
+    print("GaugeRotary-setting: " .. "no need for AutoMinMax")
+    return
+  end
 
-  print("Gauge2-setting: " .. "AutoMinMax")
+  print("GaugeRotary-setting: " .. "AutoMinMax")
   local sourceName = getSourceName(wgt.options.Source)
-  sourceName = string.sub(sourceName,2,-1) -- ???? why?
-  print("Gauge2-setting: " .. "AutoMinMax, source:" .. sourceName)
+  -- workaround for bug in getFiledInfo()
+  if string.byte(string.sub(sourceName,1,1)) > 127 then
+    sourceName = string.sub(sourceName,2,-1) -- ???? why?
+  end
+  print("GaugeRotary-setting: " .. "AutoMinMax, source:" .. sourceName)
 
   for i=1, #DEFAULT_MIN_MAX, 1 do
     local def_key = DEFAULT_MIN_MAX[i][1]
@@ -90,7 +97,7 @@ local function setAutoMinMax(wgt)
   end
 
   if wgt.options.Min == wgt.options.Max then
-    print("Gauge2-setting: " .. "AutoMinMax else")
+    print("GaugeRotary-setting: " .. "AutoMinMax else")
     wgt.options.Min = 0
     wgt.options.Max = 100
   end
@@ -98,7 +105,7 @@ local function setAutoMinMax(wgt)
 end
 
 local function create(zone, options)
-  local GaugeClass = loadScript("/WIDGETS/Gauge2/gauge_core.lua")
+  local GaugeClass = loadScript("/WIDGETS/GaugeRotary/gauge_core.lua")
 
   local wgt = {
     zone = zone,
@@ -185,6 +192,15 @@ local function getWidgetValue(wgt)
 end
 
 local function refresh_app_mode(wgt, event, touchState, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
+  local w_name, value, minValue, maxValue, w_unit = getWidgetValue(wgt)
+  if (value == nil) then
+    return
+  end
+
+  local percentageValue = getPercentageValue(value, wgt.options.Min, wgt.options.Max)
+  local percentageValueMin = getPercentageValue(minValue, wgt.options.Min, wgt.options.Max)
+  local percentageValueMax = getPercentageValue(maxValue, wgt.options.Min, wgt.options.Max)
+
   local zone_w = 460
   local zone_h = 252
 
@@ -199,6 +215,56 @@ local function refresh_app_mode(wgt, event, touchState, w_name, value, minValue,
   lcd.drawText(350, 230, string.format("Max: %d%s", percentageValueMax, w_unit), MIDSIZE)
 
 end
+
+
+local function refresh_widget(wgt, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
+  local w_name, value, minValue, maxValue, w_unit = getWidgetValue(wgt)
+  if (value == nil) then
+    return
+  end
+
+  local percentageValue = getPercentageValue(value, wgt.options.Min, wgt.options.Max)
+  local percentageValueMin = getPercentageValue(minValue, wgt.options.Min, wgt.options.Max)
+  local percentageValueMax = getPercentageValue(maxValue, wgt.options.Min, wgt.options.Max)
+
+  local value_fmt = ""
+  if wgt.options.precision == 0 then
+    value_fmt = string.format("%2.0f%s", value, w_unit)
+  else
+    value_fmt = string.format("%2.1f%s", value, w_unit)
+  end
+
+  -- calculate low-profile or full-circle
+  local isFull = true
+  if wgt.zone.h < 60 then
+    lcd.drawText(wgt.zone.x + 10, wgt.zone.y, "too small for GaugeRotary", SMLSIZE + RED)
+    return
+  elseif wgt.zone.h < 90 then
+    log("widget too low (" .. wgt.zone.h .. ")")
+    if wgt.zone.w * 1.2 > wgt.zone.h then
+      log("wgt wider then height, use low profile ")
+      isFull = false
+    end
+  end
+
+  local centerR, centerX, centerY
+
+  if isFull then
+    centerR = math.min(wgt.zone.h, wgt.zone.w) / 2
+    --local centerX = wgt.zone.x + (wgt.zone.w / 2)
+    centerX = wgt.zone.x + wgt.zone.w - centerR
+    centerY = wgt.zone.y + (wgt.zone.h / 2)
+  else
+    centerR = wgt.zone.h - 20
+    centerX = wgt.zone.x + wgt.zone.w - centerR
+    centerY = wgt.zone.y + wgt.zone.h - 20
+  end
+
+  wgt.gauge1.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, value_fmt, w_name)
+  --lcd.drawText(wgt.zone.x, wgt.zone.y, value_fmt, XXLSIZE + YELLOW)
+
+end
+
 
 local function refresh(wgt, event, touchState)
   if (wgt == nil) then return end
@@ -222,55 +288,12 @@ local function refresh(wgt, event, touchState)
     return
   end
 
-  local w_name, value, minValue, maxValue, w_unit = getWidgetValue(wgt)
-  if (value == nil) then
-    return
-  end
-
-  local percentageValue = getPercentageValue(value, wgt.options.Min, wgt.options.Max)
-  local percentageValueMin = getPercentageValue(minValue, wgt.options.Min, wgt.options.Max)
-  local percentageValueMax = getPercentageValue(maxValue, wgt.options.Min, wgt.options.Max)
-
   if (event ~= nil) then
     -- full screen (app mode)
-    refresh_app_mode(wgt, event, touchState, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
+    refresh_app_mode(wgt, event, touchState)
   else
     -- regular screen
-    local value_fmt = ""
-    if wgt.options.precision == 0 then
-      value_fmt = string.format("%2.0f%s", value, w_unit)
-    else
-      value_fmt = string.format("%2.1f%s", value, w_unit)
-    end
-
-    -- calculate low-profile or full-circle
-    local isFull = true
-    if wgt.zone.h < 60 then
-      lcd.drawText(wgt.zone.x + 10, wgt.zone.y, "too small for Gauge2", SMLSIZE + RED)
-      return
-    elseif wgt.zone.h < 90 then
-      log("widget too low (" .. wgt.zone.h .. ")")
-      if wgt.zone.w * 1.2 > wgt.zone.h then
-        log("wgt wider then height, use low profile ")
-        isFull = false
-      end
-    end
-
-    local centerR, centerX, centerY
-
-    if isFull then
-      centerR = math.min(wgt.zone.h, wgt.zone.w) / 2
-      --local centerX = wgt.zone.x + (wgt.zone.w / 2)
-      centerX = wgt.zone.x + wgt.zone.w - centerR
-      centerY = wgt.zone.y + (wgt.zone.h / 2)
-    else
-      centerR = wgt.zone.h - 20
-      centerX = wgt.zone.x + wgt.zone.w - centerR
-      centerY = wgt.zone.y + wgt.zone.h - 20
-    end
-
-    wgt.gauge1.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, value_fmt, w_name)
-    --lcd.drawText(wgt.zone.x, wgt.zone.y, value_fmt, XXLSIZE + YELLOW)
+    refresh_widget(wgt)
   end
 
   -- widget load (debugging)
