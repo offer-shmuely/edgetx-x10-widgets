@@ -115,7 +115,9 @@ function self.drawGauge(centerX, centerY, centreR, isFull, percentageValue, perc
   for i = 0, to_tick, tick_step do
     --log("HighAsGreen: " .. self.HighAsGreen)
     if (self.HighAsGreen == 1) then
-      lcd.setColor(CUSTOM_COLOR, self.getRangeColor(i, 0, to_tick - 10))
+      local newColor = self.getRangeColor(i, 0, to_tick - 10)
+      lcd.setColor(CUSTOM_COLOR, newColor)
+      --lcd.setColor(CUSTOM_COLOR, self.getRangeColor(i, 0, to_tick - 10))
     else
       lcd.setColor(CUSTOM_COLOR, self.getRangeColor(i, to_tick - 10, 0))
       --lcd.setColor(CUSTOM_COLOR, self.getRangeColor(i, 120 , 30))
@@ -129,11 +131,11 @@ function self.drawGauge(centerX, centerY, centreR, isFull, percentageValue, perc
   local armColor = lcd.RGB(255, 255, 255)
   local armColorMin, armColorMax
   if (self.HighAsGreen == 1) then
-    armColorMin = lcd.RGB(100, 0, 0)
-    armColorMax = lcd.RGB(0, 100, 0)
+    armColorMin = lcd.RGB(200, 0, 0)
+    armColorMax = lcd.RGB(0, 200, 0)
   else
-    armColorMin = lcd.RGB(0, 100, 0)
-    armColorMax = lcd.RGB(100, 0, 0)
+    armColorMin = lcd.RGB(0, 200, 0)
+    armColorMax = lcd.RGB(200, 0, 0)
   end
 
   --self.drawArm(centerX, centerY, armR, 0, armColorMin, isFull)
