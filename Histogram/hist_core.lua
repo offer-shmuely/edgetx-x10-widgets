@@ -101,7 +101,7 @@ end
 
 function self.tableIncrement(t, key)
   for i,n in ipairs(t) do
-    log("[tableIncrement] " .. i .. ". " .. n[1] .. "-" .. n[2])
+    --log("[tableIncrement] " .. i .. ". " .. n[1] .. "-" .. n[2])
 
     if n[1] ~= key then
       log("[tableIncrement]" .. i .. ". " .. n[1] .. "-" .. n[2])
@@ -176,43 +176,36 @@ function self.updateBucketsAuto(wgt_options_source)
   --if self.buckets[value] == nil then
   if self.tableGet(self.buckets, value) == nil then
 
+    -- need to enlarge the table
     table.insert(self.buckets, {value, 0})
     --table.insert(self.buckets, 5)
     --table.insert(self.buckets, 9)
     --self.buckets[5] = 55
     --self.buckets[7] = 77
     --self.buckets[9] = 99
-    --log(string.format("@ self.buckets[9] = %d", self.buckets[9]))
-    --log(string.format("@ self.buckets[7] = %d", self.buckets[7]))
-    --log(string.format("@ self.buckets[5] = %d", self.buckets[5]))
+
+    log("????????????????????filling table gaps")
+    if self.minVal ~= nil and self.maxVal ~= nil then
+      log("filling table gaps")
+      for i = self.minVal, self.maxVal, 1 do
+        if self.tableGet(self.buckets, 1) == nil then
+          log("+++ fill table: ".. i)
+          table.insert(self.buckets, {i, 0})
+        end
+      end
+    end
 
     local sorted_buckets = self.tableSort(self.buckets)
     self.buckets = sorted_buckets
-
 
   end
 
   -- +1 to the sample-count of the correct bucket
   self.tableIncrement(self.buckets, value)
 
-  --self.buckets[value] = self.buckets[value] + 1
-  --log(string.format("self.buckets[%d]: %d", value, self.buckets[value]))
-
-  --for i, v in ipairs(self.buckets) do
-  --  local bucket_val = v[1]
-  --  local sample_count = v[2]
-  --  if value <= bucket_val then
-  --    v[2] = sample_count + 1
-  --    log(string.format("found value: %d - %d", v[1], v[2]))
-  --    break
-  --  end
-  --end
-  --
-
   log("------------------------")
   self.tablePrint(self.buckets, "last")
   log("------------------------")
-
 
   -- calc min/max
   if self.minVal == nil or value < self.minVal
@@ -225,7 +218,7 @@ function self.updateBucketsAuto(wgt_options_source)
     self.maxVal =value
   end
 
-  --log(string.format("minVal: %d, maxVal: %d", self.minVal, self.maxVal))
+  log(string.format("minVal: %d, maxVal: %d", self.minVal, self.maxVal))
 end
 
 function self.drawHist(wgt)

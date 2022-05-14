@@ -4,7 +4,7 @@ local app_name = "Histogram"
 local HistClass = loadScript("/WIDGETS/" .. app_name .. "/hist_core.lua")
 
 -- consts
-local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
+--local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
 
 local _options = {
   { "Source", SOURCE, 253 }, -- RSSI
@@ -12,8 +12,8 @@ local _options = {
   --{ "Source", SOURCE, 256 }, -- RxBt
   { "Min", VALUE, -1, -1024, 1024 },
   { "Max", VALUE, -1, -1024, 1024 },
-  { "HighAsGreen", BOOL, 1 },
-  { "Precision", VALUE, 1 , 0 , 1}
+  --{ "HighAsGreen", BOOL, 1 },
+  { "Precision", VALUE, 1 , 0 , 2}
 }
 --------------------------------------------------------------
 local function log(s)
