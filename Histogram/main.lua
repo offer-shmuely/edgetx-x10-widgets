@@ -1,5 +1,9 @@
 local app_name = "Histogram"
 
+-- imports
+local HistClass = loadScript("/WIDGETS/" .. app_name .. "/hist_core.lua")
+
+-- consts
 local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
 
 local _options = {
@@ -18,21 +22,38 @@ local function log(s)
 end
 --------------------------------------------------------------
 
+local function update(wgt, options)
+  log("+++ function update()")
+  wgt.options = options
+  wgt.hist1 = HistClass(options.Source, 1000)
+
+  local sourceName = getSourceName(wgt.options.Source)
+  log("aaaaaa2:  "..  sourceName)
+  log("aaaaaa2:  ".. sourceName .. ": " .. string.byte(string.sub(sourceName, 1, 1)))
+  -- workaround for bug in getFiledInfo()
+  if string.byte(string.sub(sourceName,1,1)) > 127 then
+    sourceName = string.sub(sourceName,2,-1) -- ???? why?
+  end
+
+  wgt.source_name = sourceName
+  log("wgt.source_name: " .. wgt.source_name)
+
+end
+
 local function create(zone, options)
-  local HistClass = loadScript("/WIDGETS/" .. app_name .. "/hist_core.lua")
+  log("+++ function create()")
+  --local HistClass = loadScript("/WIDGETS/" .. app_name .. "/hist_core.lua")
 
   local wgt = {
     zone = zone,
     options = options,
-    hist1 = HistClass(options.Source, 1000),
+    source_name = "---",
+    hist1 = nil
+    --hist1 = HistClass(options.Source, 1000),
   }
 
+  update(wgt, options)
   return wgt
-end
-
-
-local function update(wgt, options)
-  wgt.options = options
 end
 
 local function getWidgetValueEx(wgt)
@@ -47,7 +68,6 @@ local function getWidgetValueEx(wgt)
   end
   --log("Source: " .. wgt.options.Source .. ",name: " .. sourceName)
 
-  --local currentValue = getValue(wgt.options.Source) / 10.24
 
   local fieldinfo = getFieldInfo(wgt.options.Source)
   if (fieldinfo == nil) then
@@ -85,15 +105,11 @@ local function background(wgt)
 end
 
 local function refresh_app_mode(wgt, event, touchState, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
-
-  wgt.hist1.drawHist(wgt, percentageValue, percentageValueMin, percentageValueMax, value_fmt, w_name)
-
+  wgt.hist1.drawHist(wgt)
 end
 
-local function refresh_widget(wgt, w_name, value, minValue, maxValue, w_unit, percentageValue, percentageValueMin, percentageValueMax)
-
-  wgt.hist1.drawHist(wgt, percentageValue, percentageValueMin, percentageValueMax, value_fmt, w_name)
-
+local function refresh_widget(wgt)
+  wgt.hist1.drawHist(wgt)
 end
 
 local function refresh(wgt, event, touchState)
@@ -101,7 +117,8 @@ local function refresh(wgt, event, touchState)
   if (wgt.options == nil) then return end
   if (wgt.zone == nil) then return end
 
-  background(wgt)
+  --background(wgt)
+  wgt.hist1.updateBucketsIfNeeded()
 
   if (event ~= nil) then
     -- full screen (app mode)
@@ -112,10 +129,10 @@ local function refresh(wgt, event, touchState)
   end
 
   -- Title
-  lcd.drawText(3, 3, "RSSI Histogram", 0 + YELLOW)
+  lcd.drawText(3, 3, string.format("%s Histogram", wgt.source_name), 0 + YELLOW)
 
   -- widget load (debugging)
-  lcd.drawText(wgt.zone.x + 10, wgt.zone.y, string.format("load: %d%%", getUsage()), SMLSIZE + GREY) -- ???
+  lcd.drawText(wgt.zone.x + 200, wgt.zone.y, string.format("load: %d%%", getUsage()), SMLSIZE + GREY) -- ???
 
   return 0
 end
