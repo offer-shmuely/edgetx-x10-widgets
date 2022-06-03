@@ -2,6 +2,7 @@ local app_name = "Histogram"
 
 -- imports
 local HistClass = loadScript("/WIDGETS/" .. app_name .. "/hist_core.lua")
+local ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/tools.lua")
 
 -- consts
 --local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
@@ -26,6 +27,7 @@ local function update(wgt, options)
   log("+++ function update()")
   wgt.options = options
   wgt.hist1 = HistClass(options.Source, 1000)
+  wgt.tools = ToolsClass()
 
   local sourceName = getSourceName(wgt.options.Source)
   log("aaaaaa2:  "..  sourceName)
@@ -42,14 +44,12 @@ end
 
 local function create(zone, options)
   log("+++ function create()")
-  --local HistClass = loadScript("/WIDGETS/" .. app_name .. "/hist_core.lua")
 
   local wgt = {
     zone = zone,
     options = options,
     source_name = "---",
     hist1 = nil
-    --hist1 = HistClass(options.Source, 1000),
   }
 
   update(wgt, options)

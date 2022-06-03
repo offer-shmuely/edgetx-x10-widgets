@@ -1,7 +1,7 @@
 ---- #########################################################################
 ---- #                                                                       #
----- # Telemetry Widget script for FrSky Horus/Radio Master TX16s            #
----- # Copyright (C) OpenTX                                                  #
+---- # Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
+---- # Copyright (C) EdgeTX                                                  #
 -----#                                                                       #
 ---- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
 ---- #                                                                       #
@@ -45,7 +45,7 @@ local defaultSensor = "RxBt" -- RxBt / A1 / A3/ VFAS /RxBt
 --------------------------------------------------------------
 local function log(s)
   return;
-  --print("Batt_A1: " .. s)
+  --print("BattAnalog: " .. s)
 end
 --------------------------------------------------------------
 
