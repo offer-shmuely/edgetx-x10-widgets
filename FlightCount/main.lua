@@ -2,8 +2,8 @@
 -- Offer Shmuely
 -- Date: 2022
 -- ver: 0.1
--- flight considered successful: ofter 20sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
--- flight considered ended: ofter 20sec of battery disconnection (detected by no telemetry)
+-- flight considered successful: after 20sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
+-- flight considered ended: after 20sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9!!!
 
 -- widget assume as follow:
@@ -30,7 +30,14 @@ local tele_is_available
 local motor_active
 local motor_channel_name
 local flight_state = "GROUND"
-local periodic1 = {startTime = getTime(), durationMili = 20000}
+local duration_passed = 0
+
+local default_flight_starting_duration = 20 -- 20 sec to detect fight success
+local default_flight_ending_duration = 8 -- 8 sec to detect fight ended
+local periodic1 = {
+  startTime = getTime(),
+  durationMili = 0
+}
 
 -- imports
 
@@ -39,16 +46,15 @@ local periodic1 = {startTime = getTime(), durationMili = 20000}
 local options = {
   { "switch", SOURCE, 117 },         -- 117== SF (arm/safety switch)
   { "motor_channel", SOURCE, 204 },   -- 204==CH3
-  { "setup_time", VALUE, 30, 0, 120},
-  --{ "text_color", COLOR, YELLOW },
-  { "wait_for_telemetry", BOOL, 1 },   -- only increase flight count if telemetry available
+  { "min_flight_duration", VALUE, default_flight_starting_duration, 1, 120},
+--  { "wait_for_telemetry", BOOL, 1 },   -- only increase flight count if telemetry available
   { "debug", BOOL, 1 }   -- show status on screen
 
 }
 
 local function log(s)
-  --return;
-  print("flightCount: " .. s)
+  return;
+  --print("flightCount: " .. s)
 end
 
 local function update(wgt, options)
@@ -64,9 +70,6 @@ local function update(wgt, options)
 
   fi_mot = getFieldInfo(wgt.options.motor_channel)
   motor_channel_name = fi_mot.name
-
-  model.setGlobalVariable(8, 7, 77)
-  model.setGlobalVariable(8, 6, 66)
 
 end
 
@@ -114,6 +117,7 @@ end
 
 local function periodicHasPassed(t)
   local elapsed = getTime() - t.startTime;
+  log(string.format('elapsed: %d (t.durationMili: %d)', elapsed, t.durationMili))
   local elapsedMili = elapsed * 10;
   if (elapsedMili < t.durationMili) then
     return false;
@@ -185,7 +189,7 @@ function updateMotorStatus(wgt)
 end
 
 function updateSwitchStatus(wgt)
-  if getValue(wgt.options.switch) > 0 then
+  if getValue(wgt.options.switch) < 0 then
     log(string.format("switch status (%s): =ON", wgt.options.switch))
     switch_on = true
     --return 2
@@ -202,23 +206,29 @@ end
 ------------------------------------------------------------
 local function getFlightCount()
   -- get flight count
-  -- get GV9 (index = 8) from Flight mode 8 (FM8)
-  local num_flights = model.getGlobalVariable(8, 8)
+  -- get GV9 (index = 0) from Flight mode 0 (FM0)
+  local num_flights = model.getGlobalVariable(8, 0)
   return num_flights
 end
 
 local function incrementFlightCount()
   local num_flights = getFlightCount()
   local new_flight_count = num_flights + 1
-  model.setGlobalVariable(8, 8, new_flight_count)
+  model.setGlobalVariable(8, 0, new_flight_count)
   log("num_flights updated: " .. new_flight_count)
+
+  -- beep
+  playFile("/WIDGETS/" .. app_name .. "/on_air.wav")
 end
 
 ---------------------------------------------------------------
-local function stateChange(newState)
+local function stateChange(wgt, newState, timer_sec)
   log(string.format("flight_state: %s --> %s", flight_state, newState))
   flight_state = newState
-  periodicStart(periodic1, 10000)
+
+  if (timer_sec > 0) then
+    periodicStart(periodic1, timer_sec * 1000)
+  end
 end
 
 local function background(wgt)
@@ -231,38 +241,48 @@ local function background(wgt)
 
   log(string.format("tele_is_available: %s", tele_is_available))
 
+  -- **** state: GROUND ***
   if flight_state == "GROUND" then
     if (motor_active == true) and (switch_on == true) and (tele_is_available == true) then
-      stateChange("FLIGHT_STARTING")
+      stateChange(wgt, "FLIGHT_STARTING", wgt.options.min_flight_duration)
     end
 
+  -- **** state: FLIGHT_STARTING ***
   elseif flight_state == "FLIGHT_STARTING" then
     if (motor_active == true) and (switch_on == true) and (tele_is_available == true) then
       pt = periodicGetElapsedTime(periodic1)
+      duration_passed = pt
       log("flight_state: FLIGHT_STARTING ..." .. pt)
       if (periodicHasPassed(periodic1)) then
-        stateChange("FLIGHT_ON")
+        stateChange(wgt, "FLIGHT_ON", 0)
+
+        -- yep, we have a good flight, count it!
         incrementFlightCount()
+
       end
     else
-      stateChange("GROUND")
+      stateChange(wgt, "GROUND", 0)
     end
 
+  -- **** state: FLIGHT_ON ***
   elseif flight_state == "FLIGHT_ON" then
     if (tele_is_available == false) then
-      stateChange("FLIGHT_ENDING")
+      stateChange(wgt, "FLIGHT_ENDING", default_flight_ending_duration)
     end
 
+  -- **** state: FLIGHT_ENDING ***
   elseif flight_state == "FLIGHT_ENDING" then
     pt = periodicGetElapsedTime(periodic1)
+    duration_passed = pt
     log("flight_state: FLIGHT_ENDING ..." .. pt)
 
     if (periodicHasPassed(periodic1)) then
-      stateChange("GROUND")
+      stateChange(wgt, "GROUND", 0)
+      playFile("/WIDGETS/" .. app_name .. "/ground.wav")
     end
 
     if (tele_is_available == true) then
-      stateChange("FLIGHT_ON")
+      stateChange(wgt, "FLIGHT_ON", 0)
     end
 
   end
@@ -289,7 +309,7 @@ local function refresh(wgt, event, touchState)
   local num_flights = getFlightCount()
 
   -- header
-  local header = "Flights count:"
+  local header = "Flights:"
   local header_w, header_h = lcd.sizeText(header, SMLSIZE)
 
   local font_size = getFontSize(wgt, num_flights)
@@ -327,8 +347,9 @@ local function refresh(wgt, event, touchState)
   if wgt.options.debug == 1 then
     lcd.drawText(wgt.zone.x, wgt.zone.y + 35, string.format("state: %s", flight_state), SMLSIZE)
     lcd.drawText(wgt.zone.x, wgt.zone.y + 50, string.format("switch(%s): %s", switch_name, ternary(switch_on)), SMLSIZE)
-    lcd.drawText(wgt.zone.x, wgt.zone.y + 65, string.format("telemetry(%s): %s", tele_src_name, ternary(tele_is_available)), SMLSIZE)
-    lcd.drawText(wgt.zone.x, wgt.zone.y + 80, string.format("motor(%s): %s", motor_channel_name, ternary(motor_active)), SMLSIZE)
+    lcd.drawText(wgt.zone.x, wgt.zone.y + 65, string.format("motor(%s): %s", motor_channel_name, ternary(motor_active)), SMLSIZE)
+    lcd.drawText(wgt.zone.x, wgt.zone.y + 80, string.format("telemetry(%s): %s", tele_src_name, ternary(tele_is_available)), SMLSIZE)
+    lcd.drawText(wgt.zone.x, wgt.zone.y + 95, string.format("duration: %.1f (%d)",duration_passed/1000  ,periodic1.durationMili/1000) , SMLSIZE)
   end
 
 end
