@@ -47,29 +47,29 @@ end
 
 local function getFontSize(wgt, txt)
   --wide_txt = string.gsub(txt, "[1-9]", "0")
-  wide_txt = txt
+  local wide_txt = txt
   --log(string.gsub("******* 12:34:56", "[1-9]", "0"))
   log("wide_txt: " .. wide_txt)
 
   local w,h = lcd.sizeText(wide_txt, XXLSIZE)
-  log(string.format("XXLSIZE w: %d, h: %d, %s", w,h, time_str))
+  log(string.format("XXLSIZE w: %d, h: %d, %s", w, h, time_str))
   if w < wgt.zone.w and h <= wgt.zone.h then
     return XXLSIZE
   end
 
   w,h = lcd.sizeText(wide_txt, DBLSIZE)
-  log(string.format("DBLSIZE w: %d, h: %d, %s", w,h, time_str))
+  log(string.format("DBLSIZE w: %d, h: %d, %s", w, h, time_str))
   if w < wgt.zone.w and h <= wgt.zone.h then
     return DBLSIZE
   end
 
   w,h = lcd.sizeText(wide_txt, MIDSIZE)
-  log(string.format("MIDSIZE w: %d, h: %d, %s", w,h, time_str))
+  log(string.format("MIDSIZE w: %d, h: %d, %s", w, h, time_str))
   if w < wgt.zone.w and h <= wgt.zone.h then
     return MIDSIZE
   end
 
-  log(string.format("SMLSIZE w: %d, h: %d, %s", w,h, time_str))
+  log(string.format("SMLSIZE w: %d, h: %d, %s", w, h, time_str))
   return SMLSIZE
 end
 
