@@ -19,7 +19,7 @@
 --   no telemetry for 30s => flight-completed
 
 
-local app_name = "FlightCount"
+local app_name = "FlightsCount"
 
 -- status
 local switch_on
@@ -55,7 +55,7 @@ local options = {
 
 local function log(s)
   return
-  --print("flightCount: " .. s)
+  --print("flightsCount: " .. s)
 end
 
 local function update(wgt, options)
@@ -366,4 +366,4 @@ local function refresh(wgt, event, touchState)
 
 end
 
-return { name = "FlightCount", options = options, create = create, update = update, background = background, refresh = refresh }
+return { name = app_name, options = options, create = create, update = update, background = background, refresh = refresh }
