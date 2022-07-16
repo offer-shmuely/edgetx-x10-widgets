@@ -15,8 +15,8 @@
 
 -- states:
 --   ground --> flight-starting --> flight-on --> flight-ending --> ground
---   all-flags on for 20s => flight-on
---   no telemetry for 30s => flight-completed
+--   all-flags on for 30s => flight-on
+--   no telemetry for 8s  => flight-completed
 
 
 local app_name = "FlightsCount"
@@ -55,7 +55,7 @@ local options = {
 
 local function log(s)
   return
-  --print("flightsCount: " .. s)
+--  print(app_name .. ": " .. s)
 end
 
 local function update(wgt, options)
