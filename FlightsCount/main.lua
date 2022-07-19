@@ -400,6 +400,7 @@ local function refresh(wgt, event, touchState)
 
   -- dbg
   if wgt.options.debug == 1 then
+    lcd.drawText(wgt.zone.x, wgt.zone.y + 20, string.format("DEBUG:"), SMLSIZE)
     lcd.drawText(wgt.zone.x, wgt.zone.y + 35, string.format("state: %s", flight_state), SMLSIZE)
     lcd.drawText(wgt.zone.x, wgt.zone.y + 50, string.format("%s - switch(%s)", ternary(switch_on), switch_name ), SMLSIZE)
     lcd.drawText(wgt.zone.x, wgt.zone.y + 65, string.format("%s - motor(%s) (inv: %s)", ternary(motor_active), motor_channel_name, motor_channel_direction_inv), SMLSIZE)
