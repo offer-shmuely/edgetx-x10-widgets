@@ -72,8 +72,7 @@ local _options = {
 
 --------------------------------------------------------------
 local function log(s)
-  --return;
-  print("GaugeRotary: " .. s)
+  --print("GaugeRotary: " .. s)
 end
 --------------------------------------------------------------
 
