@@ -335,4 +335,4 @@ local function refresh(wgt, event, touchState)
   lcd.drawText(wgt.zone.x + 10, wgt.zone.y, string.format("load: %d%%", getUsage()), SMLSIZE + GREY) -- ???
 end
 
-return { name = "GaugeRotary", options = _options, create = create, update = update, refresh = refresh }
+return { name = app_name, options = _options, create = create, update = update, refresh = refresh }
