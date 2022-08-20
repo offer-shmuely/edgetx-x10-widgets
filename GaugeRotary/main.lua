@@ -262,11 +262,25 @@ local function refresh_widget(wgt)
   local percentageValueMin = getPercentageValue(minValue, wgt.options.Min, wgt.options.Max)
   local percentageValueMax = getPercentageValue(maxValue, wgt.options.Min, wgt.options.Max)
 
+  local value_fmt_min = ""
+  local value_fmt_max = ""
   local value_fmt = ""
   if wgt.options.precision == 0 then
     value_fmt = string.format("%2.0f%s", value, w_unit)
+    if minValue ~= nil then
+      value_fmt_min = string.format("%2.0f%s", minValue, w_unit)
+    end
+    if maxValue ~= nil then
+      value_fmt_max = string.format("%2.0f%s", maxValue, w_unit)
+    end
   else
     value_fmt = string.format("%2.1f%s", value, w_unit)
+    if minValue ~= nil then
+      value_fmt_min = string.format("%2.1f%s", minValue, w_unit)
+    end
+    if maxValue ~= nil then
+      value_fmt_max = string.format("%2.1f%s", maxValue, w_unit)
+    end
   end
 
   -- calculate low-profile or full-circle
@@ -295,8 +309,16 @@ local function refresh_widget(wgt)
     centerY = wgt.zone.y + wgt.zone.h - 20
   end
 
-  wgt.gauge1.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, value_fmt, w_name)
+  wgt.gauge1.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, value_fmt, value_fmt_min, value_fmt_max, w_name)
   --lcd.drawText(wgt.zone.x, wgt.zone.y, value_fmt, XXLSIZE + YELLOW)
+
+
+  -- display min max
+  if isFull == false then
+    lcd.drawText(wgt.zone.x, wgt.zone.y + 20, value_fmt, 0 + YELLOW)
+    lcd.drawText(wgt.zone.x + 0, wgt.zone.y + 40, "Min: " .. value_fmt_min, SMLSIZE)
+    lcd.drawText(wgt.zone.x + 0, wgt.zone.y + 55, "Max: " .. value_fmt_max, SMLSIZE)
+  end
 
   if wgt.tools.isTelemetryAvailable() == false then
     lcd.drawText(wgt.zone.x, wgt.zone.y + wgt.zone.h /2, "Disconnected...", MIDSIZE + WHITE+ BLINK)
