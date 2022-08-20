@@ -32,7 +32,7 @@
 --    * batt-capacity
 --    * A1/A2 analog voltage
 
--- Version: 0.3
+-- Version: 0.4
 -- Author : Offer Shmuely
 
 
