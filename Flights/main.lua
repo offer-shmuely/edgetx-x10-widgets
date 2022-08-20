@@ -1,7 +1,7 @@
 -- Horus Widget that count number of flights
 -- Offer Shmuely
 -- Date: 2022
--- ver: 0.1
+-- ver: 0.2
 -- flight considered successful: after 20sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
 -- flight considered ended: after 20sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9!!!
