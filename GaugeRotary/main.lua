@@ -169,6 +169,9 @@ local function getWidgetValue(wgt)
   if string.byte(string.sub(sourceName,1,1)) > 127 then
     sourceName = string.sub(sourceName,2,-1) -- ???? why?
   end
+  if string.byte(string.sub(sourceName,1,1)) > 127 then
+    sourceName = string.sub(sourceName,2,-1) -- ???? why?
+  end
   --log("Source: " .. wgt.options.Source .. ",name: " .. sourceName)
 
   local fieldinfo = getFieldInfo(wgt.options.Source)
@@ -200,8 +203,14 @@ local function getWidgetValue(wgt)
     local minValue, maxValue, source_min_id, source_max_id
 
     if source_min_id == nil or source_max_id == nil then
-      source_min_id = getFieldInfo(sourceName .. "-").id
-      source_max_id = getFieldInfo(sourceName .. "+").id
+      source_min_obj = getFieldInfo(sourceName .. "-")
+      if source_min_obj ~= nil then
+        source_min_id = source_min_obj.id
+      end
+      source_max_obj = getFieldInfo(sourceName .. "+")
+      if source_min_obj ~= nil then
+        source_max_id = source_max_obj.id
+      end
     end
     if source_min_id ~= nil and source_max_id ~= nil then
       minValue = getValue(source_min_id)
