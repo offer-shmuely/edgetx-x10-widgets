@@ -90,9 +90,9 @@ local function refresh(wgt)
   update_randomizer(cr)
 
   percentageValue2 = getPercentageValue(value2[1], value2[2], value2[3])
-  wgt.gauge1.drawGauge(100, 84, 78, true, percentageValue2, 0,0,percentageValue2 .. "%", "Fuel\n  %")
-  wgt.gauge1.drawGauge(cx[1], cy[1], cr[1], true, percentageValue2, 0,0,percentageValue2 .. "%", "Fuel\n  %")
-  wgt.gauge1.drawGauge(300, 150, 60, true, percentageValue2, 0,0,percentageValue2, "V")
+  wgt.gauge1.drawGauge(100, 84, 78, true, percentageValue2, 0,0,percentageValue2 .. "%", "10", "99", "Fuel\n  %")
+  wgt.gauge1.drawGauge(cx[1], cy[1], cr[1], true, percentageValue2, 0,0,percentageValue2 .. "%", "10", "99", "Fuel\n  %")
+  wgt.gauge1.drawGauge(300, 150, 60, true, percentageValue2, 0,0,percentageValue2, "10", "99", "V")
 
 
   -- widget load (debugging)

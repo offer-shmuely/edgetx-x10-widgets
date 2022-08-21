@@ -70,7 +70,7 @@ function self.getRangeColor(value, red_value, green_value)
   end
 end
 
-function self.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, txt1, txt2)
+function self.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, txt1, value_fmt_min, value_fmt_max, txt2)
 
   local fender = 4
   local tickWidth = 9
@@ -115,7 +115,9 @@ function self.drawGauge(centerX, centerY, centerR, isFull, percentageValue, perc
   for i = 0, to_tick, tick_step do
     --log("HighAsGreen: " .. self.HighAsGreen)
     if (self.HighAsGreen == 1) then
-      lcd.setColor(CUSTOM_COLOR, self.getRangeColor(i, 0, to_tick - 10))
+      local newColor = self.getRangeColor(i, 0, to_tick - 10)
+      lcd.setColor(CUSTOM_COLOR, newColor)
+      --lcd.setColor(CUSTOM_COLOR, self.getRangeColor(i, 0, to_tick - 10))
     else
       lcd.setColor(CUSTOM_COLOR, self.getRangeColor(i, to_tick - 10, 0))
       --lcd.setColor(CUSTOM_COLOR, self.getRangeColor(i, 120 , 30))
@@ -129,11 +131,11 @@ function self.drawGauge(centerX, centerY, centerR, isFull, percentageValue, perc
   local armColor = lcd.RGB(255, 255, 255)
   local armColorMin, armColorMax
   if (self.HighAsGreen == 1) then
-    armColorMin = lcd.RGB(100, 0, 0)
-    armColorMax = lcd.RGB(0, 100, 0)
+    armColorMin = lcd.RGB(200, 0, 0)
+    armColorMax = lcd.RGB(0, 200, 0)
   else
-    armColorMin = lcd.RGB(0, 100, 0)
-    armColorMax = lcd.RGB(100, 0, 0)
+    armColorMin = lcd.RGB(0, 200, 0)
+    armColorMax = lcd.RGB(200, 0, 0)
   end
 
   --self.drawArm(centerX, centerY, armR, 0, armColorMin, isFull)
@@ -157,6 +159,9 @@ function self.drawGauge(centerX, centerY, centerR, isFull, percentageValue, perc
 
   -- text in center
   lcd.drawText(centerX + 0, centerY - 8, txt2, CENTER + SMLSIZE + WHITE) -- XXLSIZE/DBLSIZE/MIDSIZE/SMLSIZE
+
+  lcd.drawText(centerX - armCenterR - 12, centerY + 20, value_fmt_min, CENTER + SMLSIZE + WHITE)
+  lcd.drawText(centerX + armCenterR + 12, centerY + 20, value_fmt_max, CENTER + SMLSIZE + WHITE)
 
   -- text below
   if isFull then
