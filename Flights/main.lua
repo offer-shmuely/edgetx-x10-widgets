@@ -1,9 +1,9 @@
 -- Horus Widget that count number of flights
 -- Offer Shmuely
 -- Date: 2022
--- ver: 0.2
--- flight considered successful: after 20sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
--- flight considered ended: after 20sec of battery disconnection (detected by no telemetry)
+-- ver: 0.3
+-- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
+-- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9!!!
 
 -- widget assume the following:
@@ -18,7 +18,7 @@
 --   all-flags on for 30s => flight-on
 --   no telemetry for 8s  => flight-completed
 
-
+-- Note: there is two options of voice indication, and you can also put your own, if you do not like the sound, just delete the files
 local app_name = "Flights"
 
 local periodic1 = {
@@ -30,16 +30,17 @@ local periodic1 = {
 local img = Bitmap.open("/WIDGETS/".. app_name .. "/logo.png")
 
 -- const
-local text_color = YELLOW -- BLACK | WHITE | YELLOW | BLUE
 local default_flight_starting_duration = 30 -- 20 sec to detect fight success
 local default_flight_ending_duration = 8 -- 8 sec to detect fight ended
 local default_min_motor_value = 200
+local enable_sounds = 1
 
 local options = {
   { "switch", SOURCE, 117 },             -- 117== SF (arm/safety switch)
   { "motor_channel", SOURCE, 204 },      -- 204==CH3
   { "min_flight_duration", VALUE, default_flight_starting_duration, 1, 120},
-  { "enable_sounds", BOOL, 1 },          -- enable sound on adding succ flight, and on end of flight
+  --{ "enable_sounds", BOOL, 1 },          -- enable sound on adding succ flight, and on end of flight
+  { "text_color", COLOR, YELLOW },
   { "debug", BOOL, 0 }                   -- show status on screen
 }
 
@@ -264,8 +265,9 @@ local function incrementFlightCount(wgt)
   log("num_flights updated: " .. new_flight_count)
 
   -- beep
-  if (wgt.options.enable_sounds) then
-    playFile("/WIDGETS/" .. app_name .. "/on_air.wav")
+  --if (wgt.options.enable_sounds) then
+  if (enable_sounds == 1) then
+    playFile("/WIDGETS/" .. app_name .. "/flight_logged.wav")
   end
 end
 
@@ -327,8 +329,9 @@ local function background(wgt)
 
     if (periodicHasPassed(periodic1)) then
       stateChange(wgt, "GROUND", 0)
-      if (wgt.options.enable_sounds) then
-        playFile("/WIDGETS/" .. app_name .. "/ground.wav")
+      --if (wgt.options.enable_sounds) then
+      if (enable_sounds == 1) then
+        playFile("/WIDGETS/" .. app_name .. "/flight_ended.wav")
       end
     end
 
@@ -401,13 +404,13 @@ local function refresh(wgt, event, touchState)
   end
 
   -- draw header
-  lcd.drawText(wgt.zone.x, wgt.zone.y + dyh, header, font_size_header + text_color)
+  lcd.drawText(wgt.zone.x, wgt.zone.y + dyh, header, font_size_header + wgt.options.text_color)
 
   -- draw count
   --if wgt.options.debug == 0 then
-  --  lcd.drawText(wgt.zone.x + (wgt.zone.w / 2), wgt.zone.y + dy, num_flights, font_size + text_color )
+  --  lcd.drawText(wgt.zone.x + (wgt.zone.w / 2), wgt.zone.y + dy, num_flights, font_size + wgt.options.text_color )
   --else
-    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + dy, num_flights, font_size + text_color + RIGHT)
+    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + dy, num_flights, font_size + wgt.options.text_color + RIGHT)
   --end
 
   -- dbg
