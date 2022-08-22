@@ -33,20 +33,55 @@
 -- ver: 0.3
 
 local _options = {
-  { "Sensor", SOURCE, 0 }, -- default to 'A1'
-  { "Color", COLOR, YELLOW },
-  { "Show_Total_Voltage", BOOL, 0 } -- 0=Show as average Lipo cell level, 1=show the total voltage (voltage as is)
+  { "Sensor"            , SOURCE, 0      }, -- default to 'A1'
+  { "Color"             , COLOR , YELLOW },
+  { "Show_Total_Voltage", BOOL  , 0      }, -- 0=Show as average Lipo cell level, 1=show the total voltage (voltage as is)
+  { "lithium_ion"       , BOOL  , 2      }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
 }
 
 -- Data gathered from commercial lipo sensors
 local _lipoPercentListSplit = {
-  { 3, 0 }, { 3.093, 1 }, { 3.196, 2 }, { 3.301, 3 }, { 3.401, 4 }, { 3.477, 5 }, { 3.544, 6 }, { 3.601, 7 }, { 3.637, 8 }, { 3.664, 9 }, { 3.679, 10 }, { 3.683, 11 }, { 3.689, 12 }, { 3.692, 13 }, { 3.705, 14 }, { 3.71, 15 }, { 3.713, 16 }, { 3.715, 17 }, { 3.72, 18 }, { 3.731, 19 }, { 3.735, 20 }, { 3.744, 21 }, { 3.753, 22 }, { 3.756, 23 }, { 3.758, 24 }, { 3.762, 25 }, { 3.767, 26 }, { 3.774, 27 }, { 3.78, 28 }, { 3.783, 29 }, { 3.786, 30 }, { 3.789, 31 }, { 3.794, 32 }, { 3.797, 33 }, { 3.8, 34 }, { 3.802, 35 }, { 3.805, 36 }, { 3.808, 37 }, { 3.811, 38 }, { 3.815, 39 }, { 3.818, 40 }, { 3.822, 41 }, { 3.825, 42 }, { 3.829, 43 }, { 3.833, 44 }, { 3.836, 45 }, { 3.84, 46 }, { 3.843, 47 }, { 3.847, 48 }, { 3.85, 49 }, { 3.854, 50 }, { 3.857, 51 }, { 3.86, 52 }, { 3.863, 53 }, { 3.866, 54 }, { 3.87, 55 }, { 3.874, 56 }, { 3.879, 57 }, { 3.888, 58 }, { 3.893, 59 }, { 3.897, 60 }, { 3.902, 61 }, { 3.906, 62 }, { 3.911, 63 }, { 3.918, 64 }, { 3.923, 65 }, { 3.928, 66 }, { 3.939, 67 }, { 3.943, 68 }, { 3.949, 69 }, { 3.955, 70 }, { 3.961, 71 }, { 3.968, 72 }, { 3.974, 73 }, { 3.981, 74 }, { 3.987, 75 }, { 3.994, 76 }, { 4.001, 77 }, { 4.007, 78 }, { 4.014, 79 }, { 4.021, 80 }, { 4.029, 81 }, { 4.036, 82 }, { 4.044, 83 }, { 4.052, 84 }, { 4.062, 85 }, { 4.074, 86 }, { 4.085, 87 }, { 4.095, 88 }, { 4.105, 89 }, { 4.111, 90 }, { 4.116, 91 }, { 4.12, 92 }, { 4.125, 93 }, { 4.129, 94 }, { 4.135, 95 }, { 4.145, 96 }, { 4.176, 97 }, { 4.179, 98 }, { 4.193, 99 }, { 4.2, 100 }
+  { 3, 0 }, { 3.093, 1 }, { 3.196, 2 }, { 3.301, 3 }, { 3.401, 4 }, { 3.477, 5 }, { 3.544, 6 }, { 3.601, 7 }, { 3.637, 8 }, { 3.664, 9 }, { 3.679, 10 }, { 3.683, 11 }, { 3.689, 12 }, { 3.692, 13 },
+  { 3.705, 14 }, { 3.71, 15 }, { 3.713, 16 }, { 3.715, 17 }, { 3.72, 18 }, { 3.731, 19 }, { 3.735, 20 }, { 3.744, 21 }, { 3.753, 22 }, { 3.756, 23 }, { 3.758, 24 }, { 3.762, 25 }, { 3.767, 26 },
+  { 3.774, 27 }, { 3.78, 28 }, { 3.783, 29 }, { 3.786, 30 }, { 3.789, 31 }, { 3.794, 32 }, { 3.797, 33 }, { 3.8, 34 }, { 3.802, 35 }, { 3.805, 36 }, { 3.808, 37 }, { 3.811, 38 }, { 3.815, 39 },
+  { 3.818, 40 }, { 3.822, 41 }, { 3.825, 42 }, { 3.829, 43 }, { 3.833, 44 }, { 3.836, 45 }, { 3.84, 46 }, { 3.843, 47 }, { 3.847, 48 }, { 3.85, 49 }, { 3.854, 50 }, { 3.857, 51 }, { 3.86, 52 },
+  { 3.863, 53 }, { 3.866, 54 }, { 3.87, 55 }, { 3.874, 56 }, { 3.879, 57 }, { 3.888, 58 }, { 3.893, 59 }, { 3.897, 60 }, { 3.902, 61 }, { 3.906, 62 }, { 3.911, 63 }, { 3.918, 64 },
+  { 3.923, 65 }, { 3.928, 66 }, { 3.939, 67 }, { 3.943, 68 }, { 3.949, 69 }, { 3.955, 70 }, { 3.961, 71 }, { 3.968, 72 }, { 3.974, 73 }, { 3.981, 74 }, { 3.987, 75 }, { 3.994, 76 },
+  { 4.001, 77 }, { 4.007, 78 }, { 4.014, 79 }, { 4.021, 80 }, { 4.029, 81 }, { 4.036, 82 }, { 4.044, 83 }, { 4.052, 84 }, { 4.062, 85 }, { 4.074, 86 }, { 4.085, 87 }, { 4.095, 88 },
+  { 4.105, 89 }, { 4.111, 90 }, { 4.116, 91 }, { 4.12, 92 }, { 4.125, 93 }, { 4.129, 94 }, { 4.135, 95 }, { 4.145, 96 }, { 4.176, 97 }, { 4.179, 98 }, { 4.193, 99 }, { 4.2, 100 },
 }
+
+-- from: https://electric-scooter.guide/guides/electric-scooter-battery-voltage-chart/
+local _liionPercentListSplit = {
+  { {3.00,   0 },{3.01,   1 },{3.02,   2 },{3.03,   3 },{3.04,   4 } },
+  { {3.06,   5 },{3.07,   6 },{3.08,   7 },{3.09,   8 },{3.10,   9 } },
+  { {3.12,  10 },{3.13,  11 },{3.14,  12 },{3.15,  13 },{3.16,  14 } },
+  { {3.18,  15 },{3.19,  16 },{3.20,  17 },{3.21,  18 },{3.22,  19 } },
+  { {3.24,  20 },{3.25,  21 },{3.26,  22 },{3.27,  23 },{3.28,  24 } },
+  { {3.30,  25 },{3.31,  26 },{3.32,  27 },{3.33,  28 },{3.34,  29 } },
+  { {3.36,  30 },{3.37,  31 },{3.38,  32 },{3.39,  33 },{3.40,  34 } },
+  { {3.42,  35 },{3.43,  36 },{3.44,  37 },{3.45,  38 },{3.46,  39 } },
+  { {3.48,  40 },{3.49,  41 },{3.50,  42 },{3.51,  43 },{3.52,  44 } },
+  { {3.54,  45 },{3.55,  46 },{3.56,  47 },{3.57,  48 },{3.58,  49 } },
+  { {3.60,  50 },{3.61,  51 },{3.62,  52 },{3.63,  53 },{3.64,  54 } },
+  { {3.66,  55 },{3.67,  56 },{3.68,  57 },{3.69,  58 },{3.70,  59 } },
+  { {3.72,  60 },{3.73,  61 },{3.74,  62 },{3.75,  63 },{3.76,  64 } },
+  { {3.78,  65 },{3.79,  66 },{3.80,  67 },{3.81,  68 },{3.82,  69 } },
+  { {3.84,  70 },{3.85,  71 },{3.86,  72 },{3.87,  73 },{3.88,  74 } },
+  { {3.90,  75 },{3.91,  76 },{3.92,  77 },{3.93,  78 },{3.94,  79 } },
+  { {3.96,  80 },{3.97,  81 },{3.98,  82 },{3.99,  83 },{4.00,  84 } },
+  { {4.02,  85 },{4.03,  86 },{4.04,  87 },{4.05,  88 },{4.06,  89 } },
+  { {4.08,  90 },{4.09,  91 },{4.10,  92 },{4.11,  93 },{4.12,  94 } },
+  { {4.14,  95 },{4.15,  96 },{4.16,  97 },{4.17,  98 },{4.18,  99 } },
+  { {4.20, 100 },{4.21, 101 },{4.22, 102 },{4.23, 103 },{4.24, 104 } },
+}
+
+
 local defaultSensor = "RxBt" -- RxBt / A1 / A3/ VFAS /RxBt
 
 --------------------------------------------------------------
 local function log(s)
-  --print("BattAnalog: " .. s)
+  print("BattAnalog: " .. s)
 end
 --------------------------------------------------------------
 
@@ -63,6 +98,8 @@ local function update(wgt, options)
   end
 
   wgt.options.Show_Total_Voltage = wgt.options.Show_Total_Voltage % 2 -- modulo due to bug that cause the value to be other than 0|1
+
+  log(string.format("wgt.options.lithium_ion: %s", wgt.options.lithium_ion))
 end
 
 
@@ -138,7 +175,7 @@ local function detectResetEvent(wgt)
 end
 
 --- This function return the percentage remaining in a single Lipo cel
-local function getCellPercent(cellValue)
+local function getCellPercent(wgt, cellValue)
   if cellValue == nil then
     return 0
   end
@@ -148,7 +185,12 @@ local function getCellPercent(cellValue)
     return 100
   end
 
-  for i, v in ipairs(_lipoPercentListSplit) do
+  local _percentListSplit = _lipoPercentListSplit
+  if wgt.options.lithium_ion == 1 then
+    _percentListSplit = _liionPercentListSplit
+  end
+  
+  for i, v in ipairs(_percentListSplit) do
     if v[1] >= cellValue then
       result = v[2]
       break
@@ -238,7 +280,7 @@ local function calculateBatteryData(wgt)
   wgt.cellCount = newCellCount
   wgt.vTotalLive = v
   wgt.vCellLive = wgt.vTotalLive / wgt.cellCount
-  wgt.vPercent = getCellPercent(wgt.vCellLive)
+  wgt.vPercent = getCellPercent(wgt, wgt.vCellLive)
 
   -- log("wgt.vCellLive: ".. wgt.vCellLive)
   -- log("wgt.vPercent: ".. wgt.vPercent)
@@ -425,20 +467,21 @@ end
 --- Zone size: 460x252 - app mode (full screen)
 local function refreshAppMode(wgt, event, touchState)
   local x = 0
-  local w = 460
   local y = 0
-  local h = 252
-  
-  local myBatt = { ["x"] = 10, ["y"] = 0, ["w"] = 80, ["h"] = h, ["segments_h"] = 30, ["color"] = WHITE, ["cath_w"] = 30, ["cath_h"] = 10 }
+  local w = LCD_W
+  local h = LCD_H - 20
+
+  local myBatt = { ["x"] = 10, ["y"] = 10, ["w"] = 90, ["h"] = h, ["segments_h"] = 30, ["color"] = WHITE, ["cath_w"] = 30, ["cath_h"] = 10 }
 
   if (event ~= nil) then
     log("event: " .. event)
   end
     
   -- draw right text section
-  lcd.drawText(x + w, y + myBatt.y + 0, string.format("%2.1fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + w, y +h - 60, string.format("%2.1fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + w, y +h - 30, string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w - 20, y + myBatt.y + 0, string.format("%2.1fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w - 20, y + 80, string.format("%2.1fV", wgt.secondaryValue), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w - 20, y + 150, string.format("%dS", wgt.cellCount), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w - 20, y +h - 30, string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
 
   drawBattery(wgt, myBatt)
 
