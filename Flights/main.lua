@@ -34,6 +34,8 @@ local default_flight_starting_duration = 30 -- 20 sec to detect fight success
 local default_flight_ending_duration = 8 -- 8 sec to detect fight ended
 local default_min_motor_value = 200
 local enable_sounds = 1
+local enable_count_announcement_on_start = 1
+local enable_count_announcement_on_end = 1
 
 local options = {
   { "switch"             , SOURCE, 117    },  -- 117== SF (arm/safety switch)
@@ -277,6 +279,13 @@ local function incrementFlightCount(wgt)
   if (enable_sounds == 1) then
     playFile("/WIDGETS/" .. app_name .. "/flight_logged.wav")
   end
+
+  if (enable_count_announcement_on_start == 1) then
+    local num_flights = getFlightCount()
+    playNumber(num_flights, 0)
+    playFile("/WIDGETS/" .. app_name .. "/flights.wav")
+  end
+
 end
 
 ---------------------------------------------------------------
@@ -340,6 +349,12 @@ local function background(wgt)
       --if (wgt.options.enable_sounds) then
       if (enable_sounds == 1) then
         playFile("/WIDGETS/" .. app_name .. "/flight_ended.wav")
+      end
+
+      if (enable_count_announcement_on_end == 1) then
+        local num_flights = getFlightCount()
+        playNumber(num_flights, 0)
+        playFile("/WIDGETS/" .. app_name .. "/flights.wav")
       end
     end
 
