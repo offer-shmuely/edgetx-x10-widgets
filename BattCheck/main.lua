@@ -16,7 +16,7 @@
 ---- #                                                                       #
 ---- #########################################################################
 
--- Horus Widget to display the levels of lipo battery with per cell indication
+-- Widget to display the levels of lipo/li-ion battery with indication of each cell (FLVSS)
 -- 3djc & Offer Shmuely
 -- Date: 2022
 -- ver: 0.7
@@ -24,7 +24,7 @@ local version = "v0.7"
 
 local _options = {
   { "Sensor"     , SOURCE, 0     }, -- default to 'Cels'
-  { "Color"      , COLOR , WHITE },
+  { "Color"      , COLOR , YELLOW},
   { "Shadow"     , BOOL  , 0     },
   { "LowestCell" , BOOL  , 1     }, -- 0=main voltage display shows all-cell-voltage, 1=main voltage display shows lowest-cell
   { "lithium_ion", BOOL  , 0     }, -- 0=LIPO battery, 1=LI-ION (18650/21500)

@@ -16,8 +16,9 @@
 ---- #                                                                       #
 ---- #########################################################################
 
--- This widget display a graphical representation of a Lipo (not other types) battery level, it will automatically detect the cell amount of the battery.
--- it will take a lipo voltage that received as a single value (as opposed to multi cell values send while using FLVSS liPo Voltage Sensor)
+-- This widget display a graphical representation of a Lipo/Li-ion (not other types) battery level,
+-- it will automatically detect the cell amount of the battery.
+-- it will take a lipo/li-ion voltage that received as a single value (as opposed to multi cell values send while using FLVSS liPo Voltage Sensor)
 -- common sources are:
 --   * Transmitter Battery
 --   * FrSky VFAS
