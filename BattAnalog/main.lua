@@ -37,7 +37,7 @@ local _options = {
   { "Sensor"            , SOURCE, 0      }, -- default to 'A1'
   { "Color"             , COLOR , YELLOW },
   { "Show_Total_Voltage", BOOL  , 0      }, -- 0=Show as average Lipo cell level, 1=show the total voltage (voltage as is)
-  { "lithium_ion"       , BOOL  , 2      }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
+  { "lithium_ion"       , BOOL  , 0      }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
 }
 
 -- Data gathered from commercial lipo sensors
@@ -414,10 +414,10 @@ local function refreshZoneMedium(wgt)
   local myBatt = { ["x"] = 0, ["y"] = 0, ["w"] = 50, ["h"] = wgt.zone.h, ["segments_w"] = 15, ["color"] = WHITE, ["cath_w"] = 26, ["cath_h"] = 10, ["segments_h"] = 16 }
 
   -- draw values
-  lcd.drawText(wgt.zone.x + myBatt.w + 10, wgt.zone.y, string.format("%2.1fV", wgt.mainValue), DBLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(wgt.zone.x + myBatt.w + 10, wgt.zone.y, string.format("%2.2fV", wgt.mainValue), DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(wgt.zone.x + myBatt.w + 10, wgt.zone.y + 30, string.format("%2.0f%%", wgt.vPercent), MIDSIZE + wgt.text_color + wgt.no_telem_blink)
   if wgt.options.Show_Total_Voltage == 0 then
-    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h -35, string.format("%2.1fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
+    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h -35, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
   else
     --lcd.drawText(wgt.zone.x, wgt.zone.y + 40, string.format("%2.1fV", wgt.mainValue), DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   end
@@ -435,9 +435,9 @@ end
 local function refreshZoneLarge(wgt)
   local myBatt = { ["x"] = 0, ["y"] = 0, ["w"] = 76, ["h"] = wgt.zone.h, ["segments_h"] = 30, ["color"] = WHITE, ["cath_w"] = 30, ["cath_h"] = 10 }
 
-  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 0, string.format("%2.1fV", wgt.mainValue), RIGHT + DBLSIZE + wgt.text_color)
+  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 0, string.format("%2.2fV", wgt.mainValue), RIGHT + DBLSIZE + wgt.text_color)
   lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 30, wgt.vPercent .. "%", RIGHT + DBLSIZE + wgt.text_color)
-  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 35, string.format("%2.1fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color)
+  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 35, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color)
   lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 20, string.format("min %2.2fV", wgt.vMin), RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
 
   drawBattery(wgt, myBatt)
@@ -455,8 +455,8 @@ local function refreshZoneXLarge(wgt)
   local myBatt = { ["x"] = 10, ["y"] = 0, ["w"] = 80, ["h"] = h, ["segments_h"] = 30, ["color"] = WHITE, ["cath_w"] = 30, ["cath_h"] = 10 }
 
   -- draw right text section
-  lcd.drawText(x + w, y + myBatt.y + 0, string.format("%2.1fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + w, y +h - 60       , string.format("%2.1fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w, y + myBatt.y + 0, string.format("%2.2fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w, y +h - 60       , string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w, y +h - 30       , string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
 
   drawBattery(wgt, myBatt)
@@ -479,8 +479,8 @@ local function refreshAppMode(wgt, event, touchState)
   end
     
   -- draw right text section
-  lcd.drawText(x + w - 20, y + myBatt.y + 0, string.format("%2.1fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + w - 20, y + 80, string.format("%2.1fV", wgt.secondaryValue), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w - 20, y + myBatt.y + 0, string.format("%2.2fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w - 20, y + 80, string.format("%2.2fV", wgt.secondaryValue), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w - 20, y + 150, string.format("%dS", wgt.cellCount), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w - 20, y +h - 30, string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
 
