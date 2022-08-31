@@ -1,8 +1,9 @@
 -- A Timer version that fill better the widget area
 -- Offer Shmuely
 -- Date: 2022
--- ver: 0.7
+-- ver: 0.8
 
+local progress = 100
 local options = {
   { "TextColor", COLOR, YELLOW },
   { "Timer", VALUE, 1, 1, 3},
@@ -112,6 +113,100 @@ local function getFontSize(wgt, txt)
   return SMLSIZE
 end
 
+local function drawTicks(wgt)
+  if (wgt.zone.h < 50) then return end
+  if (wgt.zone.w < 50) then return end
+
+  local isFull = false
+  --local centerR = 50
+  local centerR = wgt.zone.h / 2
+  local centerX = (wgt.zone.x + wgt.zone.w) /2
+  local centerY = (wgt.zone.y + wgt.zone.h) / 2
+  local fender = 1
+  local tickWidth = 9
+
+  -- ticks
+  local to_tick = progress * 2.1
+  local tick_offset = 250
+  local tick_step = 10
+
+  progress = progress - 0.6
+  if progress <= 0 then
+    progress = 100
+  end
+
+  if (centerR < 100) then
+    tick_step = 10 + 0.15 * (100 - centerR)
+  end
+
+  if progress > 25 then
+    color_pie = GREY
+    color_annulus = BLACK
+    color_pie = lcd.RGB(0, progress, 0)
+  elseif progress > 15 then
+    color_pie = ORANGE
+    color_annulus = ORANGE
+  else
+    color_pie = RED
+    color_annulus = RED
+  end
+  --lcd.drawPie(centerX,centerY,centerR - fender, 0, 3.60 * progress, color_pie)
+  --
+  --for i = 0, to_tick, tick_step do
+  --  --local newColor = self.getRangeColor(i, 0, to_tick - 10)
+  --  --lcd.setColor(CUSTOM_COLOR, newColor)
+  --  lcd.setColor(CUSTOM_COLOR, color_annulus)
+  --
+  --  lcd.drawAnnulus(centerX, centerY,
+  --                  centerR - fender - 3 - tickWidth,
+  --                  centerR - fender - 3 + 30,
+  --                  tick_offset + i,
+  --                  tick_offset + i + 7,
+  --                  CUSTOM_COLOR)
+  --
+  --end
+
+  local line_thick = 14
+  local r2 = 30
+  local r1 = r2 - line_thick
+  local x1= wgt.zone.x + r2
+  local x2 = wgt.zone.x + wgt.zone.w - r2
+  local y1 = wgt.zone.y + r2
+  local y2 = wgt.zone.y + wgt.zone.h - r2
+
+  local ofs1 = 0.1
+  local ofs2 = 0.1
+  local ofs3 = 0.1
+  local ofs4 = 0.5
+  local ofs5 = 0.5
+  local ofs6 = 0.5
+  local ofs7 = 0.5
+  local ofs8 = 0.5
+  local ofs9 = 0.5
+
+  -- top line
+  lcd.drawFilledRectangle(wgt.zone.x + wgt.zone.w / 2 + (wgt.zone.x + wgt.zone.w / 2 - r2) * ofs1, wgt.zone.y, (wgt.zone.w /2 -r2) * (1 - ofs1), line_thick, YELLOW)
+  lcd.drawAnnulus(x2, y1, r1, r2, 0 + ofs2*90, 90, MIDSIZE + BLUE)
+
+  -- right line
+  lcd.drawFilledRectangle(wgt.zone.x + wgt.zone.w - line_thick, r2 + ofs3 * (wgt.zone.y + wgt.zone.h - r2 - r2), line_thick, (wgt.zone.y + wgt.zone.h - r2 - r2) * ofs3, YELLOW)
+  lcd.drawAnnulus(x2, y2, r1, r2, 90 + ofs4*90, 180, MIDSIZE + ORANGE)
+
+  -- bottom line
+  lcd.drawFilledRectangle(wgt.zone.x + r2, wgt.zone.y + wgt.zone.h - line_thick, wgt.zone.w - r2 -r2 - ofs5, line_thick, YELLOW)
+  lcd.drawAnnulus(x1, y2, r1, r2, 180 + ofs6*90, 270, MIDSIZE + BLUE)
+
+  -- left line
+  lcd.drawFilledRectangle(wgt.zone.x, r2, line_thick, wgt.zone.y + wgt.zone.h - r2 - r2 - ofs7, YELLOW)
+  lcd.drawAnnulus(x1, y1, r1, r2, 270 + ofs8*90, 360, MIDSIZE + ORANGE)
+
+  -- top line
+  local len = (wgt.zone.w /2 -r2) - ofs9 * (wgt.zone.w /2 -r2)
+  --lcd.drawFilledRectangle(wgt.zone.x + r2 + ofs9 * (wgt.zone.w /2 -r2), wgt.zone.y, len, line_thick, YELLOW)
+
+  lcd.drawFilledCircle(wgt.zone.x + wgt.zone.w - line_thick, wgt.zone.y + wgt.zone.h - r2 - r2, line_thick * 1.3, BLA)
+end
+
 local function refresh(wgt, event, touchState)
   if (wgt == nil)               then log("refresh(nil)")                   return end
   if (wgt.options == nil)       then log("refresh(wgt.options=nil)")       return end
@@ -121,7 +216,7 @@ local function refresh(wgt, event, touchState)
 
   -- calculate timer info
   local timerInfo = getTimerHeader(wgt, t1)
-  timer_info_w, timer_info_h = lcd.sizeText(timerInfo, SMLSIZE)
+  local timer_info_w, timer_info_h = lcd.sizeText(timerInfo, SMLSIZE)
 
   -- calculate timer time
   local time_str, isNegative = formatTime(wgt, t1)
@@ -129,13 +224,14 @@ local function refresh(wgt, event, touchState)
   local zone_w = wgt.zone.w
   local zone_h = wgt.zone.h
 
+  local textColor
   if isNegative == true then
     textColor = RED
   else
     textColor = wgt.options.TextColor
   end
 
-  font_size_header = SMLSIZE
+  local font_size_header = SMLSIZE
   if (event ~= nil) then
     -- app mode (full screen)
     font_size = XXLSIZE
@@ -144,7 +240,9 @@ local function refresh(wgt, event, touchState)
     zone_h = 252
   end
 
-  wide_time_str = string.gsub(time_str, "[1-9]", "0")
+  drawTicks(wgt)
+
+  local wide_time_str = string.gsub(time_str, "[1-9]", "0")
   local ts_w,ts_h = lcd.sizeText(wide_time_str, font_size)
   local dx = (zone_w - ts_w) /2
   local dy = timer_info_h -1

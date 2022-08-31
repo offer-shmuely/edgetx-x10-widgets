@@ -221,7 +221,7 @@ local function getWidgetValue(wgt)
     wgt.last_value_min = minValue
     wgt.last_value_max = maxValue
 
-    --log("min/max: " .. minValue .. " < " .. currentValue .. " < " .. maxValue)
+    --log("min/max: ["..sourceName.."]" .. minValue .. " < " .. currentValue .. " < " .. maxValue)
     return sourceName, currentValue, minValue, maxValue, txtUnit
   else
     log("overriding value with last_value: " .. wgt.last_value)

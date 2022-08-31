@@ -71,6 +71,18 @@ function self.getRangeColor(value, red_value, green_value)
 end
 
 function self.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, txt1, value_fmt_min, value_fmt_max, txt2)
+  if value_fmt_min == nil then
+    value_fmt_min = ""
+  end
+  if value_fmt_max == nil then
+    value_fmt_max = ""
+  end
+  if txt1 == nil then
+    txt1 = ""
+  end
+  if txt2 == nil then
+    txt2 = ""
+  end
 
   local fender = 4
   local tickWidth = 9

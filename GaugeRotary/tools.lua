@@ -49,6 +49,7 @@ function self.isTelemetryAvailable()
     if not tele_src then tele_src = getFieldInfo("1RSS") end
     if not tele_src then tele_src = getFieldInfo("2RSS") end
     if not tele_src then tele_src = getFieldInfo("RQly") end
+    if not tele_src then tele_src = getFieldInfo("TRSS") end
 
     if tele_src == nil then
       log("no telemetry sensor found")
