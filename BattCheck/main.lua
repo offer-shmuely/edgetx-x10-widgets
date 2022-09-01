@@ -27,7 +27,7 @@ local _options = {
   { "Color"      , COLOR , YELLOW},
   { "Shadow"     , BOOL  , 0     },
   { "LowestCell" , BOOL  , 1     }, -- 0=main voltage display shows all-cell-voltage, 1=main voltage display shows lowest-cell
-  { "lithium_ion", BOOL  , 0     }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
+  { "Lithium_Ion"       , BOOL  , 0      }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
 }
 
 -- Data gathered from commercial lipo sensors
@@ -229,7 +229,7 @@ local function getCellPercent(wgt, cellValue)
   local t4 = getUsage();
 
   local _percentListSplit = _lipoPercentListSplit
-  if wgt.options.lithium_ion == 1 then
+  if wgt.options.Lithium_Ion == 1 then
     _percentListSplit = _liionPercentListSplit
   end
 
@@ -620,12 +620,11 @@ local function refresh(wgt, event, touchState)
   local t4 = getUsage();
   if (event ~= nil) then
     refreshAppMode(wgt, event, touchState)
-  elseif wgt.zone.w > 380 and wgt.zone.h > 165 then   refreshZoneXLarge(wgt)
-  elseif wgt.zone.w > 180 and wgt.zone.h > 145 then   refreshZoneLarge(wgt)
-  elseif wgt.zone.w > 170 and wgt.zone.h > 65 then    refreshZoneMedium(wgt)
-  elseif wgt.zone.w > 150 and wgt.zone.h > 28 then    refreshZoneSmall(wgt)
-  elseif wgt.zone.w > 65 and wgt.zone.h > 35 then
-    refreshZoneTiny(wgt)
+  elseif wgt.zone.w > 380 and wgt.zone.h > 165 then refreshZoneXLarge(wgt)
+  elseif wgt.zone.w > 180 and wgt.zone.h > 145 then refreshZoneLarge(wgt)
+  elseif wgt.zone.w > 170 and wgt.zone.h >  65 then refreshZoneMedium(wgt)
+  elseif wgt.zone.w > 150 and wgt.zone.h >  28 then refreshZoneSmall(wgt)
+  elseif wgt.zone.w >  65 and wgt.zone.h >  35 then refreshZoneTiny(wgt)
   end
   --cpuProfilerAdd(wgt, 'main-loop-4', t4);
 

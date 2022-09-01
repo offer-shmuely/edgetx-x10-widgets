@@ -142,7 +142,7 @@ local function update(wgt, options)
 
   wgt.options.Show_Total_Voltage = wgt.options.Show_Total_Voltage % 2 -- modulo due to bug that cause the value to be other than 0|1
 
-  log(string.format("wgt.options.lithium_ion: %s", wgt.options.lithium_ion))
+  log(string.format("wgt.options.Lithium_Ion: %s", wgt.options.Lithium_Ion))
 end
 
 
@@ -229,7 +229,7 @@ local function getCellPercent(wgt, cellValue)
   end
 
   local _percentListSplit = _lipoPercentListSplit
-  if wgt.options.lithium_ion == 1 then
+  if wgt.options.Lithium_Ion == 1 then
     _percentListSplit = _liionPercentListSplit
   end
   
@@ -576,16 +576,11 @@ local function refresh(wgt, event, touchState)
 
   if (event ~= nil) then
     refreshAppMode(wgt, event, touchState)
-  elseif wgt.zone.w > 380 and wgt.zone.h > 165 then
-    refreshZoneXLarge(wgt)
-  elseif wgt.zone.w > 180 and wgt.zone.h > 145 then
-    refreshZoneLarge(wgt)
-  elseif wgt.zone.w > 170 and wgt.zone.h > 65 then
-    refreshZoneMedium(wgt)
-  elseif wgt.zone.w > 150 and wgt.zone.h > 28 then
-    refreshZoneSmall(wgt)
-  elseif wgt.zone.w > 65 and wgt.zone.h > 35 then
-    refreshZoneTiny(wgt)
+  elseif wgt.zone.w > 380 and wgt.zone.h > 165 then refreshZoneXLarge(wgt)
+  elseif wgt.zone.w > 180 and wgt.zone.h > 145 then refreshZoneLarge(wgt)
+  elseif wgt.zone.w > 170 and wgt.zone.h >  65 then refreshZoneMedium(wgt)
+  elseif wgt.zone.w > 150 and wgt.zone.h >  28 then refreshZoneSmall(wgt)
+  elseif wgt.zone.w >  65 and wgt.zone.h >  35 then refreshZoneTiny(wgt)
   end
 
 end
