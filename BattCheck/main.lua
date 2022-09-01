@@ -435,8 +435,8 @@ local function refreshZoneMedium(wgt)
   -- more info if 1/4 is high enough (without trim & slider)
   if wgt.zone.h > 80 then
     --lcd.drawText(wgt.zone.x + 50     , wgt.zone.y + 70, string.format("%2.2fV"   , wgt.secondaryValue), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
-    lcd.drawText(wgt.zone.x, wgt.zone.y + 70, string.format("dV %2.2fV", wgt.cellMax - wgt.cellMin), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
-    lcd.drawText(wgt.zone.x, wgt.zone.y + 84, string.format("Min %2.2fV", wgt.cellDataHistoryCellLowest), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
+    lcd.drawText(wgt.zone.x, wgt.zone.y + 65, string.format("dV %2.2fV", wgt.cellMax - wgt.cellMin), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
+    lcd.drawText(wgt.zone.x, wgt.zone.y + 79, string.format("Min %2.2fV", wgt.cellDataHistoryCellLowest), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
   end
 
   -- fill battery
@@ -462,7 +462,7 @@ local function refreshZoneMedium(wgt)
     --lcd.setColor(fill_color, getRangeColor(wgt.cellDataHistoryLowest[i], wgt.cellMax, wgt.cellMax - 0.2))
     lcd.drawFilledRectangle(wgt.zone.x + cellX + (cellW * wgt.cellDataHistoryLowestPercent[i])/100 -2, cellY, 2 , cellH, BLACK)
 
-    lcd.drawText           (wgt.zone.x + cellX + 10, cellY, string.format("%.2f", wgt.cellDataLive[i]), SMLSIZE + WHITE + wgt.shadowed + wgt.no_telem_blink)
+    lcd.drawText           (wgt.zone.x + cellX + 10, cellY -1 , string.format("%.2f", wgt.cellDataLive[i]), SMLSIZE + WHITE + wgt.shadowed + wgt.no_telem_blink)
     lcd.drawRectangle      (wgt.zone.x + cellX     , cellY, 59, cellH, WHITE , 1)
   end
 

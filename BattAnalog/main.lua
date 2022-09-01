@@ -31,7 +31,7 @@
 -- Widget to display the levels of Lipo battery from single analog source
 -- Offer Shmuely
 -- Date: 2022
--- ver: 0.3
+-- ver: 0.4
 
 local _options = {
   { "Sensor"            , SOURCE, 0      }, -- default to 'A1'
@@ -240,7 +240,6 @@ local function calculateBatteryData(wgt)
   local v = getValue(wgt.options.Sensor)
   local fieldinfo = getFieldInfo(wgt.options.Sensor)
   log("wgt.options.Sensor: " .. wgt.options.Sensor)
-  log("v: " .. v)
 
   if type(v) == "table" then
     -- multi cell values using FLVSS liPo Voltage Sensor
@@ -458,8 +457,11 @@ local function refreshZoneXLarge(wgt)
   local myBatt = { ["x"] = 10, ["y"] = 0, ["w"] = 80, ["h"] = h, ["segments_h"] = 30, ["color"] = WHITE, ["cath_w"] = 30, ["cath_h"] = 10 }
 
   -- draw right text section
-  lcd.drawText(x + w, y + myBatt.y + 0, string.format("%2.2fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + w, y +h - 60       , string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
+  --lcd.drawText(x + w, y + myBatt.y + 0, string.format("%2.2fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  --lcd.drawText(x + w, y + myBatt.y +  0, string.format("%2.2fV", wgt.mainValue), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + 150, y + myBatt.y +  0, string.format("%2.2fV", wgt.mainValue), XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w, y + myBatt.y + 80, string.format("%2.0f%%", wgt.vPercent), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w, y +h - 60       , string.format("%2.2fV    %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w, y +h - 30       , string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
 
   drawBattery(wgt, myBatt)
@@ -482,10 +484,13 @@ local function refreshAppMode(wgt, event, touchState)
   end
     
   -- draw right text section
-  lcd.drawText(x + w - 20, y + myBatt.y + 0, string.format("%2.2fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + w - 20, y + 80, string.format("%2.2fV", wgt.secondaryValue), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + w - 20, y + 150, string.format("%dS", wgt.cellCount), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + w - 20, y +h - 30, string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
+  --lcd.drawText(x + w - 20, y + myBatt.y + 0, string.format("%2.2fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + 180, y + 30, string.format("%2.2fV", wgt.mainValue), XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + 180, y + 100, string.format("%2.0f%%", wgt.vPercent), XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+
+  lcd.drawText(x + w - 20, y + h - 90, string.format("%2.2fV", wgt.secondaryValue), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w - 20, y + h - 60, string.format("%dS", wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + w - 20, y + h - 30, string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
 
   drawBattery(wgt, myBatt)
 
