@@ -37,7 +37,7 @@ local _options = {
   { "Sensor"            , SOURCE, 0      }, -- default to 'A1'
   { "Color"             , COLOR , YELLOW },
   { "Show_Total_Voltage", BOOL  , 0      }, -- 0=Show as average Lipo cell level, 1=show the total voltage (voltage as is)
-  { "lithium_ion"       , BOOL  , 0      }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
+  { "Lithium_Ion"       , BOOL  , 0      }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
 }
 
 -- Data gathered from commercial lipo sensors
@@ -53,7 +53,7 @@ local _lipoPercentListSplit = {
 }
 
 -- from: https://electric-scooter.guide/guides/electric-scooter-battery-voltage-chart/
-local _liionPercentListSplit = {
+local _liionPercentListSplit_old = {
   {3.00,   0 },{3.01,   1 },{3.02,   2 },{3.03,   3 },{3.04,   4 },
   {3.06,   5 },{3.07,   6 },{3.08,   7 },{3.09,   8 },{3.10,   9 },
   {3.12,  10 },{3.13,  11 },{3.14,  12 },{3.15,  13 },{3.16,  14 },
@@ -80,6 +80,30 @@ local _liionPercentListSplit = {
   --{ {4.20, 100 },{4.21, 101 },{4.22, 102 },{4.23, 103 },{4.24, 104 } },
 }
 
+local _liionPercentListSplit = {
+  {2.80,  0 },{2.85,  1 },{2.89,  2 },{2.92,  3 },{2.94,  4 },
+  {2.96,  5 },{2.97,  6 },{2.98,  7 },{2.99,  8 },{3.00,  9 },
+  {3.01, 10 },{3.02, 11 },{3.03, 12 },{3.04, 13 },{3.05, 14 },
+  {3.06, 15 },{3.07, 16 },{3.08, 17 },{3.09, 18 },{3.10, 19 },
+  {3.11, 20 },{3.12, 21 },{3.13, 22 },{3.14, 23 },{3.15, 24 },
+  {3.16, 25 },{3.17, 26 },{3.18, 27 },{3.19, 28 },{3.20, 29 },
+  {3.21, 30 },{3.22, 31 },{3.23, 32 },{3.24, 33 },{3.25, 34 },
+  {3.26, 35 },{3.27, 36 },{3.28, 37 },{3.29, 38 },{3.30, 39 },
+  {3.31, 40 },{3.32, 41 },{3.33, 42 },{3.34, 43 },{3.35, 44 },
+  {3.36, 45 },{3.37, 46 },{3.38, 47 },{3.39, 48 },{3.40, 49 },
+  {3.41, 50 },{3.42, 51 },{3.43, 52 },{3.44, 53 },{3.45, 54 },
+  {3.46, 55 },{3.47, 56 },{3.48, 57 },{3.49, 58 },{3.50, 59 },
+  {3.51, 60 },{3.52, 61 },{3.53, 62 },{3.54, 63 },{3.55, 64 },
+  {3.56, 65 },{3.57, 66 },{3.58, 67 },{3.59, 68 },{3.60, 69 },
+  {3.61, 70 },{3.62, 71 },{3.63, 72 },{3.64, 73 },{3.65, 74 },
+  {3.66, 75 },{3.67, 76 },{3.68, 77 },{3.69, 78 },{3.70, 79 },
+  {3.71, 80 },{3.72, 81 },{3.73, 82 },{3.74, 83 },{3.75, 84 },
+  {3.76, 85 },{3.77, 86 },{3.78, 87 },{3.79, 88 },{3.80, 89 },
+  {3.81, 90 },{3.83, 91 },{3.83, 92 },{3.84, 93 },{3.85, 94 },
+  {3.87, 95 },{3.89, 96 },{3.92, 97 },{3.96, 98 },{4.04, 99 },
+  {4.10, 100}
+  }
+
 
 local defaultSensor = "RxBt" -- RxBt / A1 / A3/ VFAS /RxBt
 
@@ -99,6 +123,21 @@ local function update(wgt, options)
   -- use default if user did not set, So widget is operational on "select widget"
   if wgt.options.Sensor == 0 then
     wgt.options.Sensor = defaultSensor
+  end
+
+  wgt.options.source_name = ""
+  if (type(wgt.options.Sensor) == "number") then
+    local source_name = getSourceName(wgt.options.Sensor)
+    if (source_name ~= nil) then
+      if string.byte(string.sub(source_name,1,1)) > 127 then
+        source_name = string.sub(source_name,2,-1) -- ???? why?
+      end
+      if string.byte(string.sub(source_name,1,1)) > 127 then
+        source_name = string.sub(source_name,2,-1) -- ???? why?
+      end
+      log(string.format("source_name: %s", source_name))
+      wgt.options.source_name = source_name
+    end
   end
 
   wgt.options.Show_Total_Voltage = wgt.options.Show_Total_Voltage % 2 -- modulo due to bug that cause the value to be other than 0|1
@@ -252,7 +291,7 @@ local function calculateBatteryData(wgt)
   elseif v ~= nil and v >= 1 then
     -- single cell or VFAS lipo sensor
     if fieldinfo then
-      log("single value: " .. fieldinfo['name'] .. "=" .. v)
+      log(wgt.options.source_name .. ", value: " .. fieldinfo.name .. "=" .. v)
     else
       log("only one cell using Ax lipo sensor")
     end
@@ -268,6 +307,7 @@ local function calculateBatteryData(wgt)
   end
 
   local newCellCount = calcCellCount(wgt, v)
+  log("newCellCount: " .. newCellCount)
 
   -- this is necessary for simu where cell-count can change
   if newCellCount ~= wgt.cellCount then
@@ -418,6 +458,7 @@ local function refreshZoneMedium(wgt)
   -- draw values
   lcd.drawText(wgt.zone.x + myBatt.w + 10, wgt.zone.y, string.format("%2.2fV", wgt.mainValue), DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(wgt.zone.x + myBatt.w + 10, wgt.zone.y + 30, string.format("%2.0f%%", wgt.vPercent), MIDSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h -53, wgt.options.source_name, RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
   if wgt.options.Show_Total_Voltage == 0 then
     lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h -35, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
   else
@@ -439,6 +480,8 @@ local function refreshZoneLarge(wgt)
 
   lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 0, string.format("%2.2fV", wgt.mainValue), RIGHT + DBLSIZE + wgt.text_color)
   lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 30, wgt.vPercent .. "%", RIGHT + DBLSIZE + wgt.text_color)
+
+  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 53, wgt.options.source_name, RIGHT + SMLSIZE + wgt.text_color)
   lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 35, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color)
   lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + wgt.zone.h - 20, string.format("min %2.2fV", wgt.vMin), RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
 
@@ -460,6 +503,7 @@ local function refreshZoneXLarge(wgt)
   --lcd.drawText(x + w, y + myBatt.y + 0, string.format("%2.2fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
   --lcd.drawText(x + w, y + myBatt.y +  0, string.format("%2.2fV", wgt.mainValue), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + 150, y + myBatt.y +  0, string.format("%2.2fV", wgt.mainValue), XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + 150, y + myBatt.y + 70, wgt.options.source_name, DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w, y + myBatt.y + 80, string.format("%2.0f%%", wgt.vPercent), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w, y +h - 60       , string.format("%2.2fV    %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w, y +h - 30       , string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
@@ -485,8 +529,9 @@ local function refreshAppMode(wgt, event, touchState)
     
   -- draw right text section
   --lcd.drawText(x + w - 20, y + myBatt.y + 0, string.format("%2.2fV    %2.0f%%", wgt.mainValue, wgt.vPercent), RIGHT + XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + 180, y + 0, wgt.options.source_name, DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + 180, y + 30, string.format("%2.2fV", wgt.mainValue), XXLSIZE + wgt.text_color + wgt.no_telem_blink)
-  lcd.drawText(x + 180, y + 100, string.format("%2.0f%%", wgt.vPercent), XXLSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(x + 180, y + 90, string.format("%2.0f%%", wgt.vPercent), XXLSIZE + wgt.text_color + wgt.no_telem_blink)
 
   lcd.drawText(x + w - 20, y + h - 90, string.format("%2.2fV", wgt.secondaryValue), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w - 20, y + h - 60, string.format("%dS", wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
