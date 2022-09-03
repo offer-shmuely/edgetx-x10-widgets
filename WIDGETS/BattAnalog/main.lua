@@ -410,7 +410,7 @@ end
 
 --- Zone size: 70x39 1/8th top bar
 local function refreshZoneTiny(wgt)
-  local myString = string.format("%2.1fV", wgt.mainValue)
+  local myString = string.format("%2.2fV", wgt.mainValue)
 
   -- write text
   lcd.drawText(wgt.zone.x + wgt.zone.w - 25, wgt.zone.y + 5, wgt.vPercent .. "%", RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
@@ -436,7 +436,7 @@ local function refreshZoneSmall(wgt)
   lcd.drawRectangle(wgt.zone.x + myBatt.x, wgt.zone.y + myBatt.y, myBatt.w, myBatt.h, WHITE, 2)
 
   -- write text
-  local topLine = string.format("%2.1fV      %2.0f%%", wgt.mainValue, wgt.vPercent)
+  local topLine = string.format("%2.2fV      %2.0f%%", wgt.mainValue, wgt.vPercent)
   lcd.drawText(wgt.zone.x + 20, wgt.zone.y + 2, topLine, MIDSIZE + wgt.text_color + wgt.no_telem_blink)
 end
 
