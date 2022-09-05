@@ -1,8 +1,5 @@
 ---- #########################################################################
 ---- #                                                                       #
----- # Log Viewer script for FrSky Horus/RadioMaster TX16s                   #
----- # Copyright (C) EdgeTX                                                  #
------#                                                                       #
 ---- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
 ---- #                                                                       #
 ---- # This program is free software; you can redistribute it and/or modify  #
