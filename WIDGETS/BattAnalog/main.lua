@@ -77,7 +77,7 @@ local _liionPercentListSplit = {
   { { 4.10, 100}, { 4.15,100 }, { 4.20, 100} },
 }
 
-local defaultSensor = "RxBt" -- RxBt / A1 / A3/ VFAS /RxBt
+local defaultSensor = "RxBt" -- RxBt / A1 / A3/ VFAS / Batt
 
 --------------------------------------------------------------
 local function log(s)
@@ -408,7 +408,7 @@ local function drawBattery(wgt, myBatt)
   --lcd.drawText(wgt.zone.x + myBatt.x + 20, wgt.zone.y + myBatt.y + 5, string.format("%2.1fV", wgt.mainValue), LEFT + MIDSIZE + wgt.text_color)
 end
 
---- Zone size: 70x39 1/8th top bar
+--- Zone size: 70x39 top bar
 local function refreshZoneTiny(wgt)
   local myString = string.format("%2.2fV", wgt.mainValue)
 
@@ -451,11 +451,11 @@ local function refreshZoneMedium(wgt)
   lcd.drawText(wgt.zone.x + myBatt.w + 12, wgt.zone.y + 30, string.format("%2.0f %%", wgt.vPercent), MIDSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(wgt.zone.x + wgt.zone.w - 5, wgt.zone.y + wgt.zone.h -55, wgt.options.source_name, RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
   if wgt.options.Show_Total_Voltage == 0 then
-    lcd.drawText(wgt.zone.x + wgt.zone.w - 5, wgt.zone.y + wgt.zone.h -40, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
+    lcd.drawText(wgt.zone.x + wgt.zone.w - 5, wgt.zone.y + wgt.zone.h -35, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
   else
     --lcd.drawText(wgt.zone.x, wgt.zone.y + 40, string.format("%2.2fV", wgt.mainValue), DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   end
-  lcd.drawText(wgt.zone.x + wgt.zone.w - 5, wgt.zone.y + wgt.zone.h - 30, string.format("Min %2.2fV", wgt.vMin), RIGHT + MIDSIZE + wgt.text_color + wgt.no_telem_blink)
+  lcd.drawText(wgt.zone.x + wgt.zone.w - 5, wgt.zone.y + wgt.zone.h - 20, string.format("Min %2.2fV", wgt.vMin), RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
 
   -- more info if 1/4 is high enough (without trim & slider)
   if wgt.zone.h > 80 then

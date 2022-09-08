@@ -394,9 +394,10 @@ local function getRangeColor(value, green_value, red_value)
   end
 end
 
---- Zone size: 70x39 1/8th top bar
+--- Zone size: 70x39 top bar
 local function refreshZoneTiny(wgt)
   local myString = string.format("%2.2fV", wgt.mainValue)
+  -- write text
   lcd.drawText(wgt.zone.x + wgt.zone.w - 25, wgt.zone.y + 5, wgt.cellPercent .. "%", RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(wgt.zone.x + wgt.zone.w - 25, wgt.zone.y + 20, myString, RIGHT + SMLSIZE + wgt.text_color + wgt.no_telem_blink)
 
@@ -410,7 +411,7 @@ end
 
 --- Zone size: 160x32 1/8th
 local function refreshZoneSmall(wgt)
-  local myBatt = { ["x"] = 5, ["y"] = 5, ["w"] = wgt.zone.w - 10, ["h"] = wgt.zone.h - 10, ["segments_w"] = 25, ["color"] = WHITE, ["cath_w"] = 6, ["cath_h"] = 20 }
+  local myBatt = { ["x"] = 5, ["y"] = 5, ["w"] = wgt.zone.w - 10, ["h"] = wgt.zone.h - 9, ["segments_w"] = 25, ["color"] = WHITE, ["cath_w"] = 6, ["cath_h"] = 20 }
 
   -- fill battery
   local fill_color = getPercentColor(wgt.cellPercent)
@@ -433,11 +434,12 @@ local function refreshZoneMedium(wgt)
   -- draw values
   lcd.drawText(wgt.zone.x, wgt.zone.y + 35, string.format("%2.2fV", wgt.mainValue), DBLSIZE + wgt.text_color + wgt.shadowed + wgt.no_telem_blink)
 
-  -- more info if 1/4 is high enough (without trim & slider)
+  -- more info if 1/4 is high enough (depend on  trim & slider)
   if wgt.zone.h > 80 then
-    --lcd.drawText(wgt.zone.x + 50     , wgt.zone.y + 70, string.format("%2.2fV"   , wgt.secondaryValue), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
-    lcd.drawText(wgt.zone.x, wgt.zone.y + 65, string.format("dV %2.2fV", wgt.cellMax - wgt.cellMin), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
-    lcd.drawText(wgt.zone.x, wgt.zone.y + 79, string.format("Min %2.2fV", wgt.cellDataHistoryCellLowest), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
+    lcd.drawText(wgt.zone.x, wgt.zone.y + 65, string.format("Min %2.2fV", wgt.cellDataHistoryCellLowest), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
+  end
+  if wgt.zone.h > 85 then
+      lcd.drawText(wgt.zone.x, wgt.zone.y + 79, string.format("dV %2.2fV", wgt.cellMax - wgt.cellMin), SMLSIZE + wgt.text_color + wgt.no_telem_blink)
   end
 
   -- fill battery
@@ -478,8 +480,8 @@ end
 local function refreshZoneLarge(wgt)
   local myBatt = { ["x"] = 0, ["y"] = 18, ["w"] = 76, ["h"] = 121, ["segments_h"] = 30, ["color"] = WHITE, ["cath_w"] = 30, ["cath_h"] = 10 }
 
-  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, wgt.cellPercent .. "%", RIGHT + DBLSIZE + wgt.text_color + wgt.shadowed)
-  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 30, string.format("%2.2fV", wgt.mainValue), RIGHT + DBLSIZE + wgt.text_color + wgt.shadowed)
+  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 0, string.format("%2.2fV", wgt.mainValue), RIGHT + DBLSIZE + wgt.text_color + wgt.shadowed)
+  lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 30, wgt.cellPercent .. "%", RIGHT + DBLSIZE + wgt.text_color + wgt.shadowed)
   lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + 70, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color + wgt.shadowed)
 
   -- fill battery
@@ -516,9 +518,8 @@ local function refreshAppModeImpl(wgt, x, w, y, h)
   lcd.drawFilledRectangle(x + myBatt.x, y + myBatt.y + myBatt.h + myBatt.cath_h - math.floor(wgt.cellPercent / 100 * myBatt.h), myBatt.w, math.floor(wgt.cellPercent / 100 * myBatt.h), fill_color)
 
   -- draw right text section
-  lcd.drawText(x + w, y + myBatt.y, wgt.cellPercent .. "%", RIGHT + DBLSIZE + wgt.text_color + wgt.shadowed + wgt.no_telem_blink)
-
-  lcd.drawText(x + w, y + myBatt.y + 30, string.format("%2.2fV", wgt.mainValue), RIGHT + DBLSIZE + wgt.text_color + wgt.shadowed + wgt.no_telem_blink)
+  lcd.drawText(x + w, y + myBatt.y + 0, string.format("%2.2fV", wgt.mainValue), RIGHT + DBLSIZE + wgt.text_color + wgt.shadowed + wgt.no_telem_blink)
+  lcd.drawText(x + w, y + myBatt.y + 30, wgt.cellPercent .. "%", RIGHT + DBLSIZE + wgt.text_color + wgt.shadowed + wgt.no_telem_blink)
   lcd.drawText(x + w, y + myBatt.y + 105, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color + wgt.shadowed + wgt.no_telem_blink)
 
   -- draw cells
