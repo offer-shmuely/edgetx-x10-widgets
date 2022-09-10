@@ -44,26 +44,26 @@ local _lipoPercentListSplit = {
 
 -- from: https://electric-scooter.guide/guides/electric-scooter-battery-voltage-chart/
 local _liionPercentListSplit = {
-  { { 2.800,  0 }, { 2.850,  1 }, { 2.900,  2 }, { 2.950,  3 }, { 3.000,  4 } },
-  { { 3.050,  5 }, { 3.100,  6 }, { 3.150,  7 }, { 3.190,  8 }, { 3.220,  9 } },
-  { { 3.250, 10 }, { 3.270, 11 }, { 3.290, 12 }, { 3.310, 13 }, { 3.325, 14 } },
-  { { 3.340, 15 }, { 3.355, 16 }, { 3.370, 17 }, { 3.385, 18 }, { 3.400, 19 } },
-  { { 3.410, 20 }, { 3.420, 21 }, { 3.430, 22 }, { 3.440, 23 }, { 3.450, 24 } },
-  { { 3.460, 25 }, { 3.470, 26 }, { 3.480, 27 }, { 3.490, 28 }, { 3.500, 29 } },
-  { { 3.510, 30 }, { 3.520, 31 }, { 3.525, 32 }, { 3.530, 33 }, { 3.535, 34 } },
-  { { 3.540, 35 }, { 3.545, 36 }, { 3.550, 37 }, { 3.555, 38 }, { 3.560, 39 } },
-  { { 3.565, 40 }, { 3.570, 41 }, { 3.575, 42 }, { 3.580, 43 }, { 3.585, 44 } },
-  { { 3.590, 45 }, { 3.595, 46 }, { 3.600, 47 }, { 3.605, 48 }, { 3.610, 49 } },
-  { { 3.615, 50 }, { 3.620, 51 }, { 3.625, 52 }, { 3.630, 53 }, { 3.635, 54 } },
-  { { 3.640, 55 }, { 3.645, 56 }, { 3.650, 57 }, { 3.655, 58 }, { 3.660, 59 } },
-  { { 3.665, 60 }, { 3.670, 61 }, { 3.675, 62 }, { 3.680, 63 }, { 3.685, 64 } },
-  { { 3.690, 65 }, { 3.695, 66 }, { 3.700, 67 }, { 3.705, 68 }, { 3.710, 69 } },
-  { { 3.715, 70 }, { 3.720, 71 }, { 3.725, 72 }, { 3.730, 73 }, { 3.735, 74 } },
-  { { 3.740, 75 }, { 3.745, 76 }, { 3.750, 77 }, { 3.755, 78 }, { 3.760, 79 } },
-  { { 3.765, 80 }, { 3.770, 81 }, { 3.775, 82 }, { 3.780, 83 }, { 3.785, 84 } },
-  { { 3.790, 85 }, { 3.800, 86 }, { 3.810, 87 }, { 3.820, 88 }, { 3.830, 89 } },
-  { { 3.840, 90 }, { 3.850, 91 }, { 3.860, 92 }, { 3.900, 93 }, { 3.940, 94 } },
-  { { 3.980, 95 }, { 4.020, 96 }, { 4.040, 97 } },
+  { { 2.800,  0 }, { 2.840,  1 }, { 2.880,  2 }, { 2.920,  3 }, { 2.960,  4 } },
+  { { 3.000,  5 }, { 3.040,  6 }, { 3.080,  7 }, { 3.096,  8 }, { 3.112,  9 } },
+  { { 3.128, 10 }, { 3.144, 11 }, { 3.160, 12 }, { 3.176, 13 }, { 3.192, 14 } },
+  { { 3.208, 15 }, { 3.224, 16 }, { 3.240, 17 }, { 3.256, 18 }, { 3.272, 19 } },
+  { { 3.288, 20 }, { 3.304, 21 }, { 3.320, 22 }, { 3.336, 23 }, { 3.352, 24 } },
+  { { 3.368, 25 }, { 3.384, 26 }, { 3.400, 27 }, { 3.416, 28 }, { 3.432, 29 } },
+  { { 3.448, 30 }, { 3.464, 31 }, { 3.480, 32 }, { 3.496, 33 }, { 3.504, 34 } },
+  { { 3.512, 35 }, { 3.520, 36 }, { 3.528, 37 }, { 3.536, 38 }, { 3.544, 39 } },
+  { { 3.552, 40 }, { 3.560, 41 }, { 3.568, 42 }, { 3.576, 43 }, { 3.584, 44 } },
+  { { 3.592, 45 }, { 3.600, 46 }, { 3.608, 47 }, { 3.616, 48 }, { 3.624, 49 } },
+  { { 3.632, 50 }, { 3.640, 51 }, { 3.648, 52 }, { 3.656, 53 }, { 3.664, 54 } },
+  { { 3.672, 55 }, { 3.680, 56 }, { 3.688, 57 }, { 3.696, 58 }, { 3.704, 59 } },
+  { { 3.712, 60 }, { 3.720, 61 }, { 3.728, 62 }, { 3.736, 63 }, { 3.744, 64 } },
+  { { 3.752, 65 }, { 3.760, 66 }, { 3.768, 67 }, { 3.776, 68 }, { 3.784, 69 } },
+  { { 3.792, 70 }, { 3.800, 71 }, { 3.810, 72 }, { 3.820, 73 }, { 3.830, 74 } },
+  { { 3.840, 75 }, { 3.850, 76 }, { 3.860, 77 }, { 3.870, 78 }, { 3.880, 79 } },
+  { { 3.890, 80 }, { 3.900, 81 }, { 3.910, 82 }, { 3.920, 83 }, { 3.930, 84 } },
+  { { 3.940, 85 }, { 3.950, 86 }, { 3.960, 87 }, { 3.970, 88 }, { 3.980, 89 } },
+  { { 3.990, 90 }, { 4.000, 91 }, { 4.010, 92 }, { 4.030, 93 }, { 4.050, 94 } },
+  { { 4.070, 95 }, { 4.090, 96 } },
   { { 4.10, 100}, { 4.15,100 }, { 4.20, 100} },
 }
 
@@ -140,7 +140,6 @@ local function update(wgt, options)
   end
 
   wgt.options.LowestCell = wgt.options.LowestCell % 2 -- modulo due to bug that cause the value to be other than 0|1
-
 end
 
 local function create(zone, options)
@@ -155,10 +154,10 @@ local function create(zone, options)
     telemResetLowestMinRSSI = 101,
     no_telem_blink = 0,
     isDataAvailable = 0,
-    cellDataLive = { 0, 0, 0, 0, 0, 0 },
-    cellDataLivePercent = {0,0,0,0,0,0},
-    cellDataHistoryLowest = { 5, 5, 5, 5, 5, 5 },
-    cellDataHistoryLowestPercent = {5,5,5,5,5,5},
+    cellDataLive = {0,0,0,0,0,0,0,0},
+    cellDataLivePercent = {0,0,0,0,0,0,0,0},
+    cellDataHistoryLowest = {5,5,5,5,5,5,5,5},
+    cellDataHistoryLowestPercent = {5,5,5,5,5,5,5,5},
     cellDataHistoryCellLowest = 5,
     cellMax = 0,
     cellMin = 0,
@@ -182,10 +181,10 @@ end
 local function onTelemetryResetEvent(wgt)
   wgt.telemResetCount = wgt.telemResetCount + 1
 
-  wgt.cellDataLive = { 0, 0, 0, 0, 0, 0 }
-  wgt.cellDataLivePercent = {0,0,0,0,0,0}
-  wgt.cellDataHistoryLowest = { 5, 5, 5, 5, 5, 5 }
-  wgt.cellDataHistoryLowestPercent = {5,5,5,5,5,5}
+  wgt.cellDataLive = {0,0,0,0,0,0,0,0}
+  wgt.cellDataLivePercent = {0,0,0,0,0,0,0,0}
+  wgt.cellDataHistoryLowest = {5,5,5,5,5,5,5,5}
+  wgt.cellDataHistoryLowestPercent = {5,5,5,5,5,5,5,5}
   wgt.cellDataHistoryCellLowest = 5
 end
 
@@ -213,13 +212,11 @@ local function detectResetEvent(wgt)
     return
   end
 
-
   -- reset telemetry detected
   wgt.telemResetLowestMinRSSI = 101
 
   -- notify event
   onTelemetryResetEvent(wgt)
-
 end
 
 --- This function return the percentage remaining in a single Lipo cel
@@ -279,7 +276,6 @@ local function calculateBatteryData(wgt)
       if v < wgt.cellDataHistoryCellLowest then
         wgt.cellDataHistoryCellLowest = v
       end
-
     end
 
     -- calc highest of all cells
@@ -488,7 +484,7 @@ local function refreshZoneLarge(wgt)
   local fill_color = getPercentColor(wgt.cellPercent)
   lcd.drawFilledRectangle(wgt.zone.x + myBatt.x, wgt.zone.y + myBatt.y + myBatt.h + myBatt.cath_h - math.floor(wgt.cellPercent / 100 * myBatt.h), myBatt.w, math.floor(wgt.cellPercent / 100 * myBatt.h), fill_color)
   -- draw cells
-  local pos = { { x = 80, y = 90 }, { x = 138, y = 90 }, { x = 80, y = 109 }, { x = 138, y = 109 }, { x = 80, y = 128 }, { x = 138, y = 128 } }
+  local pos = { { x = 80, y = 90 }, { x = 138, y = 90 }, { x = 80, y = 109 }, { x = 138, y = 109 }, { x = 80, y = 128 }, { x = 138, y = 128 }, { x = 80, y = 147 }, { x = 138, y = 147 } }
   for i = 1, wgt.cellCount, 1 do
     local fill_color = getRangeColor(wgt.cellDataLive[i], wgt.cellMax, wgt.cellMax - 0.2)
     print(fill_color)
@@ -523,7 +519,7 @@ local function refreshAppModeImpl(wgt, x, w, y, h)
   lcd.drawText(x + w, y + myBatt.y + 105, string.format("%2.2fV %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + SMLSIZE + wgt.text_color + wgt.shadowed + wgt.no_telem_blink)
 
   -- draw cells
-  local pos = { { x = 111, y = 38 }, { x = 164, y = 38 }, { x = 217, y = 38 }, { x = 111, y = 57 }, { x = 164, y = 57 }, { x = 217, y = 57 } }
+  local pos = { { x = 111, y = 38 }, { x = 164, y = 38 }, { x = 217, y = 38 }, { x = 111, y = 57 }, { x = 164, y = 57 }, { x = 217, y = 57 }, { x = 111, y = 77 }, { x = 164, y = 77 } }
   for i = 1, wgt.cellCount, 1 do
     local cell_color =  getRangeColor(wgt.cellDataLive[i], wgt.cellMax, wgt.cellMax - 0.2)
     lcd.drawFilledRectangle(x + pos[i].x, y + pos[i].y, 53, 20, cell_color)
@@ -531,7 +527,7 @@ local function refreshAppModeImpl(wgt, x, w, y, h)
     lcd.drawRectangle(x + pos[i].x, y + pos[i].y, 54, 20, WHITE, 1)
   end
   -- draw cells for lowest cells
-  local pos = { { x = 111, y = 110 }, { x = 164, y = 110 }, { x = 217, y = 110 }, { x = 111, y = 129 }, { x = 164, y = 129 }, { x = 217, y = 129 } }
+  local pos = { { x = 111, y = 120 }, { x = 164, y = 120 }, { x = 217, y = 120 }, { x = 111, y = 139 }, { x = 164, y = 139 }, { x = 217, y = 139 }, { x = 111, y = 159 }, { x = 164, y = 159 } }
   for i = 1, wgt.cellCount, 1 do
     local cell_color = getRangeColor(wgt.cellDataHistoryLowest[i], wgt.cellDataLive[i], wgt.cellDataLive[i] - 0.3)
     lcd.drawFilledRectangle(x + pos[i].x, y + pos[i].y, 53, 20, cell_color)
@@ -549,8 +545,8 @@ local function refreshAppModeImpl(wgt, x, w, y, h)
   -- draw middle rectangles
   lcd.drawRectangle(x + 110, y + 38, 161, 40, WHITE, 1)
   lcd.drawText(x + 220, y + 21, "Live data", RIGHT + SMLSIZE + INVERS + WHITE + wgt.shadowed)
-  lcd.drawRectangle(x + 110, y + 110, 161, 40, WHITE, 1)
-  lcd.drawText(x + 230, y + 93, "Lowest data", RIGHT + SMLSIZE + INVERS + WHITE + wgt.shadowed)
+  lcd.drawRectangle(x + 110, y + 120, 161, 40, WHITE, 1)
+  lcd.drawText(x + 230, y + 103, "Lowest data", RIGHT + SMLSIZE + INVERS + WHITE + wgt.shadowed)
   return
 end
 

@@ -54,26 +54,26 @@ local _lipoPercentListSplit = {
 
 -- from: https://electric-scooter.guide/guides/electric-scooter-battery-voltage-chart/
 local _liionPercentListSplit = {
-  { { 2.800,  0 }, { 2.850,  1 }, { 2.900,  2 }, { 2.950,  3 }, { 3.000,  4 } },
-  { { 3.050,  5 }, { 3.100,  6 }, { 3.150,  7 }, { 3.190,  8 }, { 3.220,  9 } },
-  { { 3.250, 10 }, { 3.270, 11 }, { 3.290, 12 }, { 3.310, 13 }, { 3.325, 14 } },
-  { { 3.340, 15 }, { 3.355, 16 }, { 3.370, 17 }, { 3.385, 18 }, { 3.400, 19 } },
-  { { 3.410, 20 }, { 3.420, 21 }, { 3.430, 22 }, { 3.440, 23 }, { 3.450, 24 } },
-  { { 3.460, 25 }, { 3.470, 26 }, { 3.480, 27 }, { 3.490, 28 }, { 3.500, 29 } },
-  { { 3.510, 30 }, { 3.520, 31 }, { 3.525, 32 }, { 3.530, 33 }, { 3.535, 34 } },
-  { { 3.540, 35 }, { 3.545, 36 }, { 3.550, 37 }, { 3.555, 38 }, { 3.560, 39 } },
-  { { 3.565, 40 }, { 3.570, 41 }, { 3.575, 42 }, { 3.580, 43 }, { 3.585, 44 } },
-  { { 3.590, 45 }, { 3.595, 46 }, { 3.600, 47 }, { 3.605, 48 }, { 3.610, 49 } },
-  { { 3.615, 50 }, { 3.620, 51 }, { 3.625, 52 }, { 3.630, 53 }, { 3.635, 54 } },
-  { { 3.640, 55 }, { 3.645, 56 }, { 3.650, 57 }, { 3.655, 58 }, { 3.660, 59 } },
-  { { 3.665, 60 }, { 3.670, 61 }, { 3.675, 62 }, { 3.680, 63 }, { 3.685, 64 } },
-  { { 3.690, 65 }, { 3.695, 66 }, { 3.700, 67 }, { 3.705, 68 }, { 3.710, 69 } },
-  { { 3.715, 70 }, { 3.720, 71 }, { 3.725, 72 }, { 3.730, 73 }, { 3.735, 74 } },
-  { { 3.740, 75 }, { 3.745, 76 }, { 3.750, 77 }, { 3.755, 78 }, { 3.760, 79 } },
-  { { 3.765, 80 }, { 3.770, 81 }, { 3.775, 82 }, { 3.780, 83 }, { 3.785, 84 } },
-  { { 3.790, 85 }, { 3.800, 86 }, { 3.810, 87 }, { 3.820, 88 }, { 3.830, 89 } },
-  { { 3.840, 90 }, { 3.850, 91 }, { 3.860, 92 }, { 3.900, 93 }, { 3.940, 94 } },
-  { { 3.980, 95 }, { 4.020, 96 }, { 4.040, 97 } },
+  { { 2.800,  0 }, { 2.840,  1 }, { 2.880,  2 }, { 2.920,  3 }, { 2.960,  4 } },
+  { { 3.000,  5 }, { 3.040,  6 }, { 3.080,  7 }, { 3.096,  8 }, { 3.112,  9 } },
+  { { 3.128, 10 }, { 3.144, 11 }, { 3.160, 12 }, { 3.176, 13 }, { 3.192, 14 } },
+  { { 3.208, 15 }, { 3.224, 16 }, { 3.240, 17 }, { 3.256, 18 }, { 3.272, 19 } },
+  { { 3.288, 20 }, { 3.304, 21 }, { 3.320, 22 }, { 3.336, 23 }, { 3.352, 24 } },
+  { { 3.368, 25 }, { 3.384, 26 }, { 3.400, 27 }, { 3.416, 28 }, { 3.432, 29 } },
+  { { 3.448, 30 }, { 3.464, 31 }, { 3.480, 32 }, { 3.496, 33 }, { 3.504, 34 } },
+  { { 3.512, 35 }, { 3.520, 36 }, { 3.528, 37 }, { 3.536, 38 }, { 3.544, 39 } },
+  { { 3.552, 40 }, { 3.560, 41 }, { 3.568, 42 }, { 3.576, 43 }, { 3.584, 44 } },
+  { { 3.592, 45 }, { 3.600, 46 }, { 3.608, 47 }, { 3.616, 48 }, { 3.624, 49 } },
+  { { 3.632, 50 }, { 3.640, 51 }, { 3.648, 52 }, { 3.656, 53 }, { 3.664, 54 } },
+  { { 3.672, 55 }, { 3.680, 56 }, { 3.688, 57 }, { 3.696, 58 }, { 3.704, 59 } },
+  { { 3.712, 60 }, { 3.720, 61 }, { 3.728, 62 }, { 3.736, 63 }, { 3.744, 64 } },
+  { { 3.752, 65 }, { 3.760, 66 }, { 3.768, 67 }, { 3.776, 68 }, { 3.784, 69 } },
+  { { 3.792, 70 }, { 3.800, 71 }, { 3.810, 72 }, { 3.820, 73 }, { 3.830, 74 } },
+  { { 3.840, 75 }, { 3.850, 76 }, { 3.860, 77 }, { 3.870, 78 }, { 3.880, 79 } },
+  { { 3.890, 80 }, { 3.900, 81 }, { 3.910, 82 }, { 3.920, 83 }, { 3.930, 84 } },
+  { { 3.940, 85 }, { 3.950, 86 }, { 3.960, 87 }, { 3.970, 88 }, { 3.980, 89 } },
+  { { 3.990, 90 }, { 4.000, 91 }, { 4.010, 92 }, { 4.030, 93 }, { 4.050, 94 } },
+  { { 4.070, 95 }, { 4.090, 96 } },
   { { 4.10, 100}, { 4.15,100 }, { 4.20, 100} },
 }
 
@@ -133,10 +133,8 @@ local function create(zone, options)
     vMin = 0,
     vTotalLive = 0,
     vPercent = 0,
-
     cellCount = 0,
     vCellLive = 0,
-
     mainValue = 0,
     secondaryValue = 0
   }
@@ -180,13 +178,11 @@ local function detectResetEvent(wgt)
     return
   end
 
-
   -- reset telemetry detected
   wgt.telemResetLowestMinRSSI = 101
 
   -- notify event
   onTelemetryResetEvent(wgt)
-
 end
 
 --- This function return the percentage remaining in a single Lipo cel
@@ -462,7 +458,6 @@ local function refreshZoneMedium(wgt)
   end
 
   drawBattery(wgt, myBatt)
-
 end
 
 --- Zone size: 192x152 1/2
@@ -498,9 +493,7 @@ local function refreshZoneXLarge(wgt)
   lcd.drawText(x + w, y + myBatt.y + 80, string.format("%2.0f%%", wgt.vPercent), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w, y +h - 60       , string.format("%2.2fV    %dS", wgt.secondaryValue, wgt.cellCount), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
   lcd.drawText(x + w, y +h - 30       , string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
-
   drawBattery(wgt, myBatt)
-
   return
 end
 
@@ -529,7 +522,6 @@ local function refreshAppMode(wgt, event, touchState)
   lcd.drawText(x + w - 20, y + h - 30, string.format("min %2.2fV", wgt.vMin), RIGHT + DBLSIZE + wgt.text_color + wgt.no_telem_blink)
 
   drawBattery(wgt, myBatt)
-
   return
 end
 
@@ -540,9 +532,7 @@ local function background(wgt)
   end
 
   detectResetEvent(wgt)
-
   calculateBatteryData(wgt)
-
 end
 
 local function refresh(wgt, event, touchState)
@@ -554,9 +544,7 @@ local function refresh(wgt, event, touchState)
   if (wgt.options.Show_Total_Voltage == nil) then return end
 
   detectResetEvent(wgt)
-
   calculateBatteryData(wgt)
-
   if wgt.isDataAvailable then
     wgt.no_telem_blink = 0
     wgt.text_color = wgt.options.Color
