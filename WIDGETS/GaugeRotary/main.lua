@@ -32,7 +32,7 @@
 --    * batt-capacity
 --    * A1/A2 analog voltage
 
--- Version: 0.4
+-- Version: 0.5
 -- Author : Offer Shmuely
 
 
@@ -165,7 +165,16 @@ local function getWidgetValue(wgt)
   local sourceName = getSourceName(wgt.options.Source)
   --log("aaaaaa:  ".. sourceName .. ": " .. string.byte(string.sub(sourceName, 1, 1)))
 
-  -- workaround for bug in getFiledInfo()
+    --- if table, sum of all cells
+    if type(currentValue) == "table" then
+        local cellSum = 0
+        for k, v in pairs(currentValue) do
+            cellSum = cellSum + v
+        end
+        currentValue =  cellSum
+    end
+
+    -- workaround for bug in getFiledInfo()
   if string.byte(string.sub(sourceName,1,1)) > 127 then
     sourceName = string.sub(sourceName,2,-1) -- ???? why?
   end
