@@ -1,7 +1,7 @@
 -- Horus Widget that count number of flights
 -- Offer Shmuely
 -- Date: 2022
--- ver: 0.3
+-- ver: 0.4
 -- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
 -- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9!!!
@@ -33,9 +33,9 @@ local img = Bitmap.open("/WIDGETS/".. app_name .. "/logo.png")
 local default_flight_starting_duration = 30 -- 20 sec to detect fight success
 local default_flight_ending_duration = 8 -- 8 sec to detect fight ended
 local default_min_motor_value = 200
-local enable_sounds = 1
-local enable_count_announcement_on_start = 1
-local enable_count_announcement_on_end = 1
+local enable_sounds = 1                      -- 0=no sound, 1=play blip sound on increment& on flight end
+local enable_count_announcement_on_start = 0 -- 0=no voice, 1=play the count upon increment
+local enable_count_announcement_on_end = 1   -- 0=no voice, 1=play the count upon end of flight
 
 local options = {
   { "switch"             , SOURCE, 117    },  -- 117== SF (arm/safety switch)
