@@ -126,9 +126,7 @@ end
 -----------------------------------------------------------------
 
 local function update(wgt, options)
-    if (wgt == nil) then
-        return
-    end
+    if (wgt == nil) then return end
 
     wgt.options = options
 
@@ -242,7 +240,7 @@ local function getCellPercent(wgt, cellValue)
                 if v2[1] >= cellValue then
                     result = v2[2]
                     --log(string.format("result: %d%%", result))
-                    --cpuProfilerAdd(wgt, 'cell-perc', t4);
+                    cpuProfilerAdd(wgt, 'cell-perc', t4);
                     return result
                 end
             end
@@ -338,7 +336,7 @@ local function calculateBatteryData(wgt)
         end
 
         periodicReset(wgt.periodic1)
-        --cpuProfilerAdd(wgt, 'calc-batt-perc', t5);
+        cpuProfilerAdd(wgt, 'calc-batt-perc', t5);
     end
 
 end
@@ -570,9 +568,7 @@ end
 
 -- This function allow recording of lowest cells when widget is in background
 local function background(wgt)
-    if (wgt == nil) then
-        return
-    end
+    if (wgt == nil) then return end
     local t1 = getUsage();
 
     detectResetEvent(wgt)

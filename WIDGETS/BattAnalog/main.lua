@@ -283,9 +283,9 @@ local function calculateBatteryData(wgt)
         return
     end
 
-	if newCellCount == 0 then
-		newCellCount = calcCellCount(wgt, v)
-	end
+    if newCellCount == 0 then
+        newCellCount = calcCellCount(wgt, v)
+    end
     log("newCellCount: " .. newCellCount)
 
     -- this is necessary for simu where cell-count can change
