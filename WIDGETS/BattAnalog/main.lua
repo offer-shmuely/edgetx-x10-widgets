@@ -79,6 +79,8 @@ local _liionPercentListSplit = {
 
 local defaultSensor = "RxBt" -- RxBt / A1 / A3/ VFAS / Batt
 
+local newCellCount = 0
+
 --------------------------------------------------------------
 local function log(s)
     print("BattAnalog: " .. s)
@@ -227,24 +229,26 @@ local function getCellPercent(wgt, cellValue)
     return result
 end
 
+-- Only invoke this function once.
 local function calcCellCount(wgt, singleVoltage)
-    if singleVoltage     < 4.3  then return 1
-    elseif singleVoltage < 8.6  then return 2
-    elseif singleVoltage < 12.9 then return 3
-    elseif singleVoltage < 17.2 then return 4
-    elseif singleVoltage < 21.5 then return 5
-    elseif singleVoltage < 25.8 then return 6
-    elseif singleVoltage < 30.1 then return 7
-    elseif singleVoltage < 34.4 then return 8
-    elseif singleVoltage < 38.7 then return 9
-    elseif singleVoltage < 43.0 then return 10
-    elseif singleVoltage < 47.3 then return 11
-    elseif singleVoltage < 51.6 then return 12
+    if singleVoltage     > 36 then return 12
+    elseif singleVoltage > 33 then return 11
+    elseif singleVoltage > 30 then return 10
+    elseif singleVoltage > 27 then return 9
+    elseif singleVoltage > 24 then return 8
+    elseif singleVoltage > 21 then return 7
+    elseif singleVoltage > 18 then return 6
+    elseif singleVoltage > 15 then return 5
+    elseif singleVoltage > 12 then return 4
+    elseif singleVoltage > 9  then return 3
+    elseif singleVoltage > 6  then return 2
+    elseif singleVoltage > 3  then return 1
     end
 
     log("no match found" .. singleVoltage)
     return 1
 end
+
 
 --- This function returns a table with cels values
 local function calculateBatteryData(wgt)
@@ -279,7 +283,9 @@ local function calculateBatteryData(wgt)
         return
     end
 
-    local newCellCount = calcCellCount(wgt, v)
+	if newCellCount == 0 then
+		newCellCount = calcCellCount(wgt, v)
+	end
     log("newCellCount: " .. newCellCount)
 
     -- this is necessary for simu where cell-count can change
