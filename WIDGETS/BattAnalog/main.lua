@@ -31,7 +31,7 @@
 -- Widget to display the levels of Lipo battery from single analog source
 -- Offer Shmuely
 -- Date: 2022
--- ver: 0.4
+-- ver: 0.5
 
 local _options = {
     { "Sensor"            , SOURCE, 0      }, -- default to 'A1'
