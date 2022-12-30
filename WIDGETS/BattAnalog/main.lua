@@ -146,7 +146,7 @@ local function create(zone, options)
     }
 
     -- imports
-    wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/tools.lua", "tcd")
+    wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/widget_tools.lua", "tcd")
     wgt.tools = wgt.ToolsClass(app_name)
 
     update(wgt, options)

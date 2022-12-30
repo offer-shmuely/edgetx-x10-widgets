@@ -39,8 +39,8 @@
 local app_name = "GaugeRotary"
 
 -- imports
-local GaugeClass = loadScript("/WIDGETS/" .. app_name .. "/gauge_core.lua")
-local ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/tools.lua")
+local GaugeClass = loadScript("/WIDGETS/" .. app_name .. "/gauge_core.lua", "tcd")
+local ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/widget_tools.lua", "tcd")
 
 -- consts
 local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }

@@ -12,6 +12,9 @@ self.buckets_sorted_keys = {}
 self.minVal = nil
 self.maxVal = nil
 self.max_sample_count_log = 0
+self.unit = "na"
+--self.unit = wgt.tools.unitIdToString(fieldinfo.unit)
+
 self.periodic1 = {startTime = getTime(), sampleIntervalMili = sampleIntervalMili}
 
 --------------------------------------------------------------
@@ -197,7 +200,7 @@ function self.drawHist(wgt)
   -- draw current value
   if self.minVal ~= nil and self.maxVal ~= nil
   then
-    lcd.drawText(5, 25, string.format("%d (min: %d, max: %d)", valueCurr, self.minVal, self.maxVal), 0 + MIDSIZE + YELLOW)
+    lcd.drawText(5, 25, string.format("%d %s (%d - %d %s)", valueCurr,self.unit, self.minVal, self.maxVal, self.unit), 0 + MIDSIZE + YELLOW)
   end
 
   -- properties
