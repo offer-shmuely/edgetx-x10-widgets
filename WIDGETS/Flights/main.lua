@@ -43,16 +43,23 @@ local enable_count_announcement_on_start = 0 -- 0=no voice, 1=play the count upo
 local enable_count_announcement_on_end = 1   -- 0=no voice, 1=play the count upon end of flight
 local use_telemetry = 1                      -- 0=do not use telemetry, 1=use telemetry in state machine
 
-local options = {
+-- backward compatibility
+local ver, radio, maj, minor, rev, osname = getVersion()
+local DEFAULT_ARM_SWITCH_ID = 1
+local DEFAULT_MOTOR_CHANNEL_ID = 1
+if maj == 2 and minor == 7 then
     -- for 2.7.x
-    { "switch", SOURCE, 117 }, -- 117== SF (arm/safety switch)
-    { "motor_channel", SOURCE, 204 }, -- 204==CH3
-
+    DEFAULT_ARM_SWITCH_ID = 117     -- arm/safety switch=SF
+    DEFAULT_MOTOR_CHANNEL_ID = 204  -- motor_channel=CH3
+elseif maj == 2 and minor >= 8 then
     -- for 2.8.x
-    --{ "switch", SOURCE, 125 }, -- 125== SF (arm/safety switch)
-    --{ "motor_channel", SOURCE, 212 }, -- 212==CH3
+    DEFAULT_ARM_SWITCH_ID = 125     -- arm/safety switch=SF
+    DEFAULT_MOTOR_CHANNEL_ID = 212  -- motor_channel=CH3
+end
 
-
+local options = {
+    { "switch", SOURCE, DEFAULT_ARM_SWITCH_ID },
+    { "motor_channel", SOURCE, DEFAULT_MOTOR_CHANNEL_ID },
     { "min_flight_duration", VALUE, default_flight_starting_duration, 2, 120 },
     --{ "enable_sounds"    , BOOL  , 1      },  -- enable sound on adding succ flight, and on end of flight
     { "text_color", COLOR, YELLOW },
@@ -60,7 +67,7 @@ local options = {
 }
 
 local function log(s)
-      -- print(app_name .. ": " .. s)
+    -- print(app_name .. ": " .. s)
 end
 
 local function update(wgt, options)
