@@ -1,6 +1,8 @@
 local app_name, script_dir = ...
-local ENABLE_LOG_FILE=true
-local current_level_str = "info"        -- info | no_logs
+
+local ENABLE_LOG_TO_CONSOLE = false
+local ENABLE_LOG_TO_FILE    = false
+
 
 local M = {}
 M.app_name = app_name
@@ -8,7 +10,8 @@ M.script_dir = script_dir
 
 local log = {
     outfile = script_dir .. "/app.log",
-    enable_file = ENABLE_LOG_FILE,
+    enable_file = ENABLE_LOG_TO_FILE,
+    enable_console = ENABLE_LOG_TO_CONSOLE,
     current_level = nil,
 
     -- func
@@ -27,10 +30,9 @@ local log = {
         error = 5,
         fatal = 6,
         no_logs = 99
-    }
+    },
 }
-
-log.current_level = log.levels[current_level_str]
+log.current_level = log.levels["info"] -- trace|debug|info|warn|error|fatal
 
 
 local function round(x, increment)
@@ -54,6 +56,10 @@ local function tostring(...)
 end
 
 function M.do_log(iLevel, ulevel, fmt, ...)
+    if log.enable_console == false then
+        return
+    end
+
     if iLevel < log.current_level then
         --below the log level
         return
@@ -67,8 +73,9 @@ function M.do_log(iLevel, ulevel, fmt, ...)
         msg = fmt
     end
 
-    local lineinfo = "f.lua:0"
-    local msg2 = string.format("[%-4s] %s: %s", ulevel, lineinfo, msg)
+    --local lineinfo = "f.lua:0"
+    --local msg2 = string.format("[%-4s][%-8s] %s: %s", ulevel, M.app_name, lineinfo, msg)
+    local msg2 = string.format("[%-8s][%-4s] %s", M.app_name, ulevel, msg)
 
     -- output to console
     print(msg2)

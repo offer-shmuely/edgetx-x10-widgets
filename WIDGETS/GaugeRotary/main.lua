@@ -32,7 +32,7 @@
 --    * batt-capacity
 --    * A1/A2 analog voltage
 
--- Version: 0.5
+-- Version: 0.6
 -- Author : Offer Shmuely
 
 
@@ -79,7 +79,7 @@ local _options = {
     --{ "Source", SOURCE, 243 }, -- TxBt
     --{ "Source", SOURCE, 256 }, -- RxBt
     { "Min", VALUE, -1, -1024, 1024 },
-    { "Max", VALUE, -1, -1024, 1024 },
+    { "Max", VALUE, -1, -1024, 10000 },
     { "HighAsGreen", BOOL, 1 },
     { "Precision", VALUE, 1, 0, 1 }
 }
@@ -97,11 +97,11 @@ local function setAutoMinMax(wgt)
     -- log(string.format("setAutoMinMax(wgt.options.Min: %d, wgt.options.Max: %d) ", wgt.options.Min, wgt.options.Max))
     if wgt.options.Min ~= -1 or wgt.options.Max ~= -1 then
         --if wgt.options.Min ~= wgt.options.Max then
-        print("GaugeRotary-setting: " .. "no need for AutoMinMax")
+        log("GaugeRotary-setting: " .. "no need for AutoMinMax")
         return
     end
 
-    print("GaugeRotary-setting: " .. "AutoMinMax")
+    log("GaugeRotary-setting: " .. "AutoMinMax")
     local sourceName = getSourceName(wgt.options.Source)
     if (sourceName == nil) then return end
 
@@ -109,7 +109,7 @@ local function setAutoMinMax(wgt)
     if string.byte(string.sub(sourceName, 1, 1)) > 127 then
         sourceName = string.sub(sourceName, 2, -1) -- ???? why?
     end
-    print("GaugeRotary-setting: " .. "AutoMinMax, source:" .. sourceName)
+    log("GaugeRotary-setting: " .. "AutoMinMax, source:" .. sourceName)
 
     for i = 1, #DEFAULT_MIN_MAX, 1 do
         local def_key = DEFAULT_MIN_MAX[i][1]
@@ -127,7 +127,7 @@ local function setAutoMinMax(wgt)
     end
 
     if wgt.options.Min == wgt.options.Max then
-        print("GaugeRotary-setting: " .. "AutoMinMax else")
+        log("GaugeRotary-setting: " .. "AutoMinMax else")
         wgt.options.Min = 0
         wgt.options.Max = 100
     end
@@ -150,11 +150,11 @@ local function create(zone, options)
     }
 
     -- imports
-    wgt.GaugeClass = loadScript("/WIDGETS/" .. app_name .. "/gauge_core.lua", "tcd")
     wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/widget_tools.lua", "tcd")
+    wgt.GaugeClass = loadScript("/WIDGETS/" .. app_name .. "/gauge_core.lua", "tcd")
 
-    wgt.gauge1 = wgt.GaugeClass(options.HighAsGreen, 2)
-    wgt.tools = wgt.ToolsClass(app_name)
+    wgt.gauge1 = wgt.GaugeClass(m_log, options.HighAsGreen)
+    wgt.tools = wgt.ToolsClass(m_log, app_name)
 
     update(wgt, options)
     return wgt
@@ -185,7 +185,7 @@ end
 local function getWidgetValue(wgt)
     local currentValue = getValue(wgt.options.Source)
     local sourceName = getSourceName(wgt.options.Source)
-    log("[%s],currentValue: %s" , wgt.options.Source, currentValue)
+    log("[%s-%s],currentValue: %s" , wgt.options.Source, sourceName, currentValue)
 
     --- if table, sum of all cells
     if type(currentValue) == "table" then
@@ -201,7 +201,7 @@ local function getWidgetValue(wgt)
 
     local fieldinfo = getFieldInfo(wgt.options.Source)
     if (fieldinfo == nil) then
-        log(string.format("getFieldInfo(%s)==nil", wgt.options.Source))
+        log("getFieldInfo(%s)==nil", wgt.options.Source)
         return sourceName, -1, nil, nil, ""
     end
 
