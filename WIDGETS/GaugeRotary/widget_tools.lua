@@ -1,4 +1,4 @@
-local m_log, app_name = ...
+ï»¿local m_log, app_name = ...
 
 local M = {}
 M.m_log = m_log
@@ -19,7 +19,7 @@ end
 -- const's
 local UNIT_ID_TO_STRING = {
     "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f",
-    "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°",
+    "Â°C", "Â°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "Â°",
     "rad", "ml", "fOz", "ml/m", "Hz", "mS", "uS", "km"
 }
 
