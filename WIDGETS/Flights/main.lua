@@ -1,3 +1,21 @@
+---- #########################################################################
+---- #                                                                       #
+---- # Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
+---- # Copyright (C) EdgeTX                                                  #
+-----#                                                                       #
+---- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
+---- #                                                                       #
+---- # This program is free software; you can redistribute it and/or modify  #
+---- # it under the terms of the GNU General Public License version 2 as     #
+---- # published by the Free Software Foundation.                            #
+---- #                                                                       #
+---- # This program is distributed in the hope that it will be useful        #
+---- # but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+---- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+---- # GNU General Public License for more details.                          #
+---- #                                                                       #
+---- #########################################################################
+
 -- Horus Widget that count number of flights
 -- Offer Shmuely
 -- Date: 2022
@@ -62,7 +80,7 @@ local options = {
     { "motor_channel", SOURCE, DEFAULT_MOTOR_CHANNEL_ID },
     { "min_flight_duration", VALUE, default_flight_starting_duration, 2, 120 },
     --{ "enable_sounds"    , BOOL  , 1      },  -- enable sound on adding succ flight, and on end of flight
-    { "text_color", COLOR, YELLOW },
+    { "text_color", COLOR, COLOR_THEME_PRIMARY2 },
     { "debug", BOOL, 0 }   -- show status on screen
 }
 
@@ -128,7 +146,7 @@ local function create(zone, options)
     --wgt.options.use_days = wgt.options.use_days % 2 -- modulo due to bug that cause the value to be other than 0|1
 
     -- imports
-    wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/widget_tools.lua", "tcd")
+    wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "tcd")
     wgt.tools = wgt.ToolsClass(app_name)
 
     update(wgt, options)

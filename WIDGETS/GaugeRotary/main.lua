@@ -84,8 +84,12 @@ local _options = {
     { "Precision", VALUE, 1, 0, 1 }
 }
 
-local UtilsLogClass = loadScript("/WIDGETS/" .. app_name .. "/utils_log.lua", "tcd")
-local m_log = UtilsLogClass(app_name, "/WIDGETS/" .. app_name)
+-- imports
+local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "tcd")
+local LibWidgetToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "tcd")
+local GaugeClass = loadScript("/WIDGETS/" .. app_name .. "/gauge_core.lua", "tcd")
+
+local m_log = LibLogClass(app_name, "/WIDGETS/" .. app_name)
 
 --------------------------------------------------------------
 local function log(...)
@@ -94,7 +98,7 @@ end
 --------------------------------------------------------------
 
 local function setAutoMinMax(wgt)
-    -- log(string.format("setAutoMinMax(wgt.options.Min: %d, wgt.options.Max: %d) ", wgt.options.Min, wgt.options.Max))
+    -- log("setAutoMinMax(wgt.options.Min: %d, wgt.options.Max: %d) ", wgt.options.Min, wgt.options.Max)
     if wgt.options.Min ~= -1 or wgt.options.Max ~= -1 then
         --if wgt.options.Min ~= wgt.options.Max then
         log("GaugeRotary-setting: " .. "no need for AutoMinMax")
@@ -118,7 +122,7 @@ local function setAutoMinMax(wgt)
         local def_precision = DEFAULT_MIN_MAX[i][4]
 
         if def_key == sourceName then
-            log(string.format("setting min-max from default: %s: min:%d, max:%d, precision:%d", def_key, def_min, def_max, def_precision))
+            log("setting min-max from default: %s: min:%d, max:%d, precision:%d", def_key, def_min, def_max, def_precision)
             wgt.options.Min = def_min
             wgt.options.Max = def_max
             wgt.options.precision = def_precision
@@ -136,7 +140,7 @@ end
 
 local function update(wgt, options)
     wgt.options = options
-    wgt.gauge1 = wgt.GaugeClass(m_log, options.HighAsGreen)
+    wgt.gauge1 = GaugeClass(m_log, wgt.tools, options.HighAsGreen)
     setAutoMinMax(wgt)
 end
 
@@ -150,11 +154,7 @@ local function create(zone, options)
         gauge1 = nil
     }
 
-    -- imports
-    wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/widget_tools.lua", "tcd")
-    wgt.GaugeClass = loadScript("/WIDGETS/" .. app_name .. "/gauge_core.lua", "tcd")
-
-    wgt.tools = wgt.ToolsClass(m_log, app_name)
+    wgt.tools = LibWidgetToolsClass(m_log, app_name)
 
     update(wgt, options)
     return wgt
@@ -208,13 +208,13 @@ local function getWidgetValue(wgt)
     local txtUnit = wgt.tools.unitIdToString(fieldinfo.unit)
 
     --log("")
-    --log(string.format("id: %s", fieldinfo.id))
-    --log(string.format("  sourceName: %s", sourceName))
-    --log(string.format("  curr: %2.1f", currentValue))
-    --log(string.format("  name: %s", fieldinfo.name))
-    --log(string.format("  desc: %s", fieldinfo.desc))
-    --log(string.format("  idUnit: %s", fieldinfo.unit))
-    --log(string.format("  txtUnit: %s", txtUnit))
+    --log("id: %s", fieldinfo.id)
+    --log("  sourceName: %s", sourceName)
+    --log("  curr: %2.1f", currentValue)
+    --log("  name: %s", fieldinfo.name)
+    --log("  desc: %s", fieldinfo.desc)
+    --log("  idUnit: %s", fieldinfo.unit)
+    --log("  txtUnit: %s", txtUnit)
 
     if (wgt.tools.isTelemetryAvailable()) then
 
@@ -249,6 +249,10 @@ local function getWidgetValue(wgt)
 end
 
 local function refresh_app_mode(wgt, event, touchState)
+    if (touchState and touchState.tapCount == 2) or (event and event == EVT_VIRTUAL_EXIT) then
+        lcd.exitFullScreen()
+    end
+
     local w_name, value, minValue, maxValue, w_unit = getWidgetValue(wgt)
 
     local percentageValue = getPercentageValue(value, wgt.options.Min, wgt.options.Max)
@@ -380,7 +384,7 @@ local function refresh(wgt, event, touchState)
     end
 
     -- widget load (debugging)
-    lcd.drawText(wgt.zone.x + 10, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY) -- ???
+    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY + RIGHT) -- ???
 end
 
 return { name = app_name, options = _options, create = create, update = update, refresh = refresh }

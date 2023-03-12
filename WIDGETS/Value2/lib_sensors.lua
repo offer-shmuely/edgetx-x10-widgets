@@ -1,4 +1,8 @@
+local m_log, app_name = ...
+
 local M =  {}
+M.m_log = m_log
+M.app_name = app_name
 
 --function cache
 local math_floor = math.floor
@@ -10,7 +14,12 @@ local string_sub = string.sub
 local string_char = string.char
 local string_byte = string.byte
 
---local m_log = require("./LogViewer/utils_log")
+
+---------------------------------------------------------------------------------------------------
+local function log(fmt, ...)
+    m_log.info(fmt, ...)
+end
+---------------------------------------------------------------------------------------------------
 
 function M.split(text)
     local cnt = 0

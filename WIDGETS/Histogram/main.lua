@@ -2,13 +2,24 @@ local app_name = "Histogram"
 
 -- imports
 local HistClass = loadScript("/WIDGETS/" .. app_name .. "/hist_core.lua", "tcd")
-local ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/widget_tools.lua", "tcd")
+local ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "tcd")
 
 -- consts
 --local UNIT_ID_TO_STRING = { "V", "A", "mA", "kts", "m/s", "f/s", "km/h", "mph", "m", "f", "°C", "°F", "%", "mAh", "W", "mW", "dB", "rpm", "g", "°", "rad", "ml", "fOz", "ml/m", "Hz", "uS", "km" }
 
+-- backward compatibility
+local ver, radio, maj, minor, rev, osname = getVersion()
+local DEFAULT_SOURCE = 1
+if maj == 2 and minor == 7 then
+    -- for 2.7.x
+    DEFAULT_SOURCE = 253     -- RSSI=253, TxBt=243, RxBt=256
+elseif maj == 2 and minor >= 8 then
+    -- for 2.8.x
+    DEFAULT_SOURCE = 306     -- RSSI
+end
+
 local _options = {
-  { "Source", SOURCE, 253 }, -- RSSI
+  { "Source", SOURCE, DEFAULT_SOURCE }, -- RSSI
   --{ "Source", SOURCE, 243 }, -- TxBt
   --{ "Source", SOURCE, 256 }, -- RxBt
   { "Min", VALUE, -1, -1024, 1024 },
@@ -132,8 +143,7 @@ local function refresh(wgt, event, touchState)
   lcd.drawText(3, 3, string.format("%s Histogram", wgt.source_name), 0 + YELLOW)
 
   -- widget load (debugging)
-  lcd.drawText(wgt.zone.x + 200, wgt.zone.y, string.format("load: %d%%", getUsage()), SMLSIZE + GREY) -- ???
-
+    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY + RIGHT) -- ???
   return 0
 end
 

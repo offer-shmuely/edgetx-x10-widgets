@@ -40,7 +40,7 @@ local function update(wgt, options)
 local function background(wgt)
 end
 
-function refresh(wgt)
+local function refresh(wgt)
   if (wgt == nil) then return end
 
   lcd.setColor(CUSTOM_COLOR, wgt.options.TextColor)

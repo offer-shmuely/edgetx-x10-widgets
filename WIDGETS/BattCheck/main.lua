@@ -20,14 +20,16 @@
 -- 3djc & Offer Shmuely
 -- Date: 2022
 -- ver: 0.8
-local version = "v0.7"
+local version = "v0.8"
+
+local app_name = "BattCheck"
 
 local _options = {
-    { "Sensor"     , SOURCE, 0     }, -- default to 'Cels'
-    { "Color"      , COLOR , YELLOW},
-    { "Shadow"     , BOOL  , 0     },
-    { "LowestCell" , BOOL  , 1     }, -- 0=main voltage display shows all-cell-voltage, 1=main voltage display shows lowest-cell
-    { "Lithium_Ion"       , BOOL  , 0      }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
+    { "Sensor"      , SOURCE, 0      }, -- default to 'Cels'
+    { "Color"       , COLOR , YELLOW },
+    { "Shadow"      , BOOL  , 0      },
+    { "LowestCell"  , BOOL  , 1      }, -- 0=main voltage display shows all-cell-voltage, 1=main voltage display shows lowest-cell
+    { "Lithium_Ion" , BOOL  , 0      }, -- 0=LIPO battery, 1=LI-ION (18650/21500)
 }
 
 -- Data gathered from commercial lipo sensors
@@ -42,7 +44,6 @@ local _lipoPercentListSplit = {
     { { 4.105, 89 }, { 4.111, 90 }, { 4.116, 91 }, { 4.120, 92 }, { 4.125, 93 }, { 4.129, 94 }, { 4.135, 95 }, { 4.145, 96 }, { 4.176, 97 }, { 4.179, 98 }, { 4.193, 99 }, { 4.200, 100 } },
 }
 
--- from: https://electric-scooter.guide/guides/electric-scooter-battery-voltage-chart/
 local _liionPercentListSplit = {
     { { 2.800,  0 }, { 2.840,  1 }, { 2.880,  2 }, { 2.920,  3 }, { 2.960,  4 } },
     { { 3.000,  5 }, { 3.040,  6 }, { 3.080,  7 }, { 3.096,  8 }, { 3.112,  9 } },
@@ -69,7 +70,7 @@ local _liionPercentListSplit = {
 
 --------------------------------------------------------------
 local function log(s)
-    print("BattCheck: " .. s)
+  --print("BattCheck: " .. s)
 end
 --------------------------------------------------------------
 
@@ -240,7 +241,7 @@ local function getCellPercent(wgt, cellValue)
                 if v2[1] >= cellValue then
                     result = v2[2]
                     --log(string.format("result: %d%%", result))
-                    cpuProfilerAdd(wgt, 'cell-perc', t4);
+                    --cpuProfilerAdd(wgt, 'cell-perc', t4);
                     return result
                 end
             end
@@ -336,7 +337,7 @@ local function calculateBatteryData(wgt)
         end
 
         periodicReset(wgt.periodic1)
-        cpuProfilerAdd(wgt, 'calc-batt-perc', t5);
+        --cpuProfilerAdd(wgt, 'calc-batt-perc', t5);
     end
 
 end
@@ -500,7 +501,7 @@ local function refreshZoneLarge(wgt)
 
 end
 
-local function refreshAppModeImpl(wgt, x, w, y, h)
+local function refreshImpl(wgt, x, w, y, h)
 
     local myBatt = { ["x"] = 10, ["y"] = 20, ["w"] = 80, ["h"] = 121, ["segments_h"] = 30, ["color"] = WHITE, ["cath_w"] = 30, ["cath_h"] = 10 }
 
@@ -553,16 +554,20 @@ local function refreshZoneXLarge(wgt)
     local y = wgt.zone.y
     local h = wgt.zone.h
 
-    refreshAppModeImpl(wgt, x, w, y, h)
+    refreshImpl(wgt, x, w, y, h)
 end
 
 --- Zone size: 460x252 - app mode (full screen)
 local function refreshAppMode(wgt, event, touchState)
+    if (touchState and touchState.tapCount == 2) or (event and event == EVT_VIRTUAL_EXIT) then
+        lcd.exitFullScreen()
+    end
+
     local x = 0
     local w = 460
     local y = 0
     local h = 252
-    refreshAppModeImpl(wgt, x, w, y, h)
+    refreshImpl(wgt, x, w, y, h)
 end
 
 
@@ -624,4 +629,4 @@ local function refresh(wgt, event, touchState)
     --lcd.drawText(wgt.zone.x+100, wgt.zone.y, string.format("%d%%", getUsage()), SMLSIZE + wgt.text_color)
 end
 
-return { name = "BattCheck", options = _options, create = create, update = update, background = background, refresh = refresh }
+return { name = app_name, options = _options, create = create, update = update, background = background, refresh = refresh }

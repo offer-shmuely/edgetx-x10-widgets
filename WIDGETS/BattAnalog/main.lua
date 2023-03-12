@@ -116,6 +116,8 @@ local function update(wgt, options)
             log(string.format("source_name: %s", source_name))
             wgt.options.source_name = source_name
         end
+    else
+        wgt.options.source_name = wgt.options.Sensor
     end
 
     wgt.options.Show_Total_Voltage = wgt.options.Show_Total_Voltage % 2 -- modulo due to bug that cause the value to be other than 0|1
@@ -146,7 +148,7 @@ local function create(zone, options)
     }
 
     -- imports
-    wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/widget_tools.lua", "tcd")
+    wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "tcd")
     wgt.tools = wgt.ToolsClass(app_name)
 
     update(wgt, options)
@@ -483,6 +485,10 @@ end
 
 --- Zone size: 460x252 - app mode (full screen)
 local function refreshAppMode(wgt, event, touchState)
+    if (touchState and touchState.tapCount == 2) or (event and event == EVT_VIRTUAL_EXIT) then
+        lcd.exitFullScreen()
+    end
+
     local x = 0
     local y = 0
     local w = LCD_W

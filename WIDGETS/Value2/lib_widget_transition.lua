@@ -1,6 +1,7 @@
-local app_name, p2 = ...
+local m_log, app_name = ...
 
 local M = {}
+M.m_log = m_log
 M.app_name = app_name
 M.tele_src_name = nil
 M.tele_src_id = nil
@@ -10,14 +11,7 @@ local lcd = lcd
 
 --------------------------------------------------------------
 local function log(fmt, ...)
-    local num_arg = #{ ... }
-    local msg
-    if num_arg > 0 then
-        msg = string.format(fmt, ...)
-    else
-        msg = fmt
-    end
-    print(M.app_name .. ": " .. msg)
+    m_log.info(fmt, ...)
 end
 ---------------------------------------------------------------------------------------------------
 

@@ -1,37 +1,37 @@
 local options = {
 	{ "Source", SOURCE, 1 },
 	{ "Background", COLOR, GREY },
-	{ "Interval", VALUE, 8, 1, 35 }, 
+	{ "Interval", VALUE, 8, 1, 35 },
 	{ "Min", VALUE, -100, -1024, 1024 },
 	{ "Max", VALUE, 100, -1024, 1024 }
 }
 
 local _maxPoints = 100
 
-function create(zone, options)
+local function create(zone, options)
 	local context = { zone=zone, options=options, points={}, lastTime=0, index=0 }
 	return context
 end
 
-function update(context, options)
+local function update(context, options)
 	context.options = options
 	context.index = 0
 end
 
-function refresh(context)
+local function refresh(context)
 	updatePoints(context)
 	drawGrap(context)
 end
 
-function background(context)
+local function background(context)
 	updatePoints(context)
 end
 
-function updatePoints(context)
+local function updatePoints(context)
 	time = getTime()
 
-	delay = context.options.Interval * context.options.Interval 
-	
+	delay = context.options.Interval * context.options.Interval
+
 	if time > context.lastTime + delay then
 		value = getValue(context.options.Source)
 
@@ -53,7 +53,7 @@ function updatePoints(context)
 	end
 end
 
-function drawGrap(context)
+local function drawGrap(context)
 	x = context.zone.x
 	y = context.zone.y
 	width = context.zone.w
@@ -94,7 +94,7 @@ function drawGrap(context)
 
 	zeroPos = height
 	range = maxValue - minValue
-	
+
 	zeroPos = height - (height / (range / (range + minValue)))
 
 	if minValue < 0 and maxValue > 0 then
@@ -104,10 +104,10 @@ function drawGrap(context)
 	if range == 0 then
 		range = 1
 	end
-	
+
 	previous_xPos = x
 	previous_yPos = y + height
-	
+
 	for i=0,context.index - 1,1 do
 
 		value = context.points[i]
@@ -119,11 +119,11 @@ function drawGrap(context)
 		yPos = y + (maxValue - value) * (height / range)
 
 		lcd.drawLine(previous_xPos, previous_yPos, xPos, yPos, SOLID, TEXT_BGCOLOR)
-		
+
 		previous_xPos = xPos
 		previous_yPos = yPos
 	end
-	
+
 	if context.zone.w > 100 then
 		if range >= 100 then
 			lcd.drawNumber(x + width, y + 1, value, TEXT_COLOR + RIGHT)
@@ -133,7 +133,7 @@ function drawGrap(context)
 			lcd.drawNumber(x + width - 1, y, value, TEXT_BGCOLOR + RIGHT)
 			lcd.drawNumber(x + 2, y, maxValue, TEXT_BGCOLOR)
 			lcd.drawNumber(x + 2, y + height - 18, minValue, TEXT_BGCOLOR)
-		else 
+		else
 			if range >= 10 then
 				lcd.drawNumber(x + width, y + 1, value * 10, TEXT_COLOR + RIGHT + PREC1)
 				lcd.drawNumber(x + 3, y + 1, maxValue * 10, TEXT_COLOR + PREC1)
