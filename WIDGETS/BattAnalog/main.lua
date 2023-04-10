@@ -1,20 +1,22 @@
----- #########################################################################
----- #                                                                       #
----- # Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
----- # Copyright (C) EdgeTX                                                  #
------#                                                                       #
----- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
----- #                                                                       #
----- # This program is free software; you can redistribute it and/or modify  #
----- # it under the terms of the GNU General Public License version 2 as     #
----- # published by the Free Software Foundation.                            #
----- #                                                                       #
----- # This program is distributed in the hope that it will be useful        #
----- # but WITHOUT ANY WARRANTY; without even the implied warranty of        #
----- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
----- # GNU General Public License for more details.                          #
----- #                                                                       #
----- #########################################################################
+--[[
+#########################################################################
+#                                                                       #
+# Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
+# Copyright "Offer Shmuely"                                             #
+#                                                                       #
+# License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
+#                                                                       #
+# This program is free software; you can redistribute it and/or modify  #
+# it under the terms of the GNU General Public License version 2 as     #
+# published by the Free Software Foundation.                            #
+#                                                                       #
+# This program is distributed in the hope that it will be useful        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+# GNU General Public License for more details.                          #
+#                                                                       #
+#########################################################################
+
 
 -- This widget display a graphical representation of a Lipo/Li-ion (not other types) battery level,
 -- it will automatically detect the cell amount of the battery.
@@ -27,10 +29,11 @@
 --   * radio-master 168
 --   * OMP m2 heli
 
+]]
 
 -- Widget to display the levels of Lipo battery from single analog source
--- Offer Shmuely
--- Date: 2022
+-- Author : Offer Shmuely
+-- Date: 2021-2023
 -- ver: 0.5
 
 local app_name = "BattAnalog"

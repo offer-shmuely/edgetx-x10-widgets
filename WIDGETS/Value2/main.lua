@@ -1,28 +1,33 @@
----- #########################################################################
----- #                                                                       #
----- # Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
----- # Copyright (C) EdgeTX                                                  #
------#                                                                       #
----- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
----- #                                                                       #
----- # This program is free software; you can redistribute it and/or modify  #
----- # it under the terms of the GNU General Public License version 2 as     #
----- # published by the Free Software Foundation.                            #
----- #                                                                       #
----- # This program is distributed in the hope that it will be useful        #
----- # but WITHOUT ANY WARRANTY; without even the implied warranty of        #
----- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
----- # GNU General Public License for more details.                          #
----- #                                                                       #
----- #########################################################################
+--[[
+#########################################################################
+#                                                                       #
+# Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
+# Copyright "Offer Shmuely"                                             #
+#                                                                       #
+# License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
+#                                                                       #
+# This program is free software; you can redistribute it and/or modify  #
+# it under the terms of the GNU General Public License version 2 as     #
+# published by the Free Software Foundation.                            #
+#                                                                       #
+# This program is distributed in the hope that it will be useful        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+# GNU General Public License for more details.                          #
+#                                                                       #
+#########################################################################
+
 
 -- Widget to show a telemetry Value in smart way
 --   it fill better the widget area
 --   it show the min/max values of the field
 --   it detect end of flight (by telemetry) and favor the min/max of the unused current value
 
--- Offer Shmuely
--- Date: 2022
+]]
+
+
+-- Author : Offer Shmuely
+-- Date: 2021-2023
 -- ver: 0.6
 
 local app_name = "Value2"
