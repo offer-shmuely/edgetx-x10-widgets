@@ -25,7 +25,7 @@
 -- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
 -- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9!!!
--- history of flights is kept at /flights_history.csv
+-- history of flights is kept at /flights-history.csv
 
 -- widget assume the following:
 --   the model have motor
