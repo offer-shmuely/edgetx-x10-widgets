@@ -3,7 +3,7 @@
 -- Date: 2022
 -- ver: 0.8
 
-local progress = 100
+--local progress = 100
 local options = {
   { "TextColor", COLOR, YELLOW },
   { "Timer", VALUE, 1, 1, 3},
@@ -240,7 +240,7 @@ local function refresh(wgt, event, touchState)
     zone_h = 252
   end
 
-  drawTicks(wgt)
+  --drawTicks(wgt)
 
   local wide_time_str = string.gsub(time_str, "[1-9]", "0")
   local ts_w,ts_h = lcd.sizeText(wide_time_str, font_size)
