@@ -246,7 +246,7 @@ end
 
 local function updateSwitchStatus(wgt)
     if getValue(wgt.options.switch) < 0 then
-        --log(string.format("switch status (%s): =ON", wgt.options.switch))
+        --log(string.format("switch status (%s): =ON", wgt.status.switch_name))
         wgt.status.switch_on = true
     else
         --log(string.format("switch status (%s): =OFF", wgt.status.switch_name))
