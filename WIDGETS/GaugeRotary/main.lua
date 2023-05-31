@@ -1,20 +1,22 @@
----- #########################################################################
----- #                                                                       #
----- # Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
----- # Copyright (C) EdgeTX                                                  #
------#                                                                       #
----- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
----- #                                                                       #
----- # This program is free software; you can redistribute it and/or modify  #
----- # it under the terms of the GNU General Public License version 2 as     #
----- # published by the Free Software Foundation.                            #
----- #                                                                       #
----- # This program is distributed in the hope that it will be useful        #
----- # but WITHOUT ANY WARRANTY; without even the implied warranty of        #
----- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
----- # GNU General Public License for more details.                          #
----- #                                                                       #
----- #########################################################################
+--[[
+#########################################################################
+#                                                                       #
+# Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
+# Copyright "Offer Shmuely"                                             #
+#                                                                       #
+# License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
+#                                                                       #
+# This program is free software; you can redistribute it and/or modify  #
+# it under the terms of the GNU General Public License version 2 as     #
+# published by the Free Software Foundation.                            #
+#                                                                       #
+# This program is distributed in the hope that it will be useful        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+# GNU General Public License for more details.                          #
+#                                                                       #
+#########################################################################
+
 
 --  This Rotary Gauge widget display a fancy old style analog gauge with needle
 --  Options:
@@ -31,9 +33,12 @@
 --    * Transmitter Battery
 --    * batt-capacity
 --    * A1/A2 analog voltage
+]]
 
--- Version: 0.6
+
 -- Author : Offer Shmuely
+-- Date: 2021-2023
+-- Version: 0.8
 
 
 local app_name = "GaugeRotary"
@@ -187,6 +192,17 @@ local function getWidgetValue(wgt)
     local sourceName = getSourceName(wgt.options.Source)
     log("[%s-%s],currentValue: %s" , wgt.options.Source, sourceName, currentValue)
 
+    local fieldinfo = getFieldInfo(wgt.options.Source)
+    if (fieldinfo == nil) then
+        log("getFieldInfo(%s)==nil", wgt.options.Source)
+        return sourceName, -1, nil, nil, ""
+    end
+
+    local txtUnit = wgt.tools.unitIdToString(fieldinfo.unit)
+    if type(currentValue) == "table" then
+        txtUnit = "v"
+    end
+
     --- if table, sum of all cells
     if type(currentValue) == "table" then
         local cellSum = 0
@@ -199,13 +215,6 @@ local function getWidgetValue(wgt)
     -- workaround for bug in getSourceName()
     sourceName = wgt.tools.cleanInvalidCharFromGetFiledInfo(sourceName)
 
-    local fieldinfo = getFieldInfo(wgt.options.Source)
-    if (fieldinfo == nil) then
-        log("getFieldInfo(%s)==nil", wgt.options.Source)
-        return sourceName, -1, nil, nil, ""
-    end
-
-    local txtUnit = wgt.tools.unitIdToString(fieldinfo.unit)
 
     --log("")
     --log("id: %s", fieldinfo.id)

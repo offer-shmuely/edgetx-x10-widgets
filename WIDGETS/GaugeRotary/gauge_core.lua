@@ -48,11 +48,12 @@ end
 
 -- This function returns green at green_value, red at red_value and graduate in between
 function M.getRangeColor(value, red_value, green_value)
-    local range = math.abs(green_value - red_value)
-    if range == 0 then
+    if value == nil or red_value == nil or green_value == nil then
         return lcd.RGB(0, 0xdf, 0)
     end
-    if value == nil then
+
+    local range = math.abs(green_value - red_value)
+    if range == 0 then
         return lcd.RGB(0, 0xdf, 0)
     end
 
