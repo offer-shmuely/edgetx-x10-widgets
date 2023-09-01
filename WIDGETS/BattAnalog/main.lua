@@ -34,7 +34,7 @@
 -- Widget to display the levels of Lipo battery from single analog source
 -- Author : Offer Shmuely
 -- Date: 2021-2023
--- ver: 0.5
+-- ver: 0.6
 
 local app_name = "BattAnalog"
 
