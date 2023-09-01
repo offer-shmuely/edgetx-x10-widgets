@@ -85,6 +85,9 @@ elseif maj == 2 and minor >= 8 then
     DEFAULT_MOTOR_CHANNEL_ID = 212  -- motor_channel=CH3
 end
 
+local DEFAULT_ARM_SWITCH_ID = getSwitchIds("SF")      -- arm/safety switch=SF
+local DEFAULT_MOTOR_CHANNEL_ID = getSwitchIds("CH3")  -- motor_channel=CH3
+
 local options = {
     { "switch", SOURCE, DEFAULT_ARM_SWITCH_ID },
     { "motor_channel", SOURCE, DEFAULT_MOTOR_CHANNEL_ID },
@@ -118,6 +121,7 @@ local function update(wgt, options)
     wgt.status.periodic1 = wgt.tools.periodicInit()
     wgt.status.last_flight_count = 0
     wgt.status.flight_start_time = 0
+    wgt.status.flight_start_date_time = 0
     wgt.status.flight_end_time = 0
     wgt.status.flight_duration = 0
 
@@ -293,13 +297,13 @@ local function doEndOfFlightTasks(wgt)
         playFile("/WIDGETS/" .. app_name .. "/flights.wav")
     end
 
-    wgt.status.flight_duration = math.floor(wgt.status.flight_duration)
-    if use_flights_history == 1 then
-        log("flight_start_time: %s", wgt.status.flight_start_time)
-        log("flight_end_time: %s", wgt.status.flight_end_time)
-        log("flight_duration: %s", wgt.status.flight_duration)
-        wgt.flightHistory.addFlightLog(wgt.status.flight_duration, num_flights)
-    end
+    --wgt.status.flight_duration = math.floor(wgt.status.flight_duration)
+    --if use_flights_history == 1 then
+    --    log("flight_start_time: %s", wgt.status.flight_start_time)
+    --    log("flight_end_time: %s", wgt.status.flight_end_time)
+    --    log("flight_duration: %s", wgt.status.flight_duration)
+    --    wgt.flightHistory.addFlightLog(wgt.status.flight_start_date_time, wgt.status.flight_duration, num_flights)
+    --end
 
 end
 
@@ -333,6 +337,7 @@ local function background(wgt)
             wgt.status.last_flight_count = getFlightCount()
 
             wgt.status.flight_start_time = getTime() * 10 / 1000
+            wgt.status.flight_start_date_time = getDateTime()
             log("flight_start_time: %s", wgt.status.flight_start_time)
         end
         return
@@ -375,6 +380,16 @@ local function background(wgt)
 
         if (use_telemetry==1 and wgt.status.tele_is_available == false) or (use_telemetry==0 and wgt.status.switch_on == false) then
             stateChange(wgt, "FLIGHT_ENDING", default_flight_ending_duration)
+
+            local num_flights = getFlightCount()
+            wgt.status.flight_duration = math.floor(wgt.status.flight_duration)
+            if use_flights_history == 1 then
+                log("flight_start_time: %s", wgt.status.flight_start_time)
+                log("flight_end_time: %s", wgt.status.flight_end_time)
+                log("flight_duration: %s", wgt.status.flight_duration)
+                wgt.flightHistory.addFlightLog(wgt.status.flight_start_date_time, wgt.status.flight_duration, num_flights)
+            end
+
         end
         return
 

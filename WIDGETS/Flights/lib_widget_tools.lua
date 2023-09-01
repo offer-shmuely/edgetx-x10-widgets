@@ -100,7 +100,7 @@ end
 function M.isTelemetryAvailable()
     -- select telemetry source
     if not M.tele_src_id then
-        log("select telemetry source")
+        --log("select telemetry source")
         local tele_src = getFieldInfo("RSSI")
         if not tele_src then tele_src = getFieldInfo("RxBt") end
         if not tele_src then tele_src = getFieldInfo("A1") end
@@ -112,12 +112,12 @@ function M.isTelemetryAvailable()
         if not tele_src then tele_src = getFieldInfo("VFR%") end
 
         if tele_src == nil then
-            log("no telemetry sensor found")
+            --log("no telemetry sensor found")
             M.tele_src_id = nil
             M.tele_src_name = "---"
             return false
         else
-            log("telemetry sensor found: " .. tele_src.name)
+            --log("telemetry sensor found: " .. tele_src.name)
             M.tele_src_id = tele_src.id
             M.tele_src_name = tele_src.name
         end
