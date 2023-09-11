@@ -21,7 +21,7 @@
 -- Horus Widget that count number of flights
 -- Offer Shmuely
 -- Date: 2022-2023
--- ver: 0.6
+-- ver: 0.7
 -- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
 -- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9!!!
@@ -71,18 +71,17 @@ local enable_count_announcement_on_end = 1   -- 0=no voice, 1=play the count upo
 local use_telemetry = 1                      -- 0=do not use telemetry, 1=use telemetry in state machine
 local use_flights_history = 1                -- 0=do not write flights-history, 1=write flights-history
 
--- backward compatibility
-local ver, radio, maj, minor, rev, osname = getVersion()
-local DEFAULT_ARM_SWITCH_ID = 1
-local DEFAULT_MOTOR_CHANNEL_ID = 1
-if maj == 2 and minor == 7 then
-    -- for 2.7.x
-    DEFAULT_ARM_SWITCH_ID = 117     -- arm/safety switch=SF
-    DEFAULT_MOTOR_CHANNEL_ID = 204  -- motor_channel=CH3
-elseif maj == 2 and minor >= 8 then
-    -- for 2.8.x
-    DEFAULT_ARM_SWITCH_ID = 125     -- arm/safety switch=SF
-    DEFAULT_MOTOR_CHANNEL_ID = 212  -- motor_channel=CH3
+-- for backward compatibility
+local function getSwitchIds(key)
+    local OS_SWITCH_ID = {
+        ["2.7"]  = {SA=112, SB=113, SC=114, SD=115, SE=116, SF=117, CH3 = 204},
+        ["2.8"]  = {SA=120, SB=121, SC=122, SD=123, SE=124, SF=125, CH3 = 212},
+        ["2.9"]  = {SA=120, SB=121, SC=122, SD=123, SE=124, SF=125, CH3 = 212},
+        ["2.10"] = {SA=127, SB=128, SC=129, SD=130, SE=131, SF=132, CH3 = 229},
+    }
+    local ver, radio, maj, minor, rev, osname = getVersion()
+    local os1 = string.format("%d.%d", maj, minor)
+    return OS_SWITCH_ID[os1][key]
 end
 
 local DEFAULT_ARM_SWITCH_ID = getSwitchIds("SF")      -- arm/safety switch=SF
