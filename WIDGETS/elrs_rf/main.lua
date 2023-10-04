@@ -106,14 +106,17 @@ local RFMD_LIST = {
 local RFMD_NA = 14
 local max_rssi = -40
 local MAX_TX_POWER = 7
-local POWERS      = { 10,  25, 50, 100, 250, 500, 1000, 2000 }
-local POWERS_PERC = { 100, 80, 70, 50 ,  30,  10,    1,    0 }
+local POWERS      = { 10,   25, 50, 100, 250, 500, 1000, 2000 }
+local POWERS_PERC = { 100, 100, 70, 50 ,  30,  10,    1,    0 }
 
+local progress_bar_x = 70
+local progress_bar_h = 15
 -- simulation data
+-- current_value, min, max, step
 local sim_data = {
     rfmd = { 2, 2, 13, 0.5 },
-    lq = { 95, 70, 100, -7 },
-    tpwr = { 5, 1, 7, 1 },
+    lq = { 100, 70, 100, -7 },
+    tpwr = { 2, 1, 7, 1 },
     rssi1 = { 10, -105, 10, -1 },
     rssi2 = { -60, -105, -2, -2 },
     ant = { 1, 0, 1, 0.3 },
@@ -128,8 +131,8 @@ local STATE = {
     RX_CONNECTED_WITH_MINMAX = 5,
     ON_FLIGHT_INIT = 6,
     ON_FLIGHT = 7,
-    POST_FLIGHT_ARM_SWITCH_INIT = 8,
-    POST_FLIGHT_ARM_SWITCH = 9,
+    POST_FLIGHT_ARM_SWITCH_OFF_INIT = 8,
+    POST_FLIGHT_ARM_SWITCH_OFF = 9,
     POST_FLIGHT_BATT_DISCONNECTED_INIT = 10,
     POST_FLIGHT_BATT_DISCONNECTED = 11,
 }
@@ -142,8 +145,8 @@ local STATE_TXT = {
     "RX_CONNECTED_WITH_MINMAX",
     "ON_FLIGHT",
     "ON_FLIGHT",
-    "POST_FLIGHT_ARM_SWITCH",
-    "POST_FLIGHT_ARM_SWITCH",
+    "POST_FLIGHT_ARM_SWITCH_OFF",
+    "POST_FLIGHT_ARM_SWITCH_OFF",
     "POST_FLIGHT_BATT_DISCONNECTED",
     "POST_FLIGHT_BATT_DISCONNECTED",
 }
@@ -232,7 +235,7 @@ local function update(wgt, options)
     wgt.sim_periodic = wgt.tools.periodicInit()
     wgt.tools.periodicStart(wgt.sim_periodic, 5000)
 
-    wgt.use_minmax = false
+    wgt.show_minmax = false
     wgt.minmax_init_periodic = wgt.tools.periodicInit()
     --wgt.tools.periodicStart(wgt.minmax_init_periodic, 10000)
 
@@ -370,13 +373,21 @@ local function getSwitchStatus(wgt)
     end
 end
 
-local function drawProgressBar(wgt, Y, percent, val_to_display, val_to_display_min, percent_min, percent_max)
+local function drawProgressBar(wgt, Y, percent, val_to_display, val_to_display_min, percent_min, percent_max, unit)
     --log("drawProgressBar [%s] %d < %d < %d", val_to_display, percent_min, percent, percent_max)
     local bkg_col = GREEN
-    if (wgt.state == STATE.POST_FLIGHT_ARM_SWITCH) or (wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED) then
-        percent = percent_min
-        val_to_display = val_to_display_min
+    if  wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
+        or
+        wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF
+        or
+        wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
+        or
+        wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED
+    then
+        percent = percent_min or 0
+        val_to_display = val_to_display_min or " " .. unit
         log("drawProgressBar() - STATE.POST_FLIGHT_x")
+        bkg_col = LIGHTGREY
     end
 
     if percent < 30 then
@@ -385,15 +396,15 @@ local function drawProgressBar(wgt, Y, percent, val_to_display, val_to_display_m
         bkg_col = ORANGE
     end
 
-    local x = 110
+    local x = progress_bar_x
     local y = Y + 3
-    local w = wgt.zw - 110 - 5
-    local h = 12
+    local w = wgt.zw - x - 5
+    local h = progress_bar_h
     local px = (w - 2) * percent / 100
     lcd.drawFilledRectangle(x + 1, y + 1, px, h - 2, bkg_col)
     lcd.drawRectangle(x, y, w, h, bkg_col)
 
-    if wgt.use_minmax then
+    if wgt.show_minmax and percent_min and percent_max then
         local pmin = (w - 2) * percent_min / 100
         local pmax = (w - 2) * percent_max / 100
         local ptri_w = 4
@@ -402,7 +413,7 @@ local function drawProgressBar(wgt, Y, percent, val_to_display, val_to_display_m
         lcd.drawFilledTriangle(x + pmax - ptri_w, y, x + pmax + ptri_w, y, x + pmax, y + ptri_h, BLACK)
     end
 
-    lcd.drawText(x + (wgt.zw - x) * 0.45, Y + 1, string.format("%s", val_to_display), TXT_SIZE + GREY + CENTER)
+    lcd.drawText(x + (wgt.zw - x) * 0.45, Y + 1, string.format("%s %s", val_to_display, unit), TXT_SIZE + GREY + CENTER)
 
 end
 
@@ -429,23 +440,16 @@ local function drawRfMode(wgt, Y)
 end
 
 local function drawLq(wgt, Y)
-    lcd.drawText(5, Y, string.format("LQ: %d %%", wgt.tlm.rqly), FONT_8 + TXT_COL)
+    --lcd.drawText(5, Y, string.format("LQ: %d %%", wgt.tlm.rqly), FONT_8 + TXT_COL)
+    lcd.drawText(5, Y, "Link Qly: ", FONT_8 + TXT_COL)
     local percent_min = wgt.tlm.rqly_min
     local percent_max = wgt.tlm.rqly_max
-    drawProgressBar(wgt, Y, wgt.tlm.rqly, wgt.tlm.rqly .. "%",wgt.tlm.rqly_min .. "%", percent_min, percent_max)
+
+    drawProgressBar(wgt, Y, wgt.tlm.rqly, wgt.tlm.rqly,wgt.tlm.rqly_min, percent_min, percent_max, "%")
     Y = Y + TH
     Y = Y  + 8
     return Y
 end
-
---local function pwrToIdx(powval)
---    for k, v in ipairs(POWERS) do
---        if powval >= v then
---            return k
---        end
---    end
---    return 7 -- 1000
---end
 
 local function pwrToPercent(powval)
     if (powval == nil) then
@@ -465,7 +469,8 @@ local function pwrToPercent(powval)
 end
 
 local function drawPower(wgt, Y)
-    lcd.drawText(5, Y, "power: " .. tostring(wgt.tlm.tpwr) .. "mW", TXT_SIZE + TXT_COL)
+    --lcd.drawText(5, Y, "power: " .. tostring(wgt.tlm.tpwr) .. "mW", TXT_SIZE + TXT_COL)
+    lcd.drawText(5, Y, "power: ", TXT_SIZE + TXT_COL)
 
     --local percent = 100 * pwrToIdx(wgt.tlm.tpwr) / MAX_TX_POWER
     --local inv_percent = math.floor(100 * (MAX_TX_POWER - pwrToIdx(wgt.tlm.tpwr) -1) / MAX_TX_POWER -1)
@@ -474,7 +479,7 @@ local function drawPower(wgt, Y)
     local inv_percent_min = pwrToPercent(wgt.tlm.tpwr_min)
     local inv_percent_max = pwrToPercent(wgt.tlm.tpwr_max)
 
-    drawProgressBar(wgt, Y, inv_percent, wgt.tlm.tpwr .. "mW", wgt.tlm.tpwr_min .. "mW", inv_percent_min, inv_percent_max)
+    drawProgressBar(wgt, Y, inv_percent, wgt.tlm.tpwr, wgt.tlm.tpwr_min, inv_percent_min, inv_percent_max, "mW")
     --m_log.info("power: tpwr:%s=%s%%, %s=%s%%, %s=%s%%",
     --    wgt.tlm.tpwr,
     --    inv_percent,
@@ -498,17 +503,18 @@ local function drawRssi(wgt, Y, id)
     local is_ant_active
     if id == 1 then
         rssi = wgt.tlm.rssi1
-        rssi_min = wgt.tlm.rssi1_min
-        rssi_max = wgt.tlm.rssi1_max
+        rssi_min = wgt.tlm.rssi1_min or 0
+        rssi_max = wgt.tlm.rssi1_max or 0
         is_ant_active = (wgt.tlm.ant == 0)
     else
         rssi = wgt.tlm.rssi2
-        rssi_min = wgt.tlm.rssi2_min
-        rssi_max = wgt.tlm.rssi2_max
+        rssi_min = wgt.tlm.rssi2_min or 0
+        rssi_max = wgt.tlm.rssi2_max or 0
         is_ant_active = (wgt.tlm.ant == 1)
     end
 
-    lcd.drawText(5, Y, string.format("rssi%d: %d dBm", id, rssi), TXT_SIZE + TXT_COL)
+    --lcd.drawText(5, Y, string.format("rssi%d: %d dBm", id, rssi), TXT_SIZE + TXT_COL)
+    lcd.drawText(5, Y, string.format("rssi%d:", id), TXT_SIZE + TXT_COL)
     --log("wgt.tlm.rfmd: %s", wgt.tlm.rfmd)
     local min_rssi = RFMD_LIST[wgt.tlm.rfmd][RFMD_MIN_RSSI]
     --log("min_rssi: %s", min_rssi)
@@ -521,13 +527,13 @@ local function drawRssi(wgt, Y, id)
     local rangePct_max = 100 * (fix_rssi_max - min_rssi) / (max_rssi - min_rssi)
     --log("rangePct: 100*(%d-%d) / (%d-%d) = %d", fix_rssi, min_rssi, max_rssi, min_rssi, rangePct)
 
-    drawProgressBar(wgt, Y, rangePct, rssi .. "db", rssi_min .. "db", rangePct_min, rangePct_max)
+    drawProgressBar(wgt, Y, rangePct, rssi, rssi_min, rangePct_min, rangePct_max, "dBm")
 
     if wgt.tlm.tlm_enabled == true and is_ant_active then
         local now = getTime()
         local blink_mode = now%50 > 15
         if blink_mode then
-            lcd.drawFilledCircle(110 + 6, Y + 8, 4, BLUE)
+            lcd.drawFilledCircle(progress_bar_x + 8, Y + 10, 4, BLUE)
         else
             --lcd.drawCircle(110 + 6, Y + 9, 4, BLUE)
         end
@@ -595,37 +601,51 @@ local function calcData(wgt)
 
 
     -- ----------------- state machine --------------------------------------------
-    if wgt.tlm.tlm_enabled == false
-        and wgt.state ~= STATE.POST_FLIGHT_ARM_SWITCH_INIT
-        and wgt.state ~= STATE.POST_FLIGHT_ARM_SWITCH
-        and wgt.state ~= STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
-        and wgt.state ~= STATE.POST_FLIGHT_BATT_DISCONNECTED
+    if wgt.tlm.tlm_enabled == true
+        and (
+               wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
+            or wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED
+        )
     then
         wgt.state = STATE.WAITING_FOR_RX
     end
 
+    if      wgt.tlm.tlm_enabled == false
+        --and wgt.arm_switch_on == false
+        and wgt.state == STATE.ON_FLIGHT_INIT
+        and wgt.state == STATE.ON_FLIGHT
+        and wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
+        and wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF
+        and wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
+        and wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED
+    then
+        wgt.state = STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
+    end
+
     if wgt.state == STATE.WAITING_FOR_RX then
         log("STATE.WAITING_FOR_RX")
-        wgt.use_minmax = false
+        wgt.show_minmax = false
         if wgt.tlm.tlm_enabled == true then
             wgt.state = STATE.RX_CONNECTED_NO_MINMAX_INIT
         end
 
     elseif wgt.state == STATE.RX_CONNECTED_NO_MINMAX_INIT then
         log("STATE.RX_CONNECTED_NO_MINMAX_INIT")
+        wgt.show_minmax = false
         wgt.tools.periodicStart(wgt.minmax_init_periodic, 5000)
         log("minmax_init_periodic: start wait")
         wgt.state = STATE.RX_CONNECTED_NO_MINMAX
 
     elseif wgt.state == STATE.RX_CONNECTED_NO_MINMAX then
         log("STATE.RX_CONNECTED_NO_MINMAX")
-        wgt.use_minmax = false
+        wgt.show_minmax = false
         if wgt.tools.periodicHasPassed(wgt.minmax_init_periodic, true) then
             wgt.state = STATE.RX_CONNECTED_WITH_MINMAX_INIT
         end
 
     elseif wgt.state == STATE.RX_CONNECTED_WITH_MINMAX_INIT then
         log("STATE.RX_CONNECTED_WITH_MINMAX")
+        wgt.show_minmax = false
         wgt.tlm.rqly_min =  nil
         wgt.tlm.rqly_max =  nil
         wgt.tlm.tpwr_min =  nil
@@ -639,30 +659,32 @@ local function calcData(wgt)
 
     elseif wgt.state == STATE.RX_CONNECTED_WITH_MINMAX then
         log("116 wgt.tlm.rqly_min: %s", wgt.tlm.rqly_min)
-        wgt.use_minmax = true
+        wgt.show_minmax = true
         if wgt.arm_switch_on == true then
             wgt.state = STATE.ON_FLIGHT_INIT
         end
 
     elseif wgt.state == STATE.ON_FLIGHT_INIT then
         log("STATE.ON_FLIGHT")
+        wgt.show_minmax = true
         wgt.state = STATE.ON_FLIGHT
 
     elseif wgt.state == STATE.ON_FLIGHT then
-        wgt.use_minmax = true
-        --if wgt.arm_switch_on == false then
-        --    wgt.state = STATE.POST_FLIGHT_ARM_SWITCH_INIT
-        --end
+        wgt.show_minmax = true
+        if wgt.arm_switch_on == false then
+            wgt.state = STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
+        end
         if wgt.tlm.tlm_enabled == false then
             wgt.state = STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
         end
 
-    elseif wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_INIT then
-        log("STATE.POST_FLIGHT_ARM_SWITCH_INIT")
-        wgt.state = STATE.POST_FLIGHT_ARM_SWITCH
+    elseif wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT then
+        log("STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT")
+        wgt.show_minmax = true
+        wgt.state = STATE.POST_FLIGHT_ARM_SWITCH_OFF
 
-    elseif wgt.state == STATE.POST_FLIGHT_ARM_SWITCH then
-        wgt.use_minmax = true
+    elseif wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF then
+        wgt.show_minmax = true
         if wgt.tlm.tlm_enabled == false then
             wgt.state = STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
         end
@@ -675,12 +697,12 @@ local function calcData(wgt)
         wgt.state = STATE.POST_FLIGHT_BATT_DISCONNECTED
 
     elseif wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED then
-        wgt.use_minmax = true
+        wgt.show_minmax = true
         if wgt.tlm.tlm_enabled == true then
             wgt.state = STATE.RX_CONNECTED_NO_MINMAX_INIT
         end
         --if wgt.tlm.tlm_enabled == true and wgt.arm_switch_on == false then
-        --    wgt.state = STATE.POST_FLIGHT_ARM_SWITCH_INIT
+        --    wgt.state = STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
         --end
         --if wgt.tlm.tlm_enabled == true and wgt.arm_switch_on == true then
         --    wgt.state = STATE.RX_CONNECTED_NO_MINMAX_INIT
@@ -689,20 +711,26 @@ local function calcData(wgt)
     else
         log("invalid state")
     end
-    -- ----------------- state machine --------------------------------------------
+    -- ----------------- state machine end -----------------------------------------
 
-    log("wgt.tlm.rqly_min-a: %s, v: %s", wgt.tlm.rqly_min, wgt.tlm.rqly)
-    wgt.tlm.rqly_min = safe_min(wgt.tlm.rqly_min, wgt.tlm.rqly)
-    log("wgt.tlm.rqly_min-b: %s, v: %s", wgt.tlm.rqly_min, wgt.tlm.rqly)
-    wgt.tlm.rqly_max = safe_max(wgt.tlm.rqly_max, wgt.tlm.rqly)
-    wgt.tlm.tpwr_min = safe_min(wgt.tlm.tpwr_min, wgt.tlm.tpwr)
-    wgt.tlm.tpwr_max = safe_max(wgt.tlm.tpwr_max, wgt.tlm.tpwr)
-    wgt.tlm.rssi1_min = safe_min(wgt.tlm.rssi1_min, wgt.tlm.rssi1)
-    wgt.tlm.rssi1_max = safe_max(wgt.tlm.rssi1_max, wgt.tlm.rssi1)
-    wgt.tlm.rssi2_min = safe_min(wgt.tlm.rssi2_min, wgt.tlm.rssi2)
-    wgt.tlm.rssi2_max = safe_max(wgt.tlm.rssi2_max, wgt.tlm.rssi2)
-
-    log("115 wgt.tlm.rqly_min: %s", wgt.tlm.rqly_min)
+    -- record min/max (not recortding in POST_FLIGHT_ARM_SWITCH_OFF)
+    --if      wgt.state ~= STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
+    --    and wgt.state ~= STATE.POST_FLIGHT_ARM_SWITCH_OFF
+    --    and wgt.state ~= STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
+    --    and wgt.state ~= STATE.POST_FLIGHT_BATT_DISCONNECTED
+    --    and wgt.state ~= STATE.WAITING_FOR_RX
+    if      wgt.state == STATE.ON_FLIGHT
+    then
+        wgt.tlm.rqly_min  = safe_min(wgt.tlm.rqly_min , wgt.tlm.rqly)
+        wgt.tlm.rqly_max  = safe_max(wgt.tlm.rqly_max , wgt.tlm.rqly)
+        wgt.tlm.tpwr_min  = safe_min(wgt.tlm.tpwr_min , wgt.tlm.tpwr)
+        wgt.tlm.tpwr_max  = safe_max(wgt.tlm.tpwr_max , wgt.tlm.tpwr)
+        wgt.tlm.rssi1_min = safe_min(wgt.tlm.rssi1_min, wgt.tlm.rssi1)
+        wgt.tlm.rssi1_max = safe_max(wgt.tlm.rssi1_max, wgt.tlm.rssi1)
+        wgt.tlm.rssi2_min = safe_min(wgt.tlm.rssi2_min, wgt.tlm.rssi2)
+        wgt.tlm.rssi2_max = safe_max(wgt.tlm.rssi2_max, wgt.tlm.rssi2)
+    end
+    --log("115 wgt.tlm.rqly_min: %s, rqly_max: %s", wgt.tlm.rqly_min, wgt.tlm.rqly_max)
 end
 
 
@@ -757,12 +785,12 @@ local function refresh(wgt, event, touchState)
     Y = drawMModuleName(wgt, Y)
 
     -- debugging
-    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, STATE_TXT[wgt.state], FONT_6 + LIGHTGREY + RIGHT)
+    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, STATE_TXT[wgt.state], FONT_6 + LIGHTGREY + RIGHT)
     --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y +11, string.format("load: %d%%", getUsage()), FONT_6 + LIGHTGREY + RIGHT)
     --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+22, string.format("%s",wgt.tlm.tlm_enabled), FONT_6 + LIGHTGREY + RIGHT)
     --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+33, string.format("%s",wgt.tlm.rfmd), FONT_6 + LIGHTGREY + RIGHT)
     --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+44, string.format("%s",getValue(wgt.options.arm_switch)), FONT_6 + LIGHTGREY + RIGHT)
-    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+55, string.format("%s",wgt.arm_switch_on), FONT_6 + LIGHTGREY + RIGHT)
+    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+55, string.format("%s",wgt.arm_switch_on), FONT_6 + LIGHTGREY + RIGHT)
 
     --if is_app_mode then
     if wgt.zh > 200 then
