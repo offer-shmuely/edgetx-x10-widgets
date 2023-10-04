@@ -51,6 +51,7 @@ local function formatTime(wgt, t1)
   dd_raw = dd_raw - mm * 60
   local ss = math.floor(dd_raw)
 
+  local time_str
   if dd == 0 and hh == 0 then
     -- less then 1 hour, 59:59
     time_str = string.format("%02d:%02d", mm, ss)
@@ -87,7 +88,7 @@ local function getTimerHeader(wgt, t1)
 end
 
 local function getFontSize(wgt, txt)
-  wide_txt = string.gsub(txt, "[1-9]", "0")
+  local wide_txt = string.gsub(txt, "[1-9]", "0")
   --log(string.gsub("******* 12:34:56", "[1-9]", "0"))
   log("wide_txt: " .. wide_txt)
 
