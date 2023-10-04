@@ -21,7 +21,7 @@
 -- Horus Widget that count number of flights
 -- Offer Shmuely
 -- Date: 2022-2023
--- ver: 0.7
+-- ver: 0.8
 -- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
 -- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9!!!
@@ -62,8 +62,8 @@ local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "tcd")
 local m_log = LibLogClass(app_name, "/WIDGETS/" .. app_name)
 
 -- const
-local default_flight_starting_duration = 30 -- 20 sec to detect fight success
-local default_flight_ending_duration = 8 -- 8 sec to detect fight ended
+local default_flight_starting_duration = 30 -- 20 sec to detect flight success
+local default_flight_ending_duration = 8 -- 8 sec to detect flight ended
 local default_min_motor_value = 200
 local enable_sounds = 1                      -- 0=no sound, 1=play blip sound on increment& on flight end
 local enable_count_announcement_on_start = 0 -- 0=no voice, 1=play the count upon increment
@@ -130,14 +130,14 @@ local function update(wgt, options)
     end
 
     --log("wgt.options.switch: " .. wgt.options.switch)
-    fi_sw = getFieldInfo(wgt.options.switch)
+    local fi_sw = getFieldInfo(wgt.options.switch)
     if (fi_sw == nil) then
         wgt.status.switch_name = "--"
     else
         wgt.status.switch_name = fi_sw.name
     end
 
-    fi_mot = getFieldInfo(wgt.options.motor_channel)
+    local fi_mot = getFieldInfo(wgt.options.motor_channel)
     if (fi_mot == nil) then
         wgt.status.motor_channel_name = "--"
     else
@@ -172,7 +172,7 @@ local function create(zone, options)
 end
 
 local function getFontSize(wgt, txt)
-    wide_txt = string.gsub(txt, "[1-9]", "0")
+    local wide_txt = string.gsub(txt, "[1-9]", "0")
     --log(string.gsub("******* 12:34:56", "[1-9]", "0"))
     --log("wide_txt: " .. wide_txt)
 
@@ -272,9 +272,16 @@ local function doNewFlightTasks(wgt)
     log("num_flights updated: " .. new_flight_count)
 
     -- beep
-    --if (wgt.options.enable_sounds) then
     if (enable_sounds == 1) then
-        playFile("/WIDGETS/" .. app_name .. "/flight_logged.wav")
+        local is_exist_file_10 = wgt.flightHistory.isFileExist("/WIDGETS/" .. app_name .. "/flight_logged_10.wav")
+        log("is_exist_file_10: %s", is_exist_file_10)
+
+        local num_flights = getFlightCount()
+        if (is_exist_file_10 == true) and (num_flights % 10 == 0) then
+            playFile("/WIDGETS/" .. app_name .. "/flight_logged_10.wav")
+        else
+            playFile("/WIDGETS/" .. app_name .. "/flight_logged.wav")
+        end
     end
 
     if (enable_count_announcement_on_start == 1) then
