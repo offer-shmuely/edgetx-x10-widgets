@@ -261,7 +261,7 @@ function M.lcdSizeTextFixed(txt, font_size)
     elseif font_size == FONT_6 then
         v_offset = 0
     end
-    return ts_w, ts_h, v_offset
+    return ts_w, ts_h +2*v_offset, v_offset
 end
 
 ------------------------------------------------------------------------------------------------------
