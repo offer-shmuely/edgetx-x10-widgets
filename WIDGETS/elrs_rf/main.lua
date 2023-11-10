@@ -139,15 +139,15 @@ local STATE = {
 --local state = STATE.WAITING_FOR_RX
 local STATE_TXT = {
     "WAITING_FOR_RX",
+    "RX_CONNECTED_NO_MINMAX-i",
     "RX_CONNECTED_NO_MINMAX",
-    "RX_CONNECTED_NO_MINMAX",
+    "RX_CONNECTED_WITH_MINMAX-i",
     "RX_CONNECTED_WITH_MINMAX",
-    "RX_CONNECTED_WITH_MINMAX",
+    "ON_FLIGHT-i",
     "ON_FLIGHT",
-    "ON_FLIGHT",
+    "POST_FLIGHT_ARM_SWITCH_OFF-i",
     "POST_FLIGHT_ARM_SWITCH_OFF",
-    "POST_FLIGHT_ARM_SWITCH_OFF",
-    "POST_FLIGHT_BATT_DISCONNECTED",
+    "POST_FLIGHT_BATT_DISCONNECTED-i",
     "POST_FLIGHT_BATT_DISCONNECTED",
 }
 
@@ -719,8 +719,7 @@ local function calcData(wgt)
     --    and wgt.state ~= STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
     --    and wgt.state ~= STATE.POST_FLIGHT_BATT_DISCONNECTED
     --    and wgt.state ~= STATE.WAITING_FOR_RX
-    if      wgt.state == STATE.ON_FLIGHT
-    then
+    if wgt.state == STATE.ON_FLIGHT then
         wgt.tlm.rqly_min  = safe_min(wgt.tlm.rqly_min , wgt.tlm.rqly)
         wgt.tlm.rqly_max  = safe_max(wgt.tlm.rqly_max , wgt.tlm.rqly)
         wgt.tlm.tpwr_min  = safe_min(wgt.tlm.tpwr_min , wgt.tlm.tpwr)
