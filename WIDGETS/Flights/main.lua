@@ -20,8 +20,7 @@
 
 -- Horus Widget that count number of flights
 -- Offer Shmuely
--- Date: 2022-2023
--- ver: 0.8
+-- Date: 2022-2024
 -- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
 -- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9!!!
@@ -52,24 +51,29 @@
 
 ]]
 
-
 local app_name = "Flights"
+local app_ver = "0.9"
 
--- imports
-local img = Bitmap.open("/WIDGETS/" .. app_name .. "/logo.png")
 
-local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "tcd")
-local m_log = LibLogClass(app_name, "/WIDGETS/" .. app_name)
-
--- const
-local default_flight_starting_duration = 30 -- 20 sec to detect flight success
-local default_flight_ending_duration = 8 -- 8 sec to detect flight ended
+------------------------------------------------------------------------------------------------------------------
+-- configuration
+local default_flight_starting_duration = 30  -- 20 sec to detect flight success
+local default_flight_ending_duration = 8     -- 8 sec to detect flight ended
 local default_min_motor_value = 200
 local enable_sounds = 1                      -- 0=no sound, 1=play blip sound on increment& on flight end
 local enable_count_announcement_on_start = 0 -- 0=no voice, 1=play the count upon increment
 local enable_count_announcement_on_end = 1   -- 0=no voice, 1=play the count upon end of flight
 local use_telemetry = 1                      -- 0=do not use telemetry, 1=use telemetry in state machine
 local use_flights_history = 1                -- 0=do not write flights-history, 1=write flights-history
+local inverted_switch_logic = 0              -- 0=armed when SF up, 1=armed when SF down
+------------------------------------------------------------------------------------------------------------------
+
+
+-- imports
+local img = Bitmap.open("/WIDGETS/" .. app_name .. "/logo.png")
+
+local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "tcd")
+local m_log = LibLogClass(app_name, "/WIDGETS/" .. app_name)
 
 -- for backward compatibility
 local function getSwitchIds(key)
@@ -248,13 +252,18 @@ local function updateMotorStatus(wgt)
 end
 
 local function updateSwitchStatus(wgt)
-    if getValue(wgt.options.switch) < 0 then
-        --log(string.format("switch status (%s): =ON", wgt.status.switch_name))
-        wgt.status.switch_on = true
+    local sw_val = getValue(wgt.options.switch)
+    if inverted_switch_logic == 1 then
+        wgt.status.switch_on = (sw_val < 0)
     else
-        --log(string.format("switch status (%s): =OFF", wgt.status.switch_name))
-        wgt.status.switch_on = false
+        wgt.status.switch_on = (sw_val > 0)
     end
+
+    --if wgt.status.switch_on then
+    --    log(string.format("switch status (%s): =ON", wgt.status.switch_name))
+    --else
+    --    log(string.format("switch status (%s): =OFF", wgt.status.switch_name))
+    --end
 end
 
 --------------------------------------------------------------------------------------------------------

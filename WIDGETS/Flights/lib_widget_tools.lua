@@ -16,6 +16,8 @@ local FONT_12 = MIDSIZE -- 12px
 local FONT_8 = 0 -- Default 8px
 local FONT_6 = SMLSIZE -- 6px
 
+local FONT_LIST = {FONT_6, FONT_8, FONT_12, FONT_16, FONT_38}
+
 ---------------------------------------------------------------------------------------------------
 local function log(fmt, ...)
     m_log.info(fmt, ...)
@@ -46,7 +48,8 @@ function M.unitIdToString(unitId)
         return txtUnit
     end
 
-    return "-#-"
+    --return "-#-"
+    return ""
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -107,14 +110,13 @@ function M.isTelemetryAvailable()
     if not M.tele_src_id then
         --log("select telemetry source")
         local tele_src = getFieldInfo("RSSI")
-        if not tele_src then tele_src = getFieldInfo("RxBt") end
-        if not tele_src then tele_src = getFieldInfo("A1") end
-        if not tele_src then tele_src = getFieldInfo("A2") end
         if not tele_src then tele_src = getFieldInfo("1RSS") end
         if not tele_src then tele_src = getFieldInfo("2RSS") end
         if not tele_src then tele_src = getFieldInfo("RQly") end
-        if not tele_src then tele_src = getFieldInfo("TRSS") end
         if not tele_src then tele_src = getFieldInfo("VFR%") end
+        if not tele_src then tele_src = getFieldInfo("TRSS") end
+        if not tele_src then tele_src = getFieldInfo("RxBt") end
+        if not tele_src then tele_src = getFieldInfo("A1") end
 
         if tele_src == nil then
             --log("no telemetry sensor found")
@@ -246,41 +248,61 @@ function M.cleanInvalidCharFromGetFiledInfo(sourceName)
 end
 
 ------------------------------------------------------------------------------------------------------
+function M.getFontSizeRelative(orgFontSize, delta)
+    for i = 1, #FONT_LIST do
+        if FONT_LIST[i] == orgFontSize then
+            local newIndex = i + delta
+            newIndex = math.min(newIndex, #FONT_LIST)
+            newIndex = math.max(newIndex, 1)
+            return FONT_LIST[newIndex]
+        end
+    end
+    return orgFontSize
+end
+
+------------------------------------------------------------------------------------------------------
 function M.lcdSizeTextFixed(txt, font_size)
     local ts_w, ts_h = lcd.sizeText(txt, font_size)
 
     local v_offset = 0
     if font_size == FONT_38 then
-        v_offset = -11
+        v_offset = -15
     elseif font_size == FONT_16 then
-        v_offset = -5
+        v_offset = -8
     elseif font_size == FONT_12 then
-        v_offset = -4
+        v_offset = -6
     elseif font_size == FONT_8 then
-        v_offset = -3
+        v_offset = -4
     elseif font_size == FONT_6 then
-        v_offset = 0
+        v_offset = -3
     end
-    return ts_w, ts_h, v_offset
+    return ts_w, ts_h +2*v_offset, v_offset
 end
 
 ------------------------------------------------------------------------------------------------------
+function M.drawText(x, y, text, font_size, text_color, bg_color)
+    local ts_w, ts_h, v_offset = M.lcdSizeTextFixed(text, font_size)
+    lcd.drawRectangle(x, y, ts_w, ts_h, BLUE)
+    lcd.drawText(x, y + v_offset, text, font_size + text_color)
+    return ts_w, ts_h, v_offset
+end
+
 function M.drawBadgedText(txt, txtX, txtY, font_size, text_color, bg_color)
     local ts_w, ts_h, v_offset = M.lcdSizeTextFixed(txt, font_size)
-    ts_h = ts_h + v_offset * 2
-    local r = ts_h / 2
+    local v_space = 2
+    local bdg_h = v_space + ts_h + v_space
+    local r = bdg_h / 2
     lcd.drawFilledCircle(txtX , txtY + r, r, bg_color)
     lcd.drawFilledCircle(txtX + ts_w , txtY + r, r, bg_color)
-    lcd.drawFilledRectangle(txtX, txtY , ts_w, ts_h, bg_color)
+    lcd.drawFilledRectangle(txtX, txtY , ts_w, bdg_h, bg_color)
 
-    lcd.drawText(txtX, txtY + v_offset, txt, font_size + text_color)
+    lcd.drawText(txtX, txtY + v_offset + v_space, txt, font_size + text_color)
 
-    --lcd.drawRectangle(txtX, txtY , ts_w, ts_h, RED) -- dbg
+    --lcd.drawRectangle(txtX, txtY , ts_w, bdg_h, RED) -- dbg
 end
 
 function M.drawBadgedTextCenter(txt, txtX, txtY, font_size, text_color, bg_color)
     local ts_w, ts_h, v_offset = M.lcdSizeTextFixed(txt, font_size)
-    ts_h = ts_h + v_offset * 2
     local r = ts_h / 2
     local x = txtX - ts_w/2
     local y = txtY - ts_h/2
