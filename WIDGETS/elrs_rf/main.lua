@@ -41,10 +41,10 @@
 ]]
 
 -- Author : Offer Shmuely
--- Date: 2023-
--- ver: 1.0
-
+-- Date: 2023-2024
 local app_name = "elrs_rf"
+local app_ver = "1.1"
+
 -- ELRS_RF
 -- ELRS-RF
 -- eLRS-RF
@@ -84,7 +84,7 @@ local lcd = lcd
 local RFMD_I = 1
 local RFMD_MODULATION = 2
 local RFMD_IS_FULL_RES = 3
-local RFMD_S = 4
+local RFMD_RATE_STR = 4
 local RFMD_MIN_RSSI = 5
 local RFMD_DESC = 6
 local RFMD_LIST = {
@@ -104,7 +104,7 @@ local RFMD_LIST = {
     { 14, "n/a"  , false, "n/a"     , -128, "[off-line]" },
 }
 local RFMD_NA = 14
-local max_rssi = -40
+local MAX_RSSI = -40
 local MAX_TX_POWER = 7
 local POWERS      = { 10,   25, 50, 100, 250, 500, 1000, 2000 }
 local POWERS_PERC = { 100, 100, 70, 50 ,  30,  10,    1,    0 }
@@ -117,39 +117,15 @@ local sim_data = {
     rfmd = { 2, 2, 13, 0.5 },
     lq = { 100, 70, 100, -7 },
     tpwr = { 2, 1, 7, 1 },
-    rssi1 = { 10, -105, 10, -1 },
+    --rssi1 = { 10, -105, 10, -2 },
+    rssi1 = { -20, -105, -2, -2 },
     rssi2 = { -60, -105, -2, -2 },
     ant = { 1, 0, 1, 0.3 },
 }
+local dbgX = LCD_W - 10
+local dbgY = 150
+local dbgDx = 13
 
--- state machine
-local STATE = {
-    WAITING_FOR_RX = 1,
-    RX_CONNECTED_NO_MINMAX_INIT = 2,
-    RX_CONNECTED_NO_MINMAX = 3,
-    RX_CONNECTED_WITH_MINMAX_INIT = 4,
-    RX_CONNECTED_WITH_MINMAX = 5,
-    ON_FLIGHT_INIT = 6,
-    ON_FLIGHT = 7,
-    POST_FLIGHT_ARM_SWITCH_OFF_INIT = 8,
-    POST_FLIGHT_ARM_SWITCH_OFF = 9,
-    POST_FLIGHT_BATT_DISCONNECTED_INIT = 10,
-    POST_FLIGHT_BATT_DISCONNECTED = 11,
-}
---local state = STATE.WAITING_FOR_RX
-local STATE_TXT = {
-    "WAITING_FOR_RX",
-    "RX_CONNECTED_NO_MINMAX-i",
-    "RX_CONNECTED_NO_MINMAX",
-    "RX_CONNECTED_WITH_MINMAX-i",
-    "RX_CONNECTED_WITH_MINMAX",
-    "ON_FLIGHT-i",
-    "ON_FLIGHT",
-    "POST_FLIGHT_ARM_SWITCH_OFF-i",
-    "POST_FLIGHT_ARM_SWITCH_OFF",
-    "POST_FLIGHT_BATT_DISCONNECTED-i",
-    "POST_FLIGHT_BATT_DISCONNECTED",
-}
 
 -- Variables used across all instances
 local vcache -- valueId cache
@@ -157,7 +133,6 @@ local vcache -- valueId cache
 -- imports
 local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "tcd")
 local LibWidgetToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "tcd")
-
 local m_log = LibLogClass(app_name, "/WIDGETS/" .. app_name)
 
 local function log(fmt, ...)
@@ -168,7 +143,6 @@ local function is_simulator()
     local _, rv = getVersion()
     return string.sub(rv, -5) == "-simu"
 end
-
 
 -- for backward compatibility
 local function getSwitchIds(key)
@@ -197,7 +171,7 @@ local function update(wgt, options)
     wgt.zh = wgt.zone.h
     wgt.SIMU = is_simulator()
     --wgt.SIMU = false
-    wgt.DEBUG_ENABLED = false
+    wgt.DEBUG = false
     wgt.arm_switch_on = false
     wgt.module_info = {
         is_filled = false,
@@ -218,10 +192,10 @@ local function update(wgt, options)
         tpwr = 0,
         tpwr_min = nil,
         tpwr_max = nil,
-        rssi1 = 0,
+        rssi1 = nil,
         rssi1_min = nil,
         rssi1_max = nil,
-        rssi2 = 0,
+        rssi2 = nil,
         rssi2_min = nil,
         rssi2_max = nil,
         ant = 0,
@@ -235,13 +209,9 @@ local function update(wgt, options)
     wgt.sim_periodic = wgt.tools.periodicInit()
     wgt.tools.periodicStart(wgt.sim_periodic, 5000)
 
-    wgt.show_minmax = false
+    wgt.show_minmax = true
     wgt.minmax_init_periodic = wgt.tools.periodicInit()
     --wgt.tools.periodicStart(wgt.minmax_init_periodic, 10000)
-
-    wgt.state = STATE.WAITING_FOR_RX
-
-
 end
 
 local function create(zone, options)
@@ -339,28 +309,41 @@ local function update_randomizer(value)
     value[1] = current_value
 end
 
+local function updateMinMax(wgt, oldVal, id)
+    local newVal = getV(wgt, id)
+    if newVal == nil then
+        return oldVal
+    else
+        return newVal
+    end
+end
+
 local function safe_min(min, v)
     if v == nil then
         return nil
     end
-
+    local min2
     if (min == nil) then
-        min = v
+        min2 = v
         m_log.warn("new min due to nil (%s)", v)
+    else
+        min2 = math.min(min, v)
     end
-    local min2 = math.min(min, v)
-    log("%d, %d --> %d", min, v, min2)
+    --log("min: %d, %d --> %d", min, v, min2)
     return min2
 end
 local function safe_max(max, v)
     if v == nil then
         return nil
     end
+    local max2
     if (max == nil) then
-        max = v
+        max2 = v
+    else
+        max2 = math.max(max, v)
     end
-    max = math.max(max, v)
-    return max
+    --log("max: %d, %d --> %d", max, v, max2)
+    return max2
 end
 
 local function getSwitchStatus(wgt)
@@ -373,27 +356,23 @@ local function getSwitchStatus(wgt)
     end
 end
 
-local function drawProgressBar(wgt, Y, percent, val_to_display, val_to_display_min, percent_min, percent_max, unit)
-    --log("drawProgressBar [%s] %d < %d < %d", val_to_display, percent_min, percent, percent_max)
+local function drawProgressBar(wgt, field_type, Y, percent, val_to_display, val_to_display_min, percent_min, percent_max, unit)
+    log("drawProgressBar [%s] %s: %s<%s<%s    %s", field_type, val_to_display, percent_min, percent, percent_max, unit)
+    --log("drawProgressBar [%s] [%s] %d < %d < %d", field_type, val_to_display, percent_min, percent, percent_max)
     local bkg_col = GREEN
-    if  wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
-        or
-        wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF
-        or
-        wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
-        or
-        wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED
-    then
+    if  wgt.tlm.tlm_enabled == false then
         percent = percent_min or 0
-        val_to_display = val_to_display_min or " " .. unit
-        log("drawProgressBar() - STATE.POST_FLIGHT_x")
+        val_to_display = val_to_display_min or "0"
+        --log("drawProgressBar() - STATE.POST_FLIGHT_x")
         bkg_col = LIGHTGREY
-    end
-
-    if percent < 30 then
-        bkg_col = RED
-    elseif percent < 50 then
-        bkg_col = ORANGE
+    else
+        if percent == nil then
+            percent = 0
+        elseif percent < 30 then
+            bkg_col = RED
+        elseif percent < 50 then
+            bkg_col = ORANGE
+        end
     end
 
     local x = progress_bar_x
@@ -424,19 +403,9 @@ local function drawRfMode(wgt, Y)
         return Y
     end
     local rfmd = RFMD_LIST[wgt.tlm.rfmd]
-    --local modestr = rfmd[RFMD_S]
-    local s = ""
-    --s = s .. string.format("Rate: %s/%s", rfmd[RFMD_MODULATION], modestr)
-    --s = s .. string.format("Rate: %s/%s", modestr, rfmd[RFMD_MODULATION])
-    s = s .. string.format("Rate: %s", rfmd[RFMD_DESC])
-    --if (rfmd[RFMD_IS_FULL_RES] == true) then
-    --    s = s .. string.format("/Full-Res")
-    --end
-    --s = s .. string.format(" (rfmd:%d)", wgt.tlm.rfmd)
-
-    lcd.drawText(5, Y, s, TXT_SIZE + TXT_COL)
-    Y = Y + TH
-    return Y
+    local txt = string.format("Rate: %s", rfmd[RFMD_DESC])
+    lcd.drawText(5, Y, txt, TXT_SIZE + TXT_COL)
+    return Y + TH
 end
 
 local function drawLq(wgt, Y)
@@ -445,18 +414,18 @@ local function drawLq(wgt, Y)
     local percent_min = wgt.tlm.rqly_min
     local percent_max = wgt.tlm.rqly_max
 
-    drawProgressBar(wgt, Y, wgt.tlm.rqly, wgt.tlm.rqly,wgt.tlm.rqly_min, percent_min, percent_max, "%")
-    Y = Y + TH
-    Y = Y  + 8
-    return Y
+    drawProgressBar(wgt, "LQ", Y, wgt.tlm.rqly, wgt.tlm.rqly,wgt.tlm.rqly_min, percent_min, percent_max, "%")
+    return Y + TH + 8
 end
 
 local function pwrToPercent(powval)
     if (powval == nil) then
-        return -3
+        --return -3
+        return nil
     end
     if (powval == 0) then
-        return -2
+        --return -2
+        return nil
     end
     for k, v in ipairs(POWERS) do
         if powval <= v then
@@ -465,32 +434,29 @@ local function pwrToPercent(powval)
         end
     end
     --log("pwrToPercent(%d)--> %d", powval, -1)
-    return -1 -- 1000
+    --return -1
+    return nil
 end
 
 local function drawPower(wgt, Y)
     --lcd.drawText(5, Y, "power: " .. tostring(wgt.tlm.tpwr) .. "mW", TXT_SIZE + TXT_COL)
-    lcd.drawText(5, Y, "power: ", TXT_SIZE + TXT_COL)
-
+    --m_log.info("power: tpwr_min:%s, tpwr:%s, tpwr_max:%s ", wgt.tlm.tpwr_min, wgt.tlm.tpwr, wgt.tlm.tpwr_max)
     --local percent = 100 * pwrToIdx(wgt.tlm.tpwr) / MAX_TX_POWER
     --local inv_percent = math.floor(100 * (MAX_TX_POWER - pwrToIdx(wgt.tlm.tpwr) -1) / MAX_TX_POWER -1)
 
     local inv_percent = pwrToPercent(wgt.tlm.tpwr)
-    local inv_percent_min = pwrToPercent(wgt.tlm.tpwr_min)
-    local inv_percent_max = pwrToPercent(wgt.tlm.tpwr_max)
+    local inv_percent_min = pwrToPercent(wgt.tlm.tpwr_max)
+    local inv_percent_max = pwrToPercent(wgt.tlm.tpwr_min)
 
-    drawProgressBar(wgt, Y, inv_percent, wgt.tlm.tpwr, wgt.tlm.tpwr_min, inv_percent_min, inv_percent_max, "mW")
+    lcd.drawText(5, Y, "power: ", TXT_SIZE + TXT_COL)
+    drawProgressBar(wgt, "POWER", Y, inv_percent, wgt.tlm.tpwr, wgt.tlm.tpwr_min, inv_percent_min, inv_percent_max, "mW")
     --m_log.info("power: tpwr:%s=%s%%, %s=%s%%, %s=%s%%",
-    --    wgt.tlm.tpwr,
-    --    inv_percent,
-    --    wgt.tlm.tpwr_min,
-    --    inv_percent_min,
-    --    wgt.tlm.tpwr_max,
-    --    inv_percent_max
+    --    wgt.tlm.tpwr, inv_percent,
+    --    wgt.tlm.tpwr_min, inv_percent_min,
+    --    wgt.tlm.tpwr_max, inv_percent_max
     --)
-    --m_log.info("power: tpwr:%s, MAX_TX_POWER:%s, percent:%s, inv_percent:%s, pwrToIdx: %s ", wgt.tlm.tpwr, MAX_TX_POWER, percent, inv_percent, pwrToIdx(wgt.tlm.tpwr))
-    Y = Y + TH
-    return Y
+    --m_log.info("power: tpwr:%s, MAX_TX_POWER:%s, percent:%s, inv_percent:%s ", wgt.tlm.tpwr, MAX_TX_POWER, percent, inv_percent)
+    return Y + TH
 end
 
 local function drawRssi(wgt, Y, id)
@@ -503,31 +469,43 @@ local function drawRssi(wgt, Y, id)
     local is_ant_active
     if id == 1 then
         rssi = wgt.tlm.rssi1
-        rssi_min = wgt.tlm.rssi1_min or 0
-        rssi_max = wgt.tlm.rssi1_max or 0
+        rssi_min = wgt.tlm.rssi1_min --or 0
+        rssi_max = wgt.tlm.rssi1_max --or 0
         is_ant_active = (wgt.tlm.ant == 0)
     else
         rssi = wgt.tlm.rssi2
-        rssi_min = wgt.tlm.rssi2_min or 0
-        rssi_max = wgt.tlm.rssi2_max or 0
+        rssi_min = wgt.tlm.rssi2_min --or 0
+        rssi_max = wgt.tlm.rssi2_max --or 0
         is_ant_active = (wgt.tlm.ant == 1)
     end
 
     --lcd.drawText(5, Y, string.format("rssi%d: %d dBm", id, rssi), TXT_SIZE + TXT_COL)
     lcd.drawText(5, Y, string.format("rssi%d:", id), TXT_SIZE + TXT_COL)
     --log("wgt.tlm.rfmd: %s", wgt.tlm.rfmd)
-    local min_rssi = RFMD_LIST[wgt.tlm.rfmd][RFMD_MIN_RSSI]
-    --log("min_rssi: %s", min_rssi)
+    local min_allow_rssi = RFMD_LIST[wgt.tlm.rfmd][RFMD_MIN_RSSI]
+    --log("min_allow_rssi: %s", min_allow_rssi)
 
-    local fix_rssi = math.min(rssi, max_rssi)
-    local fix_rssi_min = math.min(rssi_min, max_rssi)
-    local fix_rssi_max = math.min(rssi_max, max_rssi)
-    local rangePct = 100 * (fix_rssi - min_rssi) / (max_rssi - min_rssi)
-    local rangePct_min = 100 * (fix_rssi_min - min_rssi) / (max_rssi - min_rssi)
-    local rangePct_max = 100 * (fix_rssi_max - min_rssi) / (max_rssi - min_rssi)
-    --log("rangePct: 100*(%d-%d) / (%d-%d) = %d", fix_rssi, min_rssi, max_rssi, min_rssi, rangePct)
+    --local fix_rssi = (rssi ~= nil) and math.min(rssi, MAX_RSSI) or nil
+    local fix_rssi = nil
+    local rangePct = 0
+    if rssi ~= nil then
+        fix_rssi = math.min(rssi, MAX_RSSI)
+        rangePct = 100 * (fix_rssi - min_allow_rssi) / (MAX_RSSI - min_allow_rssi)
+    end
 
-    drawProgressBar(wgt, Y, rangePct, rssi, rssi_min, rangePct_min, rangePct_max, "dBm")
+    --log("rssi_min: %s, rssi_max: %s", rssi_min, rssi_max)
+    local fix_rssi_min, fix_rssi_max, rangePct_min, rangePct_max
+    if rssi_min ~= nil and rssi_max ~= nil then
+        fix_rssi_min = math.min(rssi_min, MAX_RSSI)
+        fix_rssi_max = math.min(rssi_max, MAX_RSSI)
+        rangePct_min = 100 * (fix_rssi_min - min_allow_rssi) / (MAX_RSSI - min_allow_rssi)
+        rangePct_max = 100 * (fix_rssi_max - min_allow_rssi) / (MAX_RSSI - min_allow_rssi)
+    end
+
+    --log("drawProgressBarRssi: 100*(%d-%d) / (%d-%d) = %d", fix_rssi, min_allow_rssi, max_rssi, min_allow_rssi, rangePct)
+    --log("rangePct: %s, rssi: %s, rssi_min: %s, rangePct_min: %s, rangePct_max: %s, min_allow_rssi: %s", rangePct, rssi, rssi_min, rangePct_min, rangePct_max, min_allow_rssi)
+
+    drawProgressBar(wgt, "RSSI", Y, rangePct, rssi, rssi_min, rangePct_min, rangePct_max, "dBm")
 
     if wgt.tlm.tlm_enabled == true and is_ant_active then
         local now = getTime()
@@ -539,20 +517,23 @@ local function drawRssi(wgt, Y, id)
         end
     end
 
-    Y = Y + TH
-    return Y
+    return Y + TH
 end
 
-local function drawMModuleName(wgt, Y, id)
+local function drawModuleName(wgt, Y)
     lcd.drawText(5, Y, string.format("elrs module: %s", wgt.module_info.vStr), TXT_SIZE + TXT_COL)
-    Y = Y + TH
-    return Y
+    return Y + TH
 end
 
 local function calcData(wgt)
-    log("111 wgt.tlm.rqly_min: %s", wgt.tlm.rqly_min)
+    --log("minmax/rqly : %s, %s...%s", wgt.tlm.rqly, wgt.tlm.rqly_min, wgt.tlm.rqly_max)
+    --log("minmax/power: %s, %s...%s ", wgt.tlm.tpwr, wgt.tlm.tpwr_min, wgt.tlm.tpwr_max)
+    --log("minmax/rssi1: %s, %s...%s ", wgt.tlm.rssi1, wgt.tlm.rssi1_min, wgt.tlm.rssi1_max)
+    --log("minmax/rssi2: %s, %s...%s ", wgt.tlm.rssi2, wgt.tlm.rssi2_min, wgt.tlm.rssi2_max)
 
     getModuleInfo(wgt)
+
+    wgt.arm_switch_on = getSwitchStatus(wgt)
 
     if wgt.SIMU then
         local is_sim_active = getValue("sa")
@@ -565,10 +546,22 @@ local function calcData(wgt)
         wgt.tlm.rssi1 = getV(wgt, "1RSS")
         wgt.tlm.rssi2 = getV(wgt, "2RSS")
         wgt.tlm.ant = getV(wgt, "ANT")
+
         if (wgt.tlm.rfmd == nil or wgt.tlm.rfmd == 0) then
             wgt.tlm.rfmd = RFMD_NA
         end
-        wgt.tlm.tlm_enabled = ((wgt.tlm.rfmd ~= nil) and (wgt.tlm.rfmd > 0) and (wgt.tlm.rfmd ~= RFMD_NA)) and ((wgt.tlm.rqly ~= nil) and (wgt.tlm.rqly > 90)) and ((wgt.tlm.tpwr ~= nil) and (wgt.tlm.tpwr > 0))
+        wgt.tlm.tlm_enabled = ((wgt.tlm.rfmd ~= nil) and (wgt.tlm.rfmd > 0) and (wgt.tlm.rfmd ~= RFMD_NA)) and ((wgt.tlm.rqly ~= nil) and (wgt.tlm.rqly > 10)) and ((wgt.tlm.tpwr ~= nil) and (wgt.tlm.tpwr > 0))
+
+        if wgt.arm_switch_on then
+            wgt.tlm.rqly_min = updateMinMax(wgt.tlm.rqly_min, wgt,"RQly-")
+            wgt.tlm.rqly_max = updateMinMax(wgt.tlm.rqly_max, wgt, "RQly+")
+            wgt.tlm.tpwr_min = updateMinMax(wgt.tlm.tpwr_min, wgt, "TPWR-")
+            wgt.tlm.tpwr_max = updateMinMax(wgt.tlm.tpwr_max, wgt, "TPWR+")
+            wgt.tlm.rssi1_min = updateMinMax(wgt.tlm.rssi1_min, wgt, "1RSS-")
+            wgt.tlm.rssi1_max = updateMinMax(wgt.tlm.rssi1_max, wgt, "1RSS+")
+            wgt.tlm.rssi2_min = updateMinMax(wgt.tlm.rssi2_min, wgt, "2RSS-")
+            wgt.tlm.rssi2_max = updateMinMax(wgt.tlm.rssi2_max, wgt, "2RSS+")
+        end
     end
 
     if wgt.DEBUG then
@@ -591,147 +584,42 @@ local function calcData(wgt)
         wgt.ctx.isDiversity = true
         local ver, radio, maj, minor, rev, osname = getVersion()
         wgt.module_info.vStr = string.format("simulator (%s)", ver)
+
+        if wgt.arm_switch_on then
+            wgt.tlm.rqly_min = safe_min(wgt.tlm.rqly_min, wgt.tlm.rqly)
+            wgt.tlm.rqly_max = safe_max(wgt.tlm.rqly_max, wgt.tlm.rqly)
+            wgt.tlm.tpwr_min = safe_min(wgt.tlm.tpwr_min, wgt.tlm.tpwr)
+            wgt.tlm.tpwr_max = safe_max(wgt.tlm.tpwr_max, wgt.tlm.tpwr)
+            wgt.tlm.rssi1_min = safe_min(wgt.tlm.rssi1_min, wgt.tlm.rssi1)
+            wgt.tlm.rssi1_max = safe_max(wgt.tlm.rssi1_max, wgt.tlm.rssi1)
+            wgt.tlm.rssi2_min = safe_min(wgt.tlm.rssi2_min, wgt.tlm.rssi2)
+            wgt.tlm.rssi2_max = safe_max(wgt.tlm.rssi2_max, wgt.tlm.rssi2)
+        end
+    end
+
+    if wgt.tlm.tlm_enabled == false then
+        wgt.tlm.rfmd = RFMD_NA
+        wgt.tlm.rqly = nil
+        wgt.tlm.tpwr = nil
+        wgt.tlm.rssi1 = nil -- bug in read, it return 0
+        wgt.tlm.rssi2 = nil
+        wgt.tlm.ant = 0
     end
 
     if wgt.tlm.ant ~= 0 then
         wgt.ctx.isDiversity = true
     end
 
-    wgt.arm_switch_on = getSwitchStatus(wgt)
-
-
-    -- ----------------- state machine --------------------------------------------
-    if wgt.tlm.tlm_enabled == true
-        and (
-               wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
-            or wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED
-        )
-    then
-        wgt.state = STATE.WAITING_FOR_RX
-    end
-
-    if      wgt.tlm.tlm_enabled == false
-        --and wgt.arm_switch_on == false
-        and wgt.state == STATE.ON_FLIGHT_INIT
-        and wgt.state == STATE.ON_FLIGHT
-        and wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
-        and wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF
-        and wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
-        and wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED
-    then
-        wgt.state = STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
-    end
-
-    if wgt.state == STATE.WAITING_FOR_RX then
-        log("STATE.WAITING_FOR_RX")
-        wgt.show_minmax = false
-        if wgt.tlm.tlm_enabled == true then
-            wgt.state = STATE.RX_CONNECTED_NO_MINMAX_INIT
-        end
-
-    elseif wgt.state == STATE.RX_CONNECTED_NO_MINMAX_INIT then
-        log("STATE.RX_CONNECTED_NO_MINMAX_INIT")
-        wgt.show_minmax = false
-        wgt.tools.periodicStart(wgt.minmax_init_periodic, 5000)
-        log("minmax_init_periodic: start wait")
-        wgt.state = STATE.RX_CONNECTED_NO_MINMAX
-
-    elseif wgt.state == STATE.RX_CONNECTED_NO_MINMAX then
-        log("STATE.RX_CONNECTED_NO_MINMAX")
-        wgt.show_minmax = false
-        if wgt.tools.periodicHasPassed(wgt.minmax_init_periodic, true) then
-            wgt.state = STATE.RX_CONNECTED_WITH_MINMAX_INIT
-        end
-
-    elseif wgt.state == STATE.RX_CONNECTED_WITH_MINMAX_INIT then
-        log("STATE.RX_CONNECTED_WITH_MINMAX")
-        wgt.show_minmax = false
-        wgt.tlm.rqly_min =  nil
-        wgt.tlm.rqly_max =  nil
-        wgt.tlm.tpwr_min =  nil
-        wgt.tlm.tpwr_max =  nil
-        wgt.tlm.rssi1_min = nil
-        wgt.tlm.rssi1_max = nil
-        wgt.tlm.rssi2_min = nil
-        wgt.tlm.rssi2_max = nil
-        wgt.state = STATE.RX_CONNECTED_WITH_MINMAX
-        log("113 wgt.tlm.rqly_min: %s", wgt.tlm.rqly_min)
-
-    elseif wgt.state == STATE.RX_CONNECTED_WITH_MINMAX then
-        log("116 wgt.tlm.rqly_min: %s", wgt.tlm.rqly_min)
-        wgt.show_minmax = true
-        if wgt.arm_switch_on == true then
-            wgt.state = STATE.ON_FLIGHT_INIT
-        end
-
-    elseif wgt.state == STATE.ON_FLIGHT_INIT then
-        log("STATE.ON_FLIGHT")
-        wgt.show_minmax = true
-        wgt.state = STATE.ON_FLIGHT
-
-    elseif wgt.state == STATE.ON_FLIGHT then
-        wgt.show_minmax = true
-        if wgt.arm_switch_on == false then
-            wgt.state = STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
-        end
-        if wgt.tlm.tlm_enabled == false then
-            wgt.state = STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
-        end
-
-    elseif wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT then
-        log("STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT")
-        wgt.show_minmax = true
-        wgt.state = STATE.POST_FLIGHT_ARM_SWITCH_OFF
-
-    elseif wgt.state == STATE.POST_FLIGHT_ARM_SWITCH_OFF then
-        wgt.show_minmax = true
-        if wgt.tlm.tlm_enabled == false then
-            wgt.state = STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
-        end
-        if wgt.tlm.tlm_enabled == true and wgt.arm_switch_on == true then
-            wgt.state = STATE.RX_CONNECTED_NO_MINMAX_INIT
-        end
-
-    elseif wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT then
-        log("STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT")
-        wgt.state = STATE.POST_FLIGHT_BATT_DISCONNECTED
-
-    elseif wgt.state == STATE.POST_FLIGHT_BATT_DISCONNECTED then
-        wgt.show_minmax = true
-        if wgt.tlm.tlm_enabled == true then
-            wgt.state = STATE.RX_CONNECTED_NO_MINMAX_INIT
-        end
-        --if wgt.tlm.tlm_enabled == true and wgt.arm_switch_on == false then
-        --    wgt.state = STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
-        --end
-        --if wgt.tlm.tlm_enabled == true and wgt.arm_switch_on == true then
-        --    wgt.state = STATE.RX_CONNECTED_NO_MINMAX_INIT
-        --end
-
-    else
-        log("invalid state")
-    end
     -- ----------------- state machine end -----------------------------------------
 
     -- record min/max (not recortding in POST_FLIGHT_ARM_SWITCH_OFF)
-    --if      wgt.state ~= STATE.POST_FLIGHT_ARM_SWITCH_OFF_INIT
-    --    and wgt.state ~= STATE.POST_FLIGHT_ARM_SWITCH_OFF
-    --    and wgt.state ~= STATE.POST_FLIGHT_BATT_DISCONNECTED_INIT
-    --    and wgt.state ~= STATE.POST_FLIGHT_BATT_DISCONNECTED
-    --    and wgt.state ~= STATE.WAITING_FOR_RX
-    if wgt.state == STATE.ON_FLIGHT then
-        wgt.tlm.rqly_min  = safe_min(wgt.tlm.rqly_min , wgt.tlm.rqly)
-        wgt.tlm.rqly_max  = safe_max(wgt.tlm.rqly_max , wgt.tlm.rqly)
-        wgt.tlm.tpwr_min  = safe_min(wgt.tlm.tpwr_min , wgt.tlm.tpwr)
-        wgt.tlm.tpwr_max  = safe_max(wgt.tlm.tpwr_max , wgt.tlm.tpwr)
-        wgt.tlm.rssi1_min = safe_min(wgt.tlm.rssi1_min, wgt.tlm.rssi1)
-        wgt.tlm.rssi1_max = safe_max(wgt.tlm.rssi1_max, wgt.tlm.rssi1)
-        wgt.tlm.rssi2_min = safe_min(wgt.tlm.rssi2_min, wgt.tlm.rssi2)
-        wgt.tlm.rssi2_max = safe_max(wgt.tlm.rssi2_max, wgt.tlm.rssi2)
-    end
     --log("115 wgt.tlm.rqly_min: %s, rqly_max: %s", wgt.tlm.rqly_min, wgt.tlm.rqly_max)
 end
 
+local function drawDbgText(msg)
+    lcd.drawText(dbgX, dbgY, msg, FONT_6 + LIGHTGREY + RIGHT)
+    dbgY = dbgY +dbgDx
+end
 
 local function background(wgt)
     calcData(wgt)
@@ -766,43 +654,44 @@ local function refresh(wgt, event, touchState)
 
     calcData(wgt)
 
-    if wgt.state == STATE.WAITING_FOR_RX then
-        lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY + RIGHT)
-        lcd.drawFilledRectangle(0, 0, wgt.zw, wgt.zh, BLACK)
-        if wgt.zh > 50 then
-            lcd.drawText(wgt.zw / 2, 10, "-- ELRS-RF --", FONT_8 + WHITE + CENTER)
-        end
-        lcd.drawText(wgt.zw / 2, wgt.zh / 2, "No RX connected...", FONT_12 + WHITE + CENTER+ VCENTER)
-        return
-    end
+    --if wgt.tlm.tlm_enabled == false then
+    --    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY + RIGHT)
+    --    lcd.drawFilledRectangle(0, 0, wgt.zw, wgt.zh, BLACK)
+    --    if wgt.zh > 50 then
+    --        lcd.drawText(wgt.zw / 2, 10, "-- ELRS-RF --", FONT_8 + WHITE + CENTER)
+    --    end
+    --    lcd.drawText(wgt.zw / 2, wgt.zh / 2, "No RX connected...", FONT_12 + WHITE + CENTER+ VCENTER)
+    --    return
+    --end
 
     Y = drawRfMode(wgt, Y)
     Y = drawLq(wgt, Y)
     Y = drawPower(wgt, Y, 0, 6, 6, wgt.tlm.tpwr, wgt.zw, wgt.zh) -- uses 1W as max
     Y = drawRssi(wgt, Y, 1)
     Y = drawRssi(wgt, Y, 2)
-    Y = drawMModuleName(wgt, Y)
+    Y = drawModuleName(wgt, Y)
 
-    -- debugging
-    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, STATE_TXT[wgt.state], FONT_6 + LIGHTGREY + RIGHT)
-    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y +11, string.format("load: %d%%", getUsage()), FONT_6 + LIGHTGREY + RIGHT)
-    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+22, string.format("%s",wgt.tlm.tlm_enabled), FONT_6 + LIGHTGREY + RIGHT)
-    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+33, string.format("%s",wgt.tlm.rfmd), FONT_6 + LIGHTGREY + RIGHT)
-    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+44, string.format("%s",getValue(wgt.options.arm_switch)), FONT_6 + LIGHTGREY + RIGHT)
-    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+55, string.format("%s",wgt.arm_switch_on), FONT_6 + LIGHTGREY + RIGHT)
-
-    --if is_app_mode then
+    --if app_mode (or big screen)
     if wgt.zh > 200 then
         local y = 180
-        local dy = 25
-        lcd.drawText(10, y, string.format("RQLY min: %s - max: %s",wgt.tlm.rqly_min, wgt.tlm.rqly_max), FONT_8 + TXT_COL)
-        --lcd.drawText(140, y, string.format("rqly_max: %s",wgt.tlm.rqly_max), FONT_6 + TXT_COL)
+        local dy = 20
+        lcd.drawText(10, y, string.format("RX link quality min: %s%%",wgt.tlm.rqly_min), FONT_8 + TXT_COL)
         y = y + dy
-        lcd.drawText(10, y, string.format("TPWR min: %s, max: %s",wgt.tlm.tpwr_min, wgt.tlm.tpwr_max), FONT_8 + TXT_COL)
-        --lcd.drawText(140, y, string.format("tpwr_max: %s",wgt.tlm.tpwr_max), FONT_6 + TXT_COL)
-        y = y + dy
-        lcd.drawText(10, y, string.format("tlm_enabled: %s",wgt.tlm.tlm_enabled), FONT_6 + TXT_COL)
-        y = y + dy
+        lcd.drawText(10, y, string.format("TX power         max: %smW",wgt.tlm.tpwr_max), FONT_8 + TXT_COL)
+
+        -- debugging
+        dbgY = 120
+        --drawDbgText(string.format("load: %d%%", getUsage()))
+        --drawDbgText(string.format("rfmd: %s",wgt.tlm.rfmd))
+        drawDbgText(string.format("arm: %s",(wgt.arm_switch_on)and "on" or "off"))
+        drawDbgText(string.format("tlm: %s",(wgt.tlm.tlm_enabled)and "on" or "off"))
+        drawDbgText(string.format("rssi: %s",wgt.tlm.rssi1))
+        drawDbgText(string.format("rssi-: %s",wgt.tlm.rssi1_min))
+        drawDbgText(string.format("rssi+: %s",wgt.tlm.rssi1_max))
+        drawDbgText(string.format("tpwr-: %s",wgt.tlm.tpwr_min))
+        drawDbgText(string.format("tpwr+: %s",wgt.tlm.tpwr_max))
+        --drawDbgText(string.format("tlm.ant: %s",wgt.tlm.ant))
+        --drawDbgText(string.format("isDiversity: %s",wgt.ctx.isDiversity))
     end
 end
 
