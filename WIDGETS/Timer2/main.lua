@@ -1,7 +1,8 @@
 -- A Timer version that fill better the widget area
 -- Offer Shmuely
 -- Date: 2022
--- ver: 0.8
+local app_name = "Timer2"
+local app_ver = "0.8"
 
 --local progress = 100
 local options = {
@@ -265,4 +266,4 @@ local function refresh(wgt, event, touchState)
   --lcd.drawText(wgt.zone.x+100, wgt.zone.y, string.format("%d%%", getUsage()), SMLSIZE + CUSTOM_COLOR)
 end
 
-return { name="Timer2", options=options, create=create, update=update, background=background, refresh=refresh }
+return { name=app_name, options=options, create=create, update=update, background=background, refresh=refresh }

@@ -38,10 +38,9 @@
 
 -- Author : Offer Shmuely
 -- Date: 2021-2023
--- Version: 0.8
-
-
 local app_name = "GaugeRotary"
+local app_ver = "0.8"
+
 
 -- consts
 local DEFAULT_MIN_MAX = {

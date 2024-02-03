@@ -23,6 +23,7 @@
 -- it will take a lipo/li-ion voltage that received as a single value (as opposed to multi cell values send while using FLVSS liPo Voltage Sensor)
 -- common sources are:
 --   * Transmitter Battery
+--   * expressLRS pwm receivers (ER6/ER8/SuperP14ch)
 --   * FrSky VFAS
 --   * A1/A2 analog voltage
 --   * mini quad flight controller
@@ -34,9 +35,8 @@
 -- Widget to display the levels of Lipo battery from single analog source
 -- Author : Offer Shmuely
 -- Date: 2021-2023
--- ver: 0.6
-
 local app_name = "BattAnalog"
+local app_ver = "0.7"
 
 local CELL_DETECTION_TIME = 8
 
@@ -107,7 +107,7 @@ local defaultSensor = "RxBt" -- RxBt / A1 / A3/ VFAS / Batt
 
 --------------------------------------------------------------
 local function log(s)
-    --print(app_name .. " .. s)
+    --print("[" .. app_name .. "]" .. s)
 end
 --------------------------------------------------------------
 
@@ -172,7 +172,7 @@ local function create(zone, options)
 
     -- imports
     wgt.ToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "tcd")
-    wgt.tools = wgt.ToolsClass(app_name)
+    wgt.tools = wgt.ToolsClass(nil, app_name)
 
     update(wgt, options)
     return wgt

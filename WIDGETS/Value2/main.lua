@@ -28,9 +28,9 @@
 
 -- Author : Offer Shmuely
 -- Date: 2021-2023
--- ver: 0.8
-
 local app_name = "Value2"
+local app_ver = "0.8"
+
 
 -- imports
 local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "tcd")

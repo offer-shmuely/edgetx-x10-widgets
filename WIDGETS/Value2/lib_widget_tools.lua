@@ -48,7 +48,8 @@ function M.unitIdToString(unitId)
         return txtUnit
     end
 
-    return "-#-"
+    --return "-#-"
+    return ""
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -109,14 +110,13 @@ function M.isTelemetryAvailable()
     if not M.tele_src_id then
         --log("select telemetry source")
         local tele_src = getFieldInfo("RSSI")
-        if not tele_src then tele_src = getFieldInfo("RxBt") end
-        if not tele_src then tele_src = getFieldInfo("A1") end
-        if not tele_src then tele_src = getFieldInfo("A2") end
         if not tele_src then tele_src = getFieldInfo("1RSS") end
         if not tele_src then tele_src = getFieldInfo("2RSS") end
         if not tele_src then tele_src = getFieldInfo("RQly") end
-        if not tele_src then tele_src = getFieldInfo("TRSS") end
         if not tele_src then tele_src = getFieldInfo("VFR%") end
+        if not tele_src then tele_src = getFieldInfo("TRSS") end
+        if not tele_src then tele_src = getFieldInfo("RxBt") end
+        if not tele_src then tele_src = getFieldInfo("A1") end
 
         if tele_src == nil then
             --log("no telemetry sensor found")
@@ -318,6 +318,33 @@ function M.drawBadgedTextCenter(txt, txtX, txtY, font_size, text_color, bg_color
     --lcd.drawLine(txtX, txtY-20, txtX, txtY+20, SOLID, RED) -- dbg
 end
 
+------------------------------------------------------------------------------------------------------
+-- usage:
+--log("bbb----------------------------------------------------------")
+--wgt.tools.heap_dump(wgt, 0, 60)
+--log("ccc----------------------------------------------------------")
+function M.heap_dump(tbl, indent, max_dept)
+    local spaces = string.rep("  ", indent)
+    if max_dept == 0 then
+        log(spaces .. "---- max dept ----")
+        return
+    end
+    max_dept = max_dept -1
+    indent = indent or 0
+
+    for key, value in pairs(tbl) do
+        if key ~= "_G" then
+            if type(value) == "table" then
+                --log(spaces .. key .. " (table) = {")
+                log(spaces .. key .. " = {")
+                M.heap_dump(value, indent + 1, max_dept)
+                log(spaces .. "}")
+            else
+                log(spaces .. key .. " = " .. tostring(value))
+            end
+        end
+    end
+end
 ------------------------------------------------------------------------------------------------------
 
 return M

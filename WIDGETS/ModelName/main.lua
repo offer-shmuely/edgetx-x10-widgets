@@ -19,7 +19,8 @@
 -- Horus Widget that show the name of the model on the bar on top
 -- Offer Shmuely
 -- Date: 2019
--- ver: 0.3
+local app_name = "ModelName"
+local app_ver = "0.3"
 
 local options = {
   { "TextColor", COLOR, YELLOW }
@@ -47,4 +48,4 @@ local function refresh(wgt)
   lcd.drawText(wgt.zone.x, wgt.zone.y, wgt.modelName, LEFT + DBLSIZE + CUSTOM_COLOR);
 end
 
-return { name="ModelName", options=options, create=create, update=update, refresh=refresh, background=background }
+return { name=app_name, options=options, create=create, update=update, refresh=refresh, background=background }
