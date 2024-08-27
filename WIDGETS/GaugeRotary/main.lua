@@ -39,7 +39,12 @@
 -- Author : Offer Shmuely
 -- Date: 2021-2023
 local app_name = "GaugeRotary"
-local app_ver = "0.8"
+local app_ver = "0.9"
+------------------------------------------------------------------------------------------------------------------
+-- configuration
+local enable_min_max = 1                     -- 0=no min/max display, 1=display min/max
+------------------------------------------------------------------------------------------------------------------
+
 
 
 -- consts
@@ -271,12 +276,12 @@ local function refresh_app_mode(wgt, event, touchState)
     local zone_h = 252
 
     local centerX = zone_w / 2
-    wgt.gauge1.drawGauge(centerX, 120, 110, false, percentageValue, percentageValueMin, percentageValueMax, value .. w_unit, w_name)
+    wgt.gauge1.drawGauge(centerX, 120, 110, false, percentageValue, percentageValueMin, percentageValueMax, value .. w_unit, w_name, wgt.tools.isTelemetryAvailable())
     lcd.drawText(10, 10, string.format("%d%s", value, w_unit), FONT_38 + YELLOW)
 
     -- min / max
-    wgt.gauge1.drawGauge(100, 180, 50, false, percentageValueMin, nil, nil, "", w_name)
-    wgt.gauge1.drawGauge(zone_w - 100, 180, 50, false, percentageValueMax, nil, nil, "", w_name)
+    wgt.gauge1.drawGauge(100, 180, 50, false, percentageValueMin, nil, nil, "", w_name, wgt.tools.isTelemetryAvailable())
+    wgt.gauge1.drawGauge(zone_w - 100, 180, 50, false, percentageValueMax, nil, nil, "", w_name, wgt.tools.isTelemetryAvailable())
     lcd.drawText(50, 230, string.format("Min: %d%s", minValue, w_unit), FONT_12)
     lcd.drawText(350, 230, string.format("Max: %d%s", maxValue, w_unit), FONT_12)
 
@@ -339,7 +344,10 @@ local function refresh_widget(wgt)
         centerY = wgt.zone.y + wgt.zone.h - 20
     end
 
-    wgt.gauge1.drawGauge(centerX, centerY, centerR, isFull, percentageValue, percentageValueMin, percentageValueMax, value_fmt, value_fmt_min, value_fmt_max, w_name)
+    wgt.gauge1.drawGauge(centerX, centerY, centerR, isFull,
+        percentageValue, percentageValueMin, percentageValueMax,
+        value_fmt, value_fmt_min, value_fmt_max, w_name,
+        wgt.tools.isTelemetryAvailable(), enable_min_max)
     --lcd.drawText(wgt.zone.x, wgt.zone.y, value_fmt, FONT_38 + YELLOW)
 
 
@@ -392,7 +400,8 @@ local function refresh(wgt, event, touchState)
     end
 
     -- widget load (debugging)
-    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY + RIGHT) -- ???
+    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY + RIGHT) -- ???
+
 end
 
 return { name = app_name, options = _options, create = create, update = update, refresh = refresh }

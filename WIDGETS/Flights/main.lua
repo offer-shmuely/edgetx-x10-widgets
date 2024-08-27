@@ -54,7 +54,7 @@
 ]]
 
 local app_name = "Flights"
-local app_ver = "1.2"
+local app_ver = "1.3"
 
 
 ------------------------------------------------------------------------------------------------------------------
@@ -97,11 +97,11 @@ local DEFAULT_MOTOR_CHANNEL_ID = getSwitchIds("CH3")  -- motor_channel=CH3
 local options = {
     { "arm_switch", SOURCE, DEFAULT_ARM_SWITCH_ID },
     { "motor_channel", SOURCE, DEFAULT_MOTOR_CHANNEL_ID },
-    { "min_flight_duration", VALUE, default_flight_starting_duration, 2, 120 },
+    { "min_flight_duration", VALUE, default_flight_starting_duration, -30, 120 },
     --{ "enable_sounds"    , BOOL  , 1      },  -- enable sound on adding succ flight, and on end of flight
     { "text_color", COLOR, COLOR_THEME_PRIMARY2 },
     --{ "debug", BOOL, 0 }   -- show status on screen
-    { "inverted_arm_switch", BOOL, 1 }   -- 0=armed when SF down, 1=armed when SF up
+    { "non_invert_arm_switch", BOOL, 0 }   -- 0=armed when SF down, 1=armed when SF up
 }
 
 local function log(fmt, ...)
@@ -132,19 +132,26 @@ local function update(wgt, options)
     wgt.status.flight_end_time = 0
     wgt.status.flight_duration = 0
     wgt.status.heli_mode = false -- ignore motor direction detection, and throttle position
+    wgt.status.ground_on_switch = false
+
+    if (wgt.options.min_flight_duration < 0) then
+        wgt.options.min_flight_duration = math.abs(wgt.options.min_flight_duration)
+        wgt.status.ground_on_switch = true
+        default_flight_ending_duration = 1
+    end
 
     --log("TimerNumB:" .. options.Timer)
     if (wgt.options.arm_switch == nil) then
         wgt.options.arm_switch = "sf"
     end
 
-    --log("wgt.options.arm_switch: " .. wgt.options.arm_switch)
     local fi_sw = getFieldInfo(wgt.options.arm_switch)
     if (fi_sw == nil) then
         wgt.status.switch_name = "--"
     else
         wgt.status.switch_name = fi_sw.name
     end
+    log("wgt.options.arm_switch: %s, name: %s", wgt.options.arm_switch, wgt.status.switch_name)
 
     local fi_mot = getFieldInfo(wgt.options.motor_channel)
     if (fi_mot == nil) then
@@ -274,7 +281,7 @@ end
 
 local function updateSwitchStatus(wgt)
     local sw_val = getValue(wgt.options.arm_switch)
-    if wgt.options.inverted_arm_switch == 1 then
+    if wgt.options.non_invert_arm_switch == 0 then
         wgt.status.switch_on = (sw_val < 0)
     else
         wgt.status.switch_on = (sw_val > 0)
@@ -414,7 +421,13 @@ local function background(wgt)
             log("flight_duration: %s", wgt.status.flight_duration)
         end
 
-        if (use_telemetry==1 and wgt.status.tele_is_available == false) or (use_telemetry==0 and wgt.status.switch_on == false) then
+        -- if  (wgt.status.ground_on_switch and wgt.status.switch_on == false) then
+        --     stateChange(wgt, "FLIGHT_ENDING", 0)
+        if (use_telemetry==1 and wgt.status.tele_is_available == false) or
+            (use_telemetry==0 and wgt.status.switch_on == false)
+            or
+            (wgt.status.ground_on_switch and wgt.status.switch_on == false)
+        then
             stateChange(wgt, "FLIGHT_ENDING", default_flight_ending_duration)
 
             local num_flights = getFlightCount()
@@ -444,8 +457,8 @@ local function background(wgt)
 
         end
 
-        --if (wgt.status.tele_is_available == true) then
-        if (use_telemetry==1 and wgt.status.tele_is_available == true) or (use_telemetry==0 and wgt.status.switch_on == true) then
+        if  (use_telemetry==1 and wgt.status.tele_is_available == true and wgt.status.ground_on_switch==false) or
+            (use_telemetry==0 and wgt.status.switch_on == true and wgt.status.ground_on_switch==false) then
             stateChange(wgt, "FLIGHT_ON", 0)
         end
 
@@ -554,7 +567,7 @@ local function refresh(wgt, event, touchState)
             lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 35, string.format("%s - throttle (%s) (heli mode)", ternary(wgt.status.motor_active), wgt.status.motor_channel_name), SMLSIZE)
         end
         lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 50, string.format("%s - telemetry(%s)", ternary(wgt.status.tele_is_available), wgt.tools.tele_src_name), SMLSIZE)
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 65, string.format("duration: %.1f/%d", wgt.status.duration_passed / 1000, wgt.tools.getDurationMili(wgt.status.periodic1) / 1000), SMLSIZE)
+        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 65, string.format("timer: %.1f/%d", wgt.status.duration_passed / 1000, wgt.tools.getDurationMili(wgt.status.periodic1) / 1000), SMLSIZE)
         lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 80, string.format("flight duration: %.1f", wgt.status.flight_duration), SMLSIZE)
         --lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 110, string.format("state: %s", wgt.status.flight_state), 0)
 

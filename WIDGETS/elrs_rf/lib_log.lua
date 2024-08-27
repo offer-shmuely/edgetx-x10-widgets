@@ -1,11 +1,6 @@
 local app_name, script_dir = ...
 
-local function is_simulator()
-    local _, rv = getVersion()
-    return string.sub(rv, -5) == "-simu"
-end
-
-local ENABLE_LOG_TO_CONSOLE = is_simulator() -- false|true|is_simulator()
+local ENABLE_LOG_TO_CONSOLE = true
 local ENABLE_LOG_TO_FILE    = false
 
 
@@ -13,10 +8,15 @@ local M = {}
 M.app_name = app_name
 M.script_dir = script_dir
 
+local function is_simulator()
+    local _, rv = getVersion()
+    return string.sub(rv, -5) == "-simu"
+end
+
 local log = {
     outfile = script_dir .. "/app.log",
     enable_file = ENABLE_LOG_TO_FILE,
-    enable_console = ENABLE_LOG_TO_CONSOLE,
+    enable_console = ENABLE_LOG_TO_CONSOLE and is_simulator(),
     current_level = nil,
 
     -- func
@@ -86,7 +86,7 @@ function M.do_log(iLevel, ulevel, fmt, ...)
     print(msg2)
 
     -- Output to log file
-    if log.enable_file == true then
+    if log.enable_file == true and log.outfile then
         local fp = io.open(log.outfile, "a")
         io.write(fp, msg2 .. "\n")
         io.close(fp)

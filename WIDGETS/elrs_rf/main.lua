@@ -150,7 +150,7 @@ local function getSwitchIds(key)
         ["2.7"]  = {SA=112, SB=113, SC=114, SD=115, SE=116, SF=117, CH3 = 204},
         ["2.8"]  = {SA=120, SB=121, SC=122, SD=123, SE=124, SF=125, CH3 = 212},
         ["2.9"]  = {SA=120, SB=121, SC=122, SD=123, SE=124, SF=125, CH3 = 212},
-        ["2.10"] = {SA=127, SB=128, SC=129, SD=130, SE=131, SF=132, CH3 = 229},
+        ["2.10"] = {SA=126, SB=127, SC=128, SD=129, SE=130, SF=131, CH3 = 228},
     }
     local ver, radio, maj, minor, rev, osname = getVersion()
     local os1 = string.format("%d.%d", maj, minor)
