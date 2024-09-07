@@ -169,7 +169,7 @@ function M.getSensorInfoByName(sensorName)
         --formula (number) Only calculated sensors. 0 = Add etc. see list of formula choices in Companion popup
         s1.formula = s2.formula
 
-        log("getSensorInfo: %d. name: %s, unit: %s , prec: %s , id: %s , instance: %s ", i, s2.name, s2.unit, s2.prec, s2.id, s2.instance)
+        -- log("getSensorInfo: %d. name: %s, unit: %s , prec: %s , id: %s , instance: %s ", i, s2.name, s2.unit, s2.prec, s2.id, s2.instance)
 
         if s2.name == sensorName then
             return s1

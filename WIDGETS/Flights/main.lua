@@ -173,7 +173,7 @@ local function update(wgt, options)
 
     -- auto debug mode if widget size 1/2 or 1/1
     wgt.options.is_debug = (wgt.options.auto_debug==1 and wgt.zone.h > 140)
-    log("auto_debug: %s, is_debug: %s, wgt.zone.h: %s", wgt.options.auto_debug, wgt.options.is_debug, wgt.zone.h)
+    -- log("auto_debug: %s, is_debug: %s, wgt.zone.h: %s", wgt.options.auto_debug, wgt.options.is_debug, wgt.zone.h)
 
     -- for heli, if the motor-sw==switch-sw, then ignore motor direction detection
     if (wgt.options.arm_switch == wgt.options.motor_channel) then
