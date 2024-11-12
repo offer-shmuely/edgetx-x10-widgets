@@ -15,37 +15,34 @@
 ---- # GNU General Public License for more details.                          #
 ---- #                                                                       #
 ---- #########################################################################
-
--- Horus Widget that show the name of the model on the bar on top
+-- Widget that show the name of the model on the bar on top
 -- Offer Shmuely
 -- Date: 2019
 local app_name = "ModelName"
-local app_ver = "0.3"
+local app_ver = "0.4"
 
 local options = {
-  { "TextColor", COLOR, YELLOW }
+    {"TextColor", COLOR, YELLOW}
 }
 
 local function create(zone, options)
-  local theModelName = model.getInfo().name
-  local wgt = { zone=zone, options=options, modelName=theModelName }
-  print(wgt.modelName)
-  return wgt
+    local wgt = {
+        zone = zone,
+        options = options,
+    }
+    return wgt
 end
 
 local function update(wgt, options)
-  if (wgt == nil) then return end
-  wgt.options = options
- end
-
-local function background(wgt)
+    if (wgt == nil) then return end
+    wgt.options = options
 end
 
 local function refresh(wgt)
-  if (wgt == nil) then return end
+    if (wgt == nil) then return end
 
-  lcd.setColor(CUSTOM_COLOR, wgt.options.TextColor)
-  lcd.drawText(wgt.zone.x, wgt.zone.y, wgt.modelName, LEFT + DBLSIZE + CUSTOM_COLOR);
+    local modelName = model.getInfo().name
+    lcd.drawText(wgt.zone.x, wgt.zone.y, modelName, LEFT + DBLSIZE + wgt.options.TextColor);
 end
 
-return { name=app_name, options=options, create=create, update=update, refresh=refresh, background=background }
+return {name = app_name, options = options, create = create, update = update, refresh = refresh}
