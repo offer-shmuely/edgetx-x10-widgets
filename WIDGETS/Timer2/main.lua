@@ -1,6 +1,6 @@
 -- A Timer version that fill better the widget area
 -- Offer Shmuely
--- Date: 2022
+-- Date: 2021-2024
 local app_name = "Timer2"
 local app_ver = "0.8"
 

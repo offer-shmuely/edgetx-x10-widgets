@@ -17,6 +17,7 @@ local FONT_8 = 0 -- Default 8px
 local FONT_6 = SMLSIZE -- 6px
 
 local FONT_LIST = {FONT_6, FONT_8, FONT_12, FONT_16, FONT_38}
+M.FONT_LIST = {FONT_6, FONT_8, FONT_12, FONT_16, FONT_38}
 
 ---------------------------------------------------------------------------------------------------
 local function log(fmt, ...)
@@ -110,6 +111,42 @@ function M.isTelemetryAvailable()
     return is_telem > 0
 end
 
+function M.isTelemetryAvailableOld()
+    -- select telemetry source
+    if not M.tele_src_id then
+        --log("select telemetry source")
+        local tele_src = getFieldInfo("RSSI")
+        if not tele_src then tele_src = getFieldInfo("1RSS") end
+        if not tele_src then tele_src = getFieldInfo("2RSS") end
+        if not tele_src then tele_src = getFieldInfo("RQly") end
+        if not tele_src then tele_src = getFieldInfo("VFR%") end
+        if not tele_src then tele_src = getFieldInfo("TRSS") end
+        if not tele_src then tele_src = getFieldInfo("RxBt") end
+        if not tele_src then tele_src = getFieldInfo("A1") end
+
+        if tele_src == nil then
+            --log("no telemetry sensor found")
+            M.tele_src_id = nil
+            M.tele_src_name = "---"
+            return false
+        else
+            --log("telemetry sensor found: " .. tele_src.name)
+            M.tele_src_id = tele_src.id
+            M.tele_src_name = tele_src.name
+        end
+    end
+
+    if M.tele_src_id == nil then
+        return false
+    end
+
+    local rx_val = getValue(M.tele_src_id)
+    if rx_val ~= 0 then
+        return true
+    end
+    return false
+end
+
 ---------------------------------------------------------------------------------------------------
 
 -- workaround to detect telemetry-reset event, until a proper implementation on the lua interface will be created
@@ -120,7 +157,6 @@ end
 -- on event detection, the function onTelemetryResetEvent() will be trigger
 --
 function M.detectResetEvent(wgt, callback_onTelemetryResetEvent)
-
     local currMinRSSI = getValue('RSSI-')
     if (currMinRSSI == nil) then
         log("telemetry reset event: can not be calculated")
@@ -158,8 +194,8 @@ function M.getSensorInfoByName(sensorName)
         s1.type = s2.type
         --name (string) Name
         s1.name = s2.name
-        --unit (number) See list of units in the appendix of the OpenTX Lua Reference Guide
-        s1.unit = s2.unit
+        --unit (number->string) See list of units in the appendix of the OpenTX Lua Reference Guide
+        s1.unit = M.unitIdToString(s2.unit)
         --prec (number) Number of decimals
         s1.prec = s2.prec
         --id (number) Only custom sensors
@@ -262,6 +298,36 @@ function M.lcdSizeTextFixed(txt, font_size)
         v_offset = -3
     end
     return ts_w, ts_h +2*v_offset, v_offset
+end
+
+function M.getFontSize(wgt, txt, max_w, max_h, max_font_size)
+    local w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_38)
+    if w <= max_w and h <= max_h then
+        -- log("[%s] FONT_38 %dx%d", txt, w, h, txt)
+        return FONT_38, w, h, v_offset
+    end
+
+    w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_16)
+    if w <= max_w and h <= max_h then
+        -- log("[%s] FONT_16 %dx%d", txt, w, h, txt)
+        return FONT_16, w, h, v_offset
+    end
+
+    w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_12)
+    if w <= max_w and h <= max_h then
+        -- log("[%s] FONT_12 %dx%d", txt, w, h, txt)
+        return FONT_12, w, h, v_offset
+    end
+
+    w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_8)
+    if w <= max_w and h <= max_h then
+        -- log("[%s] FONT_8 %dx%d", txt, w, h, txt)
+        return FONT_8, w, h, v_offset
+    end
+
+    w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_6)
+    -- log("[%s] FONT_6 %dx%d", txt, w, h, txt)
+    return FONT_6, w, h, v_offset
 end
 
 ------------------------------------------------------------------------------------------------------

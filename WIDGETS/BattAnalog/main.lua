@@ -36,7 +36,7 @@
 -- Author : Offer Shmuely
 -- Date: 2021-2024
 local app_name = "BattAnalog"
-local app_ver = "0.10"
+local app_ver = "0.11"
 
 local CELL_DETECTION_TIME = 8
 local lib_sensors = loadScript("/WIDGETS/" .. app_name .. "/lib_sensors.lua", "tcd")(m_log,app_name)
@@ -116,7 +116,8 @@ local percent_list_hv = {
 }
 
 local voltageRanges_lipo = {4.30, 8.60, 12.90, 17.20, 21.50, 25.80, 30.10, 34.40, 38.70, 43.00, 47.30, 51.60}
-local voltageRanges_lion = {4.20, 8.40, 12.60, 16.80, 21.00, 25.20, 29.40, 33.60, 37.80, 42.00, 46.20, 50.40}
+--local voltageRanges_lion={4.20, 8.40, 12.60, 16.80, 21.00, 25.20, 29.40, 33.60, 37.80, 42.00, 46.20, 50.40}
+local voltageRanges_lion = {4.30, 8.60, 12.90, 17.20, 21.50, 25.80, 30.10, 34.40, 38.70, 43.00, 47.30, 51.60}
 local voltageRanges_hv   = {4.45, 8.90, 13.35, 17.80, 22.25, 26.70, 31.15, 35.60, 40.05, 44.50, 48.95, 53.40}
 
 local defaultSensor = "RxBt" -- RxBt / A1 / A3/ VFAS / Batt

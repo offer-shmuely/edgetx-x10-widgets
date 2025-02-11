@@ -1,7 +1,7 @@
 --[[
 #########################################################################
 #                                                                       #
-# Telemetry Widget script for FrSky Horus/RadioMaster TX16s             #
+# Telemetry Widget script for radiomaster TX16s                         #
 # Copyright "Offer Shmuely"                                             #
 #                                                                       #
 # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
@@ -29,7 +29,7 @@
 -- Author : Offer Shmuely
 -- Date: 2021-2024
 local app_name = "Value2"
-local app_ver = "0.9"
+local app_ver = "0.10"
 
 
 -- imports
@@ -46,43 +46,8 @@ local FONT_12 = MIDSIZE -- 12px
 local FONT_8 = 0 -- Default 8px
 local FONT_6 = SMLSIZE -- 6px
 
--- for backward compatibility
---local function getSensorId(sensorName)
---    for i=0, 30, 1 do
---        local s2 = model.getSensor(i)
---        --if s2.name == sensorName then
---            local sensor_id = s2.id
---            print(string.format("getSensorPrecession: a id: %d", sensor_id))
---            if sensor_id > 61440 then
---                sensor_id = sensor_id - 61440 --F000
---            end
---            print(string.format("getSensorPrecession: b id: %d", sensor_id))
---            local instance_hex_value = s2.instance
---            local instance_dec_value = tonumber(instance_hex_value, 16)
---            print(string.format("getSensorPrecession: c s2.instance: %d --> %d", s2.instance, instance_dec_value))
---            sensor_id = sensor_id + instance_dec_value
---            print(string.format("getSensorPrecession: d sensor_id: %d", sensor_id))
---            print(string.format("getSensorPrecession: %d. name: %s, unit: %s , prec: %s , id: %s , instance: %s, sensor_id: %s ", i, s2.name, s2.unit, s2.prec, s2.id, s2.instance, sensor_id))
---            --return sensor_id
---        --end
---    end
---    return -1
---end
-
--- for backward compatibility
-local function getSensorId(key)
-    local OS_SWITCH_ID = {
-        ["2.7"]  = {RSSI=253, CELS=0  , TxBt=243, RxBt=256},
-        ["2.8"]  = {RSSI=261, CELS=300, TxBt=251, RxBt=0  },
-        ["2.9"]  = {RSSI=294, CELS=121, TxBt=251, RxBt=291},
-        ["2.10"] = {RSSI=0  , CELS=0  , TxBt=0  , RxBt=0  },
-    }
-    local ver, radio, maj, minor, rev, osname = getVersion()
-    local os1 = string.format("%d.%d", maj, minor)
-    return OS_SWITCH_ID[os1][key]
-end
-
-local DEFAULT_SOURCE = getSensorId("RxBt")
+local lib_sensors = loadScript("/WIDGETS/" .. app_name .. "/lib_sensors.lua", "tcd")(m_log,app_name)
+local DEFAULT_SOURCE = lib_sensors.findSourceId( {"RQLY", "VFR", "cell","cels","RSSI","RxBt"})
 
 local options = {
     { "Source", SOURCE, DEFAULT_SOURCE },
@@ -118,7 +83,6 @@ local function update(wgt, options)
     --wgt.transitions = WidgetTransitionClass(m_log,app_name)
     wgt.utils_sensors = UtilsSensorsClass(m_log,app_name)
 
-    wgt.fieldinfo = getFieldInfo(wgt.options.Source)
     wgt.source_name = wgt.tools.getSourceNameCleaned(wgt.options.Source)
     if (wgt.source_name == nil) then
         wgt.source_name = "N/A"
@@ -126,11 +90,11 @@ local function update(wgt, options)
 
     wgt.isTypeSensor = false
 
+    wgt.fieldinfo = wgt.tools.getSensorInfoByName(wgt.source_name)
+    -- wgt.fieldinfo = getFieldInfo(wgt.options.Source)
     if (wgt.fieldinfo == nil) then
         log("getFieldInfo(%s)==nil", wgt.options.Source)
     else
-        wgt.unit = wgt.tools.unitIdToString(wgt.fieldinfo.unit)
-
         local base_source_name = wgt.source_name
         log("getFieldInfo    base_source_id: %s", wgt.options.Source)
         log("getFieldInfo    base_source_name: %s", base_source_name)
@@ -142,20 +106,23 @@ local function update(wgt, options)
             log("getFieldInfo  fixed  base_source_name: %s", base_source_name)
         end
 
-        wgt.precession = wgt.tools.getSensorPrecession(base_source_name)
+        -- wgt.unit = wgt.tools.unitIdToString(wgt.fieldinfo.unit)
+        -- wgt.precession = wgt.tools.getSensorPrecession(base_source_name)
+        wgt.unit = wgt.fieldinfo.unit
+        wgt.precession = wgt.fieldinfo.precession
 
         -- update min id
         local source_min_obj = getFieldInfo(base_source_name .. "-")
         if source_min_obj ~= nil then
             wgt.source_min_id = source_min_obj.id
-            --log("source_min_id: %d", wgt.source_min_id)
+            -- log("source_min_id: %d", wgt.source_min_id)
         end
 
         -- update max id
         local source_max_obj = getFieldInfo(base_source_name .. "+")
         if source_min_obj ~= nil then
             wgt.source_max_id = source_max_obj.id
-            --log("source_max_id: %d", wgt.source_max_id)
+            -- log("source_max_id: %d", wgt.source_max_id)
         end
         --log("source_min_id: %d, source_max_id: %d", wgt.source_min_id, wgt.source_max_id)
     end
@@ -179,6 +146,9 @@ local function prettyPrintNone(val, precession)
     -- log("prettyPrintNone - precession:%s", precession)
     if val == nil then
         return "N/A (nil)"
+    end
+    if type(val) == "table" then
+        return "N/A (table)"
     end
 
     if val == -1 then
@@ -389,13 +359,13 @@ local function refresh_widget_no_telem(wgt)
     -- end of flight
 
     local last_y = 1
-    local valueColor = (wgt.isTypeSensor) and lcd.RGB(0xA4A5A4) or wgt.options.TextColor
-    local bkgColor = (wgt.isTypeSensor) and lcd.RGB(0xA4A5A4) or wgt.options.TextColor
+    local valueColor = (wgt.isTypeSensor) and lcd.RGB(0xA4A5A4) or wgt.options.TextColor -- do not GREY non telemetry sensors
+    local bkgColor = (wgt.isTypeSensor) and lcd.RGB(0xA4A5A4) or lcd.RGB(0xA4A5A4) --LIGHTGREY
 
     -- draw header
     local header_txt = wgt.source_name .. " " .. wgt.options.Suffix
     local font_size_header, ts_h_w, ts_h_h, v_offset = getFontSizeHeader(wgt, header_txt, wgt.zone.h)
-    log("val: font_size_header: %d, ts_h_h: %d, lastY: %d", wgt.zone.y, ts_h_h, last_y)
+    -- log("val: font_size_header: %d, ts_h_h: %d, lastY: %d", wgt.zone.y, ts_h_h, last_y)
     lcd.drawText(wgt.zone.x + 5, wgt.zone.y + last_y + v_offset, header_txt, font_size_header + wgt.options.TextColor)
     --lcd.drawRectangle(wgt.zone.x, wgt.zone.y + last_y, ts_h_w, ts_h_h, BLUE)
     last_y = last_y + ts_h_h + 3
@@ -413,7 +383,7 @@ local function refresh_widget_no_telem(wgt)
             local dx = (wgt.zone.w - ts_mm_w) / 2
             if (ts_mm_h <= wgt.zone.h - last_y) and (ts_mm_w <= wgt.zone.w) then
                wgt.tools.drawBadgedText(val_str_mm, wgt.zone.x + dx - 5, wgt.zone.h - ts_mm_h +v_offset, font_size_mm, wgt.options.TextColor, bkgColor)
-               --log("wgt.zone.y: %d, wgt.zone.h: %d, ts_mm_h: %d", wgt.zone.y,wgt.zone.h,ts_mm_h)
+               --log("wgt.zone.y: %d, wgt.zone.h: %d, ts_mm_h: %d, val: %s", wgt.zone.y,wgt.zone.h,ts_mm_h, val_str_mm)
             end
         end
     end
