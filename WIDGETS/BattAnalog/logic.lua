@@ -1,4 +1,6 @@
 
+local CELL_DETECTION_TIME = 8
+
 
 -- The widget table will be returned to the main script.
 local wgt = {
@@ -351,6 +353,20 @@ end
 function wgt.background()
     wgt.tools.detectResetEvent(wgt, wgt.onTelemetryResetEvent)
     wgt.calculateBatteryData()
+
+    -- send sensor if needed
+    if (wgt.options.isTelemCellV == 1) then
+        setTelemetryValue(0x0310, 0, 1, wgt.vCellLive * 100, 1, 2, "cell")
+    end
+
+    -- if (wgt.reportSensorCellCount == true) then
+    --     setTelemetryValue(0x0310, 1, 1, wgt.cellCount, 0, 0, "cel#")
+    -- end
+
+    if (wgt.options.isTelemCellPerc == 1) then
+        setTelemetryValue(0x0310, 1, 1, wgt.vPercent, 13, 0, "cel%")
+    end
+
 end
 
 return wgt
