@@ -45,15 +45,6 @@
 local app_name = "elrs_rf"
 local app_ver = "1.2"
 
--- ELRS_RF
--- ELRS-RF
--- eLRS-RF
--- eLRS_RF
--- eLRS-Planes
--- eLRS-PlanesTelemetry
--- eLRS-RF-Planes-Telemetry
--- eLRS-RF-Telemetry
-
 -- CRSF available telemetry fields
 --[[
     -- RF --
@@ -144,27 +135,10 @@ local function is_simulator()
     return string.sub(rv, -5) == "-simu"
 end
 
--- for backward compatibility
-local function getSwitchIds(key)
-    local OS_SWITCH_ID = {
-        ["2.7"]  = {SA=112, SB=113, SC=114, SD=115, SE=116, SF=117, STICK3 = 89, INPUT3 = 3, CH3 = 204},
-        ["2.8"]  = {SA=120, SB=121, SC=122, SD=123, SE=124, SF=125, STICK3 = 89, INPUT3 = 3, CH3 = 212},
-        ["2.9"]  = {SA=120, SB=121, SC=122, SD=123, SE=124, SF=125, STICK3 = 89, INPUT3 = 3, CH3 = 212},
-        ["2.10"] = {SA=126, SB=127, SC=128, SD=129, SE=130, SF=131, STICK3 = 89, INPUT3 = 3, CH3 = 228},
-        ["2.11"] = {SA=126, SB=127, SC=128, SD=129, SE=130, SF=131, STICK3 = 89, INPUT3 = 3, CH3 = 228},
-    }
-    local ver, radio, maj, minor, rev, osname = getVersion()
-    local os1 = string.format("%d.%d", maj, minor)
-    return OS_SWITCH_ID[os1][key]
-end
-
-local DEFAULT_ARM_SWITCH_ID = getSwitchIds("SF")      -- arm/safety switch=SF
-
 local options = {
-    { "arm_switch", SOURCE, DEFAULT_ARM_SWITCH_ID },
+    { "arm_switch", SWITCH, getSwitchIndex("SF"..CHAR_UP)  },
     --{ "text_color", COLOR, COLOR_THEME_PRIMARY2 },
 }
-
 
 local function update(wgt, options)
     wgt.options = options
@@ -702,6 +676,7 @@ return {
     create = create,
     update = update,
     background = background,
-    refresh = refresh
+    refresh = refresh,
+    useLvgl=false
 }
 
