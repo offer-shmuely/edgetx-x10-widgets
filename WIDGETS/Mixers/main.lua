@@ -3,8 +3,8 @@ local app_ver = "0.6"
 local y
 local M = {}
 --------------------------------------------------------------
-local function log(...)
-    print(string.format("[%s] %s", app_name, ...))
+local function log(fmt, ...)
+    print(string.format("[%s] "..fmt, app_name, ...))
     return
 end
 --------------------------------------------------------------

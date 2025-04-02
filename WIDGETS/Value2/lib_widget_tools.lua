@@ -185,6 +185,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function M.getSensorInfoByName(sensorName)
+    sensorName = string.gsub(sensorName, "-", "")
+    sensorName = string.gsub(sensorName, "+", "")
     local sensors = {}
     for i=0, 30, 1 do
         local s1 = {}
