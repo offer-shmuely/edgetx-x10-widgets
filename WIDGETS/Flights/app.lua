@@ -55,12 +55,12 @@
 ]]
 
 local app_name = "Flights"
-local app_ver = "1.6-dev"
+local app_ver = "1.6"
 
-
+local build_ui = nil
 ------------------------------------------------------------------------------------------------------------------
 -- configuration
--- local default_flight_starting_duration = 30  -- 30 sec to detect flight success
+local default_flight_starting_duration = 30  -- 30 sec to detect flight success
 local default_flight_ending_duration = 8     --  8 sec to detect flight ended
 local default_min_motor_value = 200
 local enable_count_announcement_on_start = 0 -- 0=no voice, 1=play the count upon increment
@@ -151,6 +151,7 @@ local function update(wgt, options)
     wgt.is_valid_ver = (maj == 2 and minor >= 11)
 
 
+    build_ui(wgt)
 end
 
 local function create(zone, options)
@@ -456,124 +457,102 @@ local function ternary(cond, T, F)
     end
 end
 
-local function drawTopbarDot(wgt, i, is_on)
-    local dxc = 6
-    if is_on==true then
-        lcd.drawFilledCircle(5, 24 + dxc*i, 2, GREEN)
-    else
-        lcd.drawFilledCircle(5, 24 + dxc*i, 2, GREY)
-    end
+local function getColorByState(wgt, flight_state)
+    return (wgt.status.flight_state  == flight_state) and BLUE or 0+GREY
 end
 
 
-local function refresh(wgt, event, touchState)
+build_ui = function(wgt)
+
+    lvgl.clear()
+
     if (wgt == nil) then log("refresh(nil)") return end
     if (wgt.options == nil) then log("refresh(wgt.options=nil)") return end
 
-    if wgt.is_valid_ver==false then
-        local err = "!! v2.11 !! \nneeded\n\nthis widget \nis supported only \non ver 2.11 and above"
-        lcd.drawText(0, 0, err, 0 + RED)
-        return
-    end
-
-    background(wgt)
-
     -- get flight count
     local num_flights = getFlightCount(wgt)
-
-    -- header
-    local header = "Flights:"
-    local header_w, header_h = lcd.sizeText(header, SMLSIZE)
 
     local font_size = getFontSize(wgt, num_flights)
     local zone_w = wgt.zone.w
     local zone_h = wgt.zone.h
 
-    local font_size_header = SMLSIZE
-    if (event ~= nil) then
-        -- app mode (full screen)
-        font_size = XXLSIZE
-        font_size_header = DBLSIZE
-        zone_w = LCD_W
-        zone_h = LCD_H - 20
-    end
+    local font_size_header = FS.FONT_6
+    -- if (event ~= nil) then
+    --     -- app mode (full screen)
+    --     font_size = FS.FONT_38
+    --     font_size_header = FS.FONT_16
+    --     zone_w = LCD_W
+    --     zone_h = LCD_H - 20
+    -- end
 
     local ts_w, ts_h = lcd.sizeText(num_flights, font_size)
     local dx = (zone_w - ts_w) / 2
     local dyh = 5
-    local dy = header_h - 1
-    local icon_y = 22
-    local icon_x = 15
-    local is_top_bar = false
-    if (header_h + ts_h > zone_h) and (zone_h < 50) then
-        is_top_bar = true
-    end
+    local dy --  = header_h - 1
+    local is_top_bar = (zone_h < 50)
 
     if is_top_bar then
-        --log(string.format("--- not enough height, force minimal spaces"))
+        -- force minimal spaces"))
         dyh = -3
-        dy = 8
+        dy = 10
+    else
+        dyh = 5
+        dy = 12
     end
 
-    -- icon
-    if wgt.options.is_debug == false then
-        if is_top_bar == false then
-            lcd.drawBitmap(img, icon_x, icon_y, 45)
-        end
-    end
+    -- global
+    -- lvgl.rectangle({x=0, y=0, w=LCD_W, h=LCD_H, color=lcd.RGB(0x11, 0x11, 0x11), filled=true})
+    lvgl.label({text="LVGL", x=zone_w-50, y=0, font=FS.FONT_8, color=RED})
+    local pMain = lvgl.box({x=0, y=0})
 
     -- draw header
-    lcd.drawText(wgt.zone.x, wgt.zone.y + dyh, header, font_size_header + wgt.options.text_color)
-
-    -- enable_dbg_dots
-    if (show_dots == true) then
-        drawTopbarDot(wgt, 0, wgt.status.tele_is_available==true)
-        drawTopbarDot(wgt, 1, wgt.status.switch_on==true)
-        drawTopbarDot(wgt, 2, wgt.status.motor_active==true)
-    end
+    pMain:label({x=0, y=dyh, font=font_size_header, text="Flights:", color=wgt.options.text_color})
 
     -- draw count
     if is_top_bar == true then
-        --lcd.drawText(wgt.zone.x + 4, wgt.zone.y + dy, num_flights, font_size + wgt.options.text_color)
-        --lcd.drawText(wgt.zone.x + wgt.zone.w -6, wgt.zone.y + dy, num_flights, font_size + wgt.options.text_color + RIGHT)
-        lcd.drawText(wgt.zone.x + (wgt.zone.w / 2), wgt.zone.y + dy, num_flights, font_size + wgt.options.text_color + CENTER)
+        -- pMain:label({x=(zone_w / 2), y=dy, font=font_size, text=function() return getFlightCount(wgt) end, color=wgt.options.text_color})
+        pMain:label({x=zone_w-ts_w, y=dy, font=font_size, text=function() return getFlightCount(wgt) end, color=wgt.options.text_color})
     else
-        lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y + dy, num_flights, font_size + wgt.options.text_color + RIGHT)
+        pMain:label({x=zone_w-ts_w, y=dy, font=font_size, text=function() return getFlightCount(wgt) end, color=wgt.options.text_color})
+    end
+
+    -- enable_dbg_dots
+    if (show_dots == true) then
+        local dxc = 7
+        pMain:circle({x=5, y=20 + dxc*0, radius=3, filled=true, color=function() return wgt.status.tele_is_available==true   and GREEN or GREY end})
+        pMain:circle({x=5, y=20 + dxc*1, radius=3, filled=true, color=function() return wgt.status.switch_on==true           and GREEN or GREY end})
+        pMain:circle({x=5, y=20 + dxc*2, radius=3, filled=true, color=function() return wgt.status.motor_active==true        and GREEN or GREY end})
     end
 
     -- debug
+    local pInfo = lvgl.box({x=0, y=40})
     if wgt.options.is_debug == true then
         local dx = 15
-        --lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 25, string.format("DEBUG:"), SMLSIZE)
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 20, string.format("%s - telemetry", ternary(wgt.status.tele_is_available)), SMLSIZE)
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 35, string.format("%s - arm_switch (%s)", ternary(wgt.status.switch_on), wgt.status.switch_name), SMLSIZE)
-        if (wgt.heli_mode == false) then
-            lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 50, string.format("%s - throttle (%s) (inv: %s)", ternary(wgt.status.motor_active), wgt.status.motor_channel_name, wgt.status.motor_channel_direction_inv), SMLSIZE)
-        else
-            lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 50, string.format("%s - heli mode arm (ignore throttle)", ternary(wgt.status.motor_active)), SMLSIZE)
-        end
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 65, string.format("timer: %.1f/%d", wgt.status.duration_passed / 1000, wgt.tools.getDurationMili(wgt.status.periodic1) / 1000), SMLSIZE)
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 80, string.format("flight duration: %.1f", wgt.status.flight_duration), SMLSIZE)
-        --lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 110, string.format("state: %s", wgt.status.flight_state), 0)
+        pInfo:label({x=dx, y=0, font=FS.FONT_6, text=function() return string.format("%s - telemetry",         ternary(wgt.status.tele_is_available)) end})
+        pInfo:label({x=dx, y=15, font=FS.FONT_6, text=function() return string.format("%s - arm_switch (%s)",   ternary(wgt.status.switch_on), wgt.status.switch_name) end})
+        pInfo:label({x=dx, y=30, font=FS.FONT_6, text=function()
+            if (wgt.heli_mode == false) then
+                return string.format("%s - throttle (%s) (inv: %s)" , ternary(wgt.status.motor_active), wgt.status.motor_channel_name, wgt.status.motor_channel_direction_inv)
+            else
+                return string.format("%s - heli mode arm (ignore throttle)", ternary(wgt.status.motor_active))
+            end
+        end})
+        pInfo:label({x=dx, y=45, font=FS.FONT_6, text=function() return string.format("timer: %.1f/%d",        wgt.status.duration_passed / 1000, wgt.tools.getDurationMili(wgt.status.periodic1) / 1000) end})
+        pInfo:label({x=dx, y=60, font=FS.FONT_6, text=function() return string.format("flight duration: %.1f", wgt.status.flight_duration) end})
 
-        local GROUND_COLOR          = (wgt.status.flight_state == "GROUND")             and BLUE or 0+GREY
-        local FLIGHT_STARTING_COLOR = (wgt.status.flight_state == "FLIGHT_STARTING")    and BLUE or 0+GREY
-        local FLIGHT_ON_COLOR       = (wgt.status.flight_state == "FLIGHT_ON")          and BLUE or 0+GREY
-        local FLIGHT_ENDING_COLOR   = (wgt.status.flight_state == "FLIGHT_ENDING")      and BLUE or 0+GREY
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 105, "state:"                      , SMLSIZE)
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 105, "             GROUND"         , SMLSIZE + GROUND_COLOR)
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 120, "             FLIGHT_STARTING", SMLSIZE + FLIGHT_STARTING_COLOR)
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 135, "             FLIGHT_ON"      , SMLSIZE + FLIGHT_ON_COLOR)
-        lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 150, "             FLIGHT_ENDING"  , SMLSIZE + FLIGHT_ENDING_COLOR)
-
-        --lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 110, "state: GROUND"         , 0 + GROUND_COLOR)
-        --lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 125, "state: FLIGHT_STARTING", 0 + FLIGHT_STARTING_COLOR)
-        --lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 140, "state: FLIGHT_ON"      , 0 + FLIGHT_ON_COLOR)
-        --lcd.drawText(wgt.zone.x + dx, wgt.zone.y + 155, "state: FLIGHT_ENDING"  , 0 + FLIGHT_ENDING_COLOR)
-
+        pInfo:label({x=dx, y=85, font=FS.FONT_6, text="state:"})
+        dx = 50
+        pInfo:label({x=dx, y=85, font=FS.FONT_6, text="GROUND"         , color=function() return getColorByState(wgt, "GROUND") end})
+        pInfo:label({x=dx, y=100, font=FS.FONT_6, text="FLIGHT_STARTING", color=function() return getColorByState(wgt, "FLIGHT_STARTING") end})
+        pInfo:label({x=dx, y=115, font=FS.FONT_6, text="FLIGHT_ON"      , color=function() return getColorByState(wgt, "FLIGHT_ON") end})
+        pInfo:label({x=dx, y=130, font=FS.FONT_6, text="FLIGHT_ENDING"  , color=function() return getColorByState(wgt, "FLIGHT_ENDING") end})
     end
-
 end
+
+local function refresh(wgt, event, touchState)
+    background(wgt)
+end
+
 
 return {
     name = app_name,
@@ -581,5 +560,5 @@ return {
     update = update,
     refresh = refresh,
     background = background,
-    useLvgl = false
+    useLvgl=true
 }
