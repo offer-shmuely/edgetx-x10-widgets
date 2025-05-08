@@ -147,5 +147,5 @@ return {
     background = background,
     refresh = refresh,
     translate=translate,
-    useLvgl = true
+    useLvgl=true
 }
