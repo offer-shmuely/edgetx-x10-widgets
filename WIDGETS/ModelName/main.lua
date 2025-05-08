@@ -32,12 +32,14 @@ local FONT_LIST = {FONT_6,FONT_8,FONT_12,FONT_16,FONT_38,}
 local options = {
     {"TextColor", COLOR, YELLOW},
     {"fontSizeIndex", CHOICE, 3 , {"6px","8px","12px","16px","38px"} },
+    {"align", ALIGNMENT, 0}
 }
 
 local function translate(name)
     local translations = {
         TextColor = "Text Color",
         fontSizeIndex = "Font Size",
+        align = "Alignment"
     }
     return translations[name]
 end
@@ -65,8 +67,18 @@ local function refresh(wgt)
     if (font == nil) then
         font = FONT_16
     end
+    local ali = 0
+    if (wgt.options.align == 0) then
+        ali = LEFT;
+    elseif (wgt.options.align == 1) then
+        ali = CENTER
+    elseif (wgt.options.align == 2) then
+        ali = RIGHT
+    end
 
-    lcd.drawText(wgt.zone.x, wgt.zone.y, modelName, LEFT + font + wgt.options.TextColor);
+
+
+    lcd.drawText(wgt.zone.x, wgt.zone.y, modelName, ali + font + wgt.options.TextColor);
 end
 
 return {name = app_name, options = options, create = create, update = update, refresh = refresh, translate = translate}
