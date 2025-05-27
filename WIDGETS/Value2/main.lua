@@ -29,7 +29,7 @@
 -- Author : Offer Shmuely
 -- Date: 2021-2024
 local app_name = "Value2"
-local app_ver = "0.11"
+local app_ver = "0.12"
 
 
 -- imports
@@ -55,6 +55,16 @@ local options = {
     { "Suffix", STRING, "" },
     { "Show_MinMax", BOOL, 1 }
 }
+
+local function translate(name)
+    local translations = {
+        Source = "Source",
+        TextColor = "Text Color",
+        Show_MinMax="Show Min / Max"
+    }
+    return translations[name]
+end
+
 
 --------------------------------------------------------------
 local function log(...)
@@ -409,4 +419,4 @@ local function refresh(wgt, event, touchState)
     -- lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+20, string.format("isTypeSensor: %s", wgt.isTypeSensor), FONT_6 + GREY + RIGHT) -- ???
 end
 
-return { name = app_name, options = options, create = create, update = update, background = background, refresh = refresh }
+return { name=app_name, options=options, translate=translate, create=create, update=update, background=background, refresh=refresh }
