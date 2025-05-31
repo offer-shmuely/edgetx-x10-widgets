@@ -36,13 +36,13 @@
 -- Author : Offer Shmuely
 -- Date: 2021-2025
 local app_name = "BattAnalog"
-local app_ver = "1.3"
+local app_ver = "1.4"
 
 local _options = {
     {"sensor"            , SOURCE, "RxBt" },
     -- should work soon {"sensor", SOURCE, {"cell","VFAS","RxBt","A1", "A2"} },
     {"batt_type"         , CHOICE, 1 , {"LiPo", "LiPo-HV (high voltage)", "Li-Ion"} },
-    {"cbCellCount"       , CHOICE, 1 , {"Auto Detection", "1 cell", "2 cell", "3 cell", "4 cell", "5 cell", "6 cell", "8 cell", "10 cell", "12 cell", "14 cell"} },
+    {"cbCellCount"       , CHOICE, 1 , {"Auto Detection", "1 cell", "2 cell", "3 cell", "4 cell", "5 cell", "6 cell", "7 cell","8 cell", "10 cell", "12 cell", "14 cell"} },
     {"isTotalVoltage"    , BOOL  , 0      }, -- 0=Show as average Lipo cell level, 1=show the total voltage (voltage as is)
     {"color"             , COLOR , YELLOW },
     {"isTelemCellV"      , BOOL  , 0},
