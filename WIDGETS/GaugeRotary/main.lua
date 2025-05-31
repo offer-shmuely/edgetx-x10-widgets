@@ -1,7 +1,7 @@
 --[[
 #########################################################################
 #                                                                       #
-# Telemetry Widget script for radiomaster TX16s                         #
+# Telemetry Widget script for RadioMaster TX16S                         #
 # Copyright "Offer Shmuely"                                             #
 #                                                                       #
 # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
@@ -389,8 +389,7 @@ local function refresh(wgt, event, touchState)
     end
 
     -- widget load (debugging)
-    lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY + RIGHT) -- ???
-
+    --lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y, string.format("load: %d%%", getUsage()), FONT_6 + GREY + RIGHT) -- ???
 end
 
 return { name = app_name, options = _options, create = create, update = update, refresh = refresh }
