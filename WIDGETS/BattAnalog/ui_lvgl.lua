@@ -268,8 +268,6 @@ local function layoutZoneNormal()
 end
 
 function wgt.refresh(event, touchState)
-    -- wgt.tools.detectResetEvent(wgt, wgt.onTelemetryResetEvent)
-    -- wgt.calculateBatteryData()
     wgt.background(wgt)
 
     if wgt.isDataAvailable then

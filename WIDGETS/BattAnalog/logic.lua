@@ -377,9 +377,9 @@ function wgt.background()
     --     setTelemetryValue(0x0310, 1, 1, wgt.cellCount, 0, 0, "cel#")
     -- end
 
-    if (wgt.options.isTelemCellPerc == 1) then
-        setTelemetryValue(0x0310, 1, 1, wgt.vPercent, 13, 0, "cel%")
-    end
+    -- if (wgt.options.isTelemCellPerc == 1) then
+    --     setTelemetryValue(0x0310, 1, 1, wgt.vPercent, 13, 0, "cel%")
+    -- end
 
 end
 

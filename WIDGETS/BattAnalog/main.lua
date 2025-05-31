@@ -36,7 +36,7 @@
 -- Author : Offer Shmuely
 -- Date: 2021-2025
 local app_name = "BattAnalog"
-local app_ver = "1.4"
+local app_ver = "1.5"
 
 local _options = {
     {"sensor"            , SOURCE, "RxBt" },
@@ -46,7 +46,7 @@ local _options = {
     {"isTotalVoltage"    , BOOL  , 0      }, -- 0=Show as average Lipo cell level, 1=show the total voltage (voltage as is)
     {"color"             , COLOR , YELLOW },
     {"isTelemCellV"      , BOOL  , 0},
-    {"isTelemCellPerc"   , BOOL  , 0},
+    -- {"isTelemCellPerc"   , BOOL  , 0},
 }
 
 local function translate(name)
@@ -118,23 +118,6 @@ end
 
 local function refresh(wgt, event, touchState)
     wgt.background()
-    -- local is_need_update = false
-
-    -- local dw = getDxByStick("ail")
-    -- wgt.batt_width = wgt.batt_width + dw
-    -- wgt.batt_width = math.max(10, math.min(480, wgt.batt_width))
-    -- is_need_update = is_need_update or (dw ~= 0)
-
-    -- local dh = getDxByStick("ele")
-    -- wgt.batt_height = wgt.batt_height - dh
-    -- wgt.batt_height = math.max(10, math.min(272, wgt.batt_height))
-    -- is_need_update = is_need_update or (dh ~= 0)
-
-    -- if (is_need_update == true) then
-    --     wgt.zone.w = wgt.batt_width
-    --     wgt.zone.h = wgt.batt_height
-    --     wgt.update_ui()
-    -- end
 
     wgt.refresh(event, touchState)
 end
