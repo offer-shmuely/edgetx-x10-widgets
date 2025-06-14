@@ -148,8 +148,8 @@ local function update(wgt, options)
     end
 
     local ver, radio, maj, minor, rev, osname = getVersion()
-    wgt.is_valid_ver = (maj == 2 and minor >= 11)
-
+    local nVer = maj*1000000 + minor*1000 + rev
+    wgt.is_valid_ver = (nVer>=2011000)
 
     build_ui(wgt)
 end
@@ -345,6 +345,15 @@ local function stateChange(wgt, newState, timer_sec)
     end
 end
 
+
+local function is_flight_starting(wgt)
+    if (wgt.status.motor_active == true) and (wgt.status.switch_on == true) and (wgt.use_telemetry==0 or wgt.status.tele_is_available == true) then
+        return true
+    else
+        return false
+    end
+end
+
 local function background(wgt)
 
     updateSwitchStatus(wgt)
@@ -357,7 +366,8 @@ local function background(wgt)
 
     -- **** state: GROUND ***
     if wgt.status.flight_state == "GROUND" then
-            if (wgt.status.motor_active == true) and (wgt.status.switch_on == true) and (wgt.use_telemetry==0 or wgt.status.tele_is_available == true) then
+        -- if (wgt.status.motor_active == true) and (wgt.status.switch_on == true) and (wgt.use_telemetry==0 or wgt.status.tele_is_available == true) then
+        if (is_flight_starting(wgt) == true) then
             stateChange(wgt, "FLIGHT_STARTING", wgt.options.min_flight_duration)
             wgt.status.last_flight_count = getFlightCount(wgt)
             wgt.status.flight_start_time = getTime() * 10 / 1000
@@ -369,7 +379,8 @@ local function background(wgt)
         -- **** state: FLIGHT_STARTING ***
     elseif wgt.status.flight_state == "FLIGHT_STARTING" then
 
-        if (wgt.status.motor_active == false) or (wgt.status.switch_on == false) or (wgt.use_telemetry==1 and wgt.status.tele_is_available == false) then
+        -- if (wgt.status.motor_active == false) or (wgt.status.switch_on == false) or (wgt.use_telemetry==1 and wgt.status.tele_is_available == false) then
+        if (is_flight_starting(wgt) == false) then
             stateChange(wgt, "GROUND", 0)
             return
         end
