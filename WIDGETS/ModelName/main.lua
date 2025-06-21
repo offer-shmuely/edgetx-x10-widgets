@@ -1,19 +1,21 @@
 
 local options = {
     {"textColor", COLOR, YELLOW},
-    {"fontSizeIdx", CHOICE, 3 , {"Extra Small","Normal","Large","Extra Large","Huge"} },
-    {"space_x", VALUE, 5, 0, 100},
-    {"space_y", VALUE, 5, 0, 100},
-    -- {"align", ALIGNMENT, 0},
+    {"autoSize", BOOL, 1},
+    {"autoAlign", BOOL, 1},
+    {"fontSizeIdx", CHOICE, 3 , {"Extra Small (6px)","Normal (8px)","Large (12px)","Extra Large (16px)","Huge (38px)"} },
+    {"space_x", VALUE, 5, 0, 400},
+    {"space_y", VALUE, 5, 0, 200},
 }
 
 local function translate(name)
     local translations = {
-        TextColor = "Text Color",
-        fontSizeIdx = "Text Size",
-        space_x = "Horizontal Space (X)",
-        space_y = "Vertical Space (Y)",
-        -- align = "Text Alignment"
+        textColor = "Text Color",
+        autoSize = "Auto Size",
+        fontSizeIdx = "Manual Text Size",
+        autoAlign = "Auto align to center",
+        space_x = "Manual Space X",
+        space_y = "Manual Space Y",
     }
     return translations[name]
 end
