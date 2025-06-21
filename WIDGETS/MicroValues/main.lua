@@ -6,8 +6,8 @@ local options = {
     { "textColor"     , COLOR   , YELLOW },
     { "inactiveColor" , COLOR   , GREY },
     -- { "font_size", TEXT_SIZE},
-    { "fontSizeValIdx", CHOICE   , 2 , {"6px","8px","12px","16px","38px"} },
-    { "fontSizeKeyIdx", CHOICE   , 1 , {"6px","8px","12px","16px","38px"} },
+    { "fontSizeValIdx", CHOICE   , 2 , {"Extra Small (6px)","Normal (8px)","Large (12px)","Extra Large (16px)","Huge (38px)"} },
+    { "fontSizeKeyIdx", CHOICE   , 1 , {"Extra Small (6px)","Normal (8px)","Large (12px)","Extra Large (16px)","Huge (38px)"} },
     { "align"        , ALIGNMENT, 0},
 }
 

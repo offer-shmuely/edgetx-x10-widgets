@@ -2,7 +2,7 @@
 -- Offer Shmuely
 -- Date: 2021-2024
 local app_name = "Timer2"
-local app_ver = "0.8"
+local app_ver = "0.9"
 
 --local progress = 100
 local options = {
