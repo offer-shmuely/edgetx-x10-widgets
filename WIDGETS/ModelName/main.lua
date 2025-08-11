@@ -1,11 +1,11 @@
 
 local options = {
-    {"textColor", COLOR, YELLOW},
-    {"autoSize", BOOL, 1},
-    {"autoAlign", BOOL, 1},
-    {"fontSizeIdx", CHOICE, 3 , {"Extra Small (6px)","Normal (8px)","Large (12px)","Extra Large (16px)","Huge (38px)"} },
-    {"space_x", VALUE, 5, 0, 400},
-    {"space_y", VALUE, 5, 0, 200},
+    {"textColor",   COLOR, YELLOW},
+    {"autoSize",    BOOL,    0 },
+    {"autoAlign",   BOOL,    0 },
+    {"fontSizeIdx", CHOICE,  4, {"Extra Small (6px)","Normal (8px)","Large (12px)","Extra Large (16px)","Huge (38px)"} },
+    {"space_x",     VALUE,  10, 0, 400},
+    {"space_y",     VALUE,   0, 0, 200},
 }
 
 local function translate(name)

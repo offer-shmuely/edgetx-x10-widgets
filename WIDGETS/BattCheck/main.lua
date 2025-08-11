@@ -20,9 +20,9 @@
 -- 3djc & Offer Shmuely
 -- Date: 2022
 local app_name = "BattCheck"
-local app_ver = "0.9"
+local app_ver = "0.10"
 
-local lib_sensors = loadScript("/WIDGETS/" .. app_name .. "/lib_sensors.lua", "tcd")(m_log,app_name)
+local lib_sensors = loadScript("/WIDGETS/" .. app_name .. "/lib_sensors.lua", "btd")(m_log,app_name)
 local DEFAULT_SOURCE = lib_sensors.findSourceId( {"Cels"})
 
 local _options = {

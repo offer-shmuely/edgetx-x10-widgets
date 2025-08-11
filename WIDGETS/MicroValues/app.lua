@@ -27,12 +27,12 @@
 -- Author : Offer Shmuely
 -- Date: 2025
 local app_name = "MicroValues"
-local app_ver = "1.2"
+local app_ver = "1.3"
 
 
 -- imports
-local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "tcd")
-local LibWidgetToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "tcd")
+local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "btd")
+local LibWidgetToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "btd")
 
 local m_log = LibLogClass(app_name, "/WIDGETS/" .. app_name)
 

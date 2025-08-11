@@ -36,7 +36,7 @@
 -- Author : Offer Shmuely
 -- Date: 2021-2025
 local app_name = "BattAnalog"
-local app_ver = "1.6"
+local app_ver = "1.7"
 
 local _options = {
     {"sensor"            , SOURCE, "RxBt" },

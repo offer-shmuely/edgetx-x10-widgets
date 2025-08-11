@@ -19,7 +19,7 @@
 -- Offer Shmuely
 -- Date: 2019-2015
 local app_name = "ModelName"
-local app_ver = "0.8"
+local app_ver = "0.9"
 
 -- better font names
 local FS={FONT_38=XXLSIZE,FONT_16=DBLSIZE,FONT_12=MIDSIZE,FONT_8=0,FONT_6=SMLSIZE}

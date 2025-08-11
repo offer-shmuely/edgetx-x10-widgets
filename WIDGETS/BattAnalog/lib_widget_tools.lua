@@ -1,4 +1,6 @@
-local m_log, app_name, useLvgl = ...
+local args = {...}
+local m_log = args[1]
+local app_name = args[2]
 
 local M = {}
 M.m_log = m_log
@@ -16,21 +18,7 @@ local FONT_12 = MIDSIZE -- 12px
 local FONT_8 = 0 -- Default 8px
 local FONT_6 = SMLSIZE -- 6px
 
--- better font size names
-M.FONT_SIZES = {
-    FONT_6  = SMLSIZE, -- 6px
-    FONT_8  = 0,       -- Default 8px
-    FONT_12 = MIDSIZE, -- 12px
-    FONT_16 = DBLSIZE, -- 16px
-    FONT_38 = XXLSIZE, -- 38px
-}
-M.FONT_LIST = {
-    FONT_6,
-    FONT_8,
-    FONT_12,
-    FONT_16,
-    FONT_38,
-}
+M.FONT_LIST = {FONT_6, FONT_8, FONT_12, FONT_16, FONT_38}
 
 ---------------------------------------------------------------------------------------------------
 local function log(fmt, ...)
@@ -199,6 +187,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function M.getSensorInfoByName(sensorName)
+    sensorName = string.gsub(sensorName, "-", "")
+    sensorName = string.gsub(sensorName, "+", "")
     local sensors = {}
     for i=0, 30, 1 do
         local s1 = {}
@@ -208,8 +198,8 @@ function M.getSensorInfoByName(sensorName)
         s1.type = s2.type
         --name (string) Name
         s1.name = s2.name
-        --unit (number) See list of units in the appendix of the OpenTX Lua Reference Guide
-        s1.unit = s2.unit
+        --unit (number->string) See list of units in the appendix of the OpenTX Lua Reference Guide
+        s1.unit = M.unitIdToString(s2.unit)
         --prec (number) Number of decimals
         s1.prec = s2.prec
         --id (number) Only custom sensors
@@ -219,7 +209,7 @@ function M.getSensorInfoByName(sensorName)
         --formula (number) Only calculated sensors. 0 = Add etc. see list of formula choices in Companion popup
         s1.formula = s2.formula
 
-        log("getSensorInfo: %d. name: %s, unit: %s , prec: %s , id: %s , instance: %s ", i, s2.name, s2.unit, s2.prec, s2.id, s2.instance)
+        -- log("getSensorInfo: %d. name: %s, unit: %s , prec: %s , id: %s , instance: %s ", i, s2.name, s2.unit, s2.prec, s2.id, s2.instance)
 
         if s2.name == sensorName then
             return s1
@@ -307,35 +297,13 @@ function M.getFontIndex(fontSize, defaultFontSize)
 end
 
 ------------------------------------------------------------------------------------------------------
--- function M.lcdSizeTextFixed(txt, font_size)
---     local ts_w, ts_h = lcd.sizeText(txt, font_size)
-
---     local v_offset = 0
---     if font_size == FONT_38 then
---         if (useLvgl==true) then
---             v_offset = -7
---             return ts_w-3, ts_h +2*v_offset-14, v_offset
---         else
---             v_offset = -14
---         end
---     elseif font_size == FONT_16 then
---         v_offset = -8
---     elseif font_size == FONT_12 then
---         v_offset = -6
---     elseif font_size == FONT_8 then
---         v_offset = -4
---     elseif font_size == FONT_6 then
---         v_offset = -3
---     end
---     return ts_w, ts_h +2*v_offset, v_offset
--- end
 
 function M.lcdSizeTextFixed(txt, font_size)
     local ts_w, ts_h = lcd.sizeText(txt, font_size)
 
     local v_offset = 0
     if font_size == FONT_38 then
-        if (useLvgl==true) then
+        if (lvgl~=nil) then
             v_offset = -7
             ts_h = 61
             return ts_w-3, ts_h+v_offset-14, v_offset
@@ -378,24 +346,24 @@ function M.getFontSize(wgt, txt, max_w, max_h, max_font_size)
 
     w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_16)
     if w <= max_w and h <= max_h then
-        log("[%s] FONT_16 %dx%d", txt, w, h)
+        -- log("[%s] FONT_16 %dx%d", txt, w, h, txt)
         return FONT_16, w, h, v_offset
     end
 
     w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_12)
     if w <= max_w and h <= max_h then
-        log("[%s] FONT_12 %dx%d", txt, w, h)
+        -- log("[%s] FONT_12 %dx%d", txt, w, h, txt)
         return FONT_12, w, h, v_offset
     end
 
     w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_8)
     if w <= max_w and h <= max_h then
-        log("[%s] FONT_8 %dx%d", txt, w, h)
+        -- log("[%s] FONT_8 %dx%d", txt, w, h, txt)
         return FONT_8, w, h, v_offset
     end
 
     w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_6)
-    log("[%s] FONT_6 %dx%d", txt, w, h)
+    -- log("[%s] FONT_6 %dx%d", txt, w, h, txt)
     return FONT_6, w, h, v_offset
 end
 
