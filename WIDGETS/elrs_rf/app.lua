@@ -41,9 +41,9 @@
 ]]
 
 -- Author : Offer Shmuely
--- Date: 2023-2024
+-- Date: 2023-2025
 local app_name = "elrs_rf"
-local app_ver = "1.3"
+local app_ver = "1.4"
 
 -- CRSF available telemetry fields
 --[[
@@ -140,6 +140,7 @@ local function update(wgt, options)
     --wgt.SIMU = false
     wgt.DEBUG = false
     wgt.arm_switch_on = false
+    wgt.switch_name = getSwitchName(wgt.options.arm_switch_id)
     wgt.module_info = {
         is_filled = false,
         name = "n/a",
@@ -317,13 +318,12 @@ local function safe_max(max, v)
     return max2
 end
 
-local function getSwitchStatus(wgt)
-    if getValue(wgt.options.arm_switch) < 0 then
-        --log(string.format("switch status (%s): =ON", wgt.options.arm_switch))
-        return true
+local function updateArmSwitchStatus(wgt)
+    wgt.arm_switch_on = getSwitchValue(wgt.options.arm_switch_id)
+    if wgt.arm_switch_on then
+        --log("arm switch status (%s): = ON", wgt.switch_name)
     else
-        --log(string.format("switch status (%s): =OFF", wgt.options.arm_switch))
-        return false
+        --log("arm switch status (%s): = OFF", wgt.switch_name)
     end
 end
 
@@ -506,7 +506,7 @@ local function calcData(wgt)
 
     getModuleInfo(wgt)
 
-    wgt.arm_switch_on = getSwitchStatus(wgt)
+    updateArmSwitchStatus(wgt)
 
     if wgt.SIMU then
         local is_sim_active = getValue("sa")

@@ -1,13 +1,13 @@
 local app_name = "elrs_rf"
 
 local options = {
-    { "arm_switch", SWITCH, getSwitchIndex("SF"..CHAR_UP)  },
+    { "arm_switch_id", SWITCH, getSwitchIndex("SF"..CHAR_UP)  },
     --{ "text_color", COLOR, COLOR_THEME_PRIMARY2 },
 }
 
 local function translate(name)
     local translations = {
-        arm_switch = "Arm Switch",
+        arm_switch_id = "Arm Switch",
     }
     return translations[name]
 end
