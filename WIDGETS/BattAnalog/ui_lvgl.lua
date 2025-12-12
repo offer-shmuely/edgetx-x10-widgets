@@ -205,13 +205,13 @@ local function layoutTextZoneNormal(batSize)
     sec_dh = ts_h + 5
     line_space = ts_h * 0
     sec_x = math.min(sec_x, wgt.zone.w -ts_w -space)
-    txtSizes.source = {y=wgt.zone.h +v_offset -space +line_space -sec_dh*3, visible=(function() return wgt.options.isTotalVoltage == 0 end)}
+    txtSizes.source = {y=wgt.zone.h +v_offset -space +line_space -sec_dh*3, visible=(function() return wgt.options.isTotalVoltage == false end)}
 
 
     -- vSec + cell count
     local ts_w, ts_h, v_offset = wgt.tools.lcdSizeTextFixed("99.99 V  12s", sec_font)
     sec_x = math.min(sec_x, wgt.zone.w -ts_w -space)
-    txtSizes.vSec = {y=wgt.zone.h +v_offset  -space +line_space -sec_dh*2, visible=(function() return wgt.options.isTotalVoltage == 0 end)}
+    txtSizes.vSec = {y=wgt.zone.h +v_offset  -space +line_space -sec_dh*2, visible=(function() return wgt.options.isTotalVoltage == false end)}
 
     -- vMin
     local ts_w, ts_h, v_offset = wgt.tools.lcdSizeTextFixed(getVMin(), sec_font)

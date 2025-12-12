@@ -138,7 +138,13 @@ function wgt.update_logic(wgt, options)
         wgt.source_name = wgt.options.sensor
     end
 
-    wgt.options.isTotalVoltage = wgt.options.isTotalVoltage % 2 -- modulo due to bug that cause the value to be other than 0|1
+    -- wgt.options.isTotalVoltage = wgt.options.isTotalVoltage % 2 -- modulo due to bug that cause the value to be other than 0|1
+    if (wgt.options.cbShowVoltage == 1) then
+        wgt.options.isTotalVoltage = false
+    else
+        wgt.options.isTotalVoltage = true
+    end
+
 
     -- log("wgt.options.batt_type: %s", wgt.options.batt_type)
 end
@@ -301,10 +307,10 @@ function wgt.calculateBatteryData()
     -- log("wgt.vPercent: ".. wgt.vPercent)
 
     -- mainValue
-    if wgt.options.isTotalVoltage == 0 then
+    if wgt.options.isTotalVoltage == false then
         wgt.mainValue = wgt.vCellLive
         wgt.secondaryValue = wgt.vTotalLive
-    elseif wgt.options.isTotalVoltage == 1 then
+    elseif wgt.options.isTotalVoltage == true then
         wgt.mainValue = wgt.vTotalLive
         wgt.secondaryValue = wgt.vCellLive
     else
