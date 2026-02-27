@@ -1,8 +1,8 @@
 local app_name = "MicroValues"
 
 local options = {
-    { "source_1"      , SOURCE  , "Batt" },
-    { "source_2"      , SOURCE  , "RQly" },
+    { "source_1"      , SOURCE  , {"1RSS", "cell","VFAS","RxBt","A1", "A2"} },
+    { "source_2"      , SOURCE  , {"RQly", "1RSS"} },
     { "textColor"     , COLOR   , YELLOW },
     { "inactiveColor" , COLOR   , GREY },
     -- { "font_size", TEXT_SIZE},

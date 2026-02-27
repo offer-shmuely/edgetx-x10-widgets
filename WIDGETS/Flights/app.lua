@@ -57,7 +57,10 @@ local args = {...}
 local triggerTypeDefs = args[1]
 
 local app_name = "Flights"
-local app_ver = "2.0"
+local app_ver = "2.1"
+
+local lvSCALE = lvgl.LCD_SCALE or 1
+local is800 = (LCD_W==800)
 
 local build_ui = nil
 ------------------------------------------------------------------------------------------------------------------
@@ -406,15 +409,15 @@ build_ui = function(wgt)
 
     local ts_w, ts_h = lcd.sizeText(num_flights, font_size)
     local dx = (zone_w - ts_w) / 2
-    local dyh = 5
+    local dyh = 5*lvSCALE
     local dy --  = header_h - 1
-    local is_top_bar = (zone_h < 50)
+    local is_top_bar = (zone_h < 50*lvSCALE)
 
     if is_top_bar then
         -- force minimal spaces
-        dyh = -3
+        dyh = -3*lvSCALE
     else
-        dyh = 5
+        dyh = 5*lvSCALE
     end
 
     -- global
@@ -427,45 +430,43 @@ build_ui = function(wgt)
     -- draw count
     if is_top_bar == true then
         -- pMain:label({x=zone_w-ts_w -10, y=dy, font=font_size, text=function() return getFlightCount(wgt) end, color=wgt.options.text_color})
-        pMain:label({x=10, y=13, font=font_size, text=function() return getFlightCount(wgt) end, color=wgt.options.text_color})
+        pMain:label({x=10*lvSCALE, y=13*lvSCALE, font=font_size, text=function() return getFlightCount(wgt) end, color=wgt.options.text_color})
     else
-        pMain:label({x=zone_w-ts_w-5, y=5, font=font_size, text=function() return getFlightCount(wgt) end, color=wgt.options.text_color})
+        pMain:label({x=zone_w-ts_w-5*lvSCALE, y=5*lvSCALE, font=font_size, text=function() return getFlightCount(wgt) end, color=wgt.options.text_color})
     end
 
     -- enable 3 dots
     if (show_dots == true) then
-        local dxc = 7
-        pMain:circle({x=5, y=20 + dxc*0, radius=3, filled=true, color=function() return wgt.rule:is_dot_1()   and GREEN or GREY end})
-        pMain:circle({x=5, y=20 + dxc*1, radius=3, filled=true, color=function() return wgt.rule:is_dot_2()   and GREEN or GREY end})
-        pMain:circle({x=5, y=20 + dxc*2, radius=3, filled=true, color=function() return wgt.rule:is_dot_3()   and GREEN or GREY end})
+        local dxc = 7*lvSCALE
+        pMain:circle({x=5*lvSCALE, y=20*lvSCALE + dxc*0, radius=3, filled=true, color=function() return wgt.rule:is_dot_1()   and GREEN or GREY end})
+        pMain:circle({x=5*lvSCALE, y=20*lvSCALE + dxc*1, radius=3, filled=true, color=function() return wgt.rule:is_dot_2()   and GREEN or GREY end})
+        pMain:circle({x=5*lvSCALE, y=20*lvSCALE + dxc*2, radius=3, filled=true, color=function() return wgt.rule:is_dot_3()   and GREEN or GREY end})
     end
 
     -- debug
     local pInfo = lvgl.box({x=0, y=40})
     if wgt.options.is_debug == true then
-        local dx = 15
+        local dx = 15*lvSCALE
+        pInfo:label({x=dx+190*lvSCALE, y= 5*lvSCALE, font=FS.FONT_8, text=function() return string.format("Rule: %s", wgt.triggerDesc) end})
+        pInfo:label({x=dx, y= 0*lvSCALE, font=FS.FONT_6, text=function() return wgt.rule:dot_1_txt() end})
+        pInfo:label({x=dx, y=15*lvSCALE, font=FS.FONT_6, text=function() return wgt.rule:dot_2_txt() end})
+        pInfo:label({x=dx, y=30*lvSCALE, font=FS.FONT_6, text=function() return wgt.rule:dot_3_txt() end})
+        pInfo:label({x=dx, y=45*lvSCALE, font=FS.FONT_6, text=function() return string.format("timer: %.1f/%d",        wgt.status.duration_passed / 1000, wgt.tools.getDurationMili(wgt.status.periodic1) / 1000) end})
+        pInfo:label({x=dx, y=60*lvSCALE, font=FS.FONT_6, text=function() return string.format("flight duration: %.1f", wgt.status.flight_duration) end})
 
+        pInfo:label({x=dx, y=80*lvSCALE, font=FS.FONT_6, text="state:"})
+        dx = 50*lvSCALE
+        pInfo:label({x=dx, y= 80*lvSCALE, font=FS.FONT_6, text="GROUND"         , color=function() return getColorByState(wgt, "GROUND") end})
+        pInfo:label({x=dx, y= 95*lvSCALE, font=FS.FONT_6, text="FLIGHT_STARTING", color=function() return getColorByState(wgt, "FLIGHT_STARTING") end})
+        pInfo:label({x=dx, y=110*lvSCALE, font=FS.FONT_6, text="FLIGHT_ON"      , color=function() return getColorByState(wgt, "FLIGHT_ON") end})
+        pInfo:label({x=dx, y=125*lvSCALE, font=FS.FONT_6, text="FLIGHT_ENDING"  , color=function() return getColorByState(wgt, "FLIGHT_ENDING") end})
 
-        pInfo:label({x=dx+190, y= 5, font=FS.FONT_8, text=function() return string.format("Rule: %s", wgt.triggerDesc) end})
-        pInfo:label({x=dx, y= 0, font=FS.FONT_6, text=function() return wgt.rule:dot_1_txt() end})
-        pInfo:label({x=dx, y=15, font=FS.FONT_6, text=function() return wgt.rule:dot_2_txt() end})
-        pInfo:label({x=dx, y=30, font=FS.FONT_6, text=function() return wgt.rule:dot_3_txt() end})
-        pInfo:label({x=dx, y=45, font=FS.FONT_6, text=function() return string.format("timer: %.1f/%d",        wgt.status.duration_passed / 1000, wgt.tools.getDurationMili(wgt.status.periodic1) / 1000) end})
-        pInfo:label({x=dx, y=60, font=FS.FONT_6, text=function() return string.format("flight duration: %.1f", wgt.status.flight_duration) end})
+        pInfo:label({x=  5*lvSCALE, y=145*lvSCALE, font=FS.FONT_6, text=function() return string.format("starting:\n %s", wgt.rule.is_flight_starting()) end})
+        pInfo:label({x= 70*lvSCALE, y=145*lvSCALE, font=FS.FONT_6, text=function() return string.format("on_flight:\n %s", wgt.rule.is_still_on_flight()) end})
+        pInfo:label({x=140*lvSCALE, y=145*lvSCALE, font=FS.FONT_6, text=function() return string.format("ending:\n %s", wgt.rule.is_flight_ending()) end})
 
-        pInfo:label({x=dx, y=80, font=FS.FONT_6, text="state:"})
-        dx = 50
-        pInfo:label({x=dx, y= 80, font=FS.FONT_6, text="GROUND"         , color=function() return getColorByState(wgt, "GROUND") end})
-        pInfo:label({x=dx, y= 95, font=FS.FONT_6, text="FLIGHT_STARTING", color=function() return getColorByState(wgt, "FLIGHT_STARTING") end})
-        pInfo:label({x=dx, y=110, font=FS.FONT_6, text="FLIGHT_ON"      , color=function() return getColorByState(wgt, "FLIGHT_ON") end})
-        pInfo:label({x=dx, y=125, font=FS.FONT_6, text="FLIGHT_ENDING"  , color=function() return getColorByState(wgt, "FLIGHT_ENDING") end})
-
-        pInfo:label({x=  5, y=145, font=FS.FONT_6, text=function() return string.format("starting:\n %s", wgt.rule.is_flight_starting()) end})
-        pInfo:label({x= 70, y=145, font=FS.FONT_6, text=function() return string.format("on_flight:\n %s", wgt.rule.is_still_on_flight()) end})
-        pInfo:label({x=140, y=145, font=FS.FONT_6, text=function() return string.format("ending:\n %s", wgt.rule.is_flight_ending()) end})
-
-        pInfo:rectangle({x=dx+160, y=30, w=260, h=140, color=LIGHTBLUE, filled=true, rounded=5})
-        pInfo:label({x=dx+160+10, y=40, font=FS.FONT_6, text=function() return wgt.rule:info() end, color=WHITE})
+        pInfo:rectangle({x=dx+160*lvSCALE, y=30*lvSCALE, w=260*lvSCALE, h=140*lvSCALE, color=LIGHTBLUE, filled=true, rounded=5})
+        pInfo:label({x=dx+(160+10)*lvSCALE, y=40*lvSCALE, font=FS.FONT_6, text=function() return wgt.rule:info() end, color=WHITE})
     end
 end
 
