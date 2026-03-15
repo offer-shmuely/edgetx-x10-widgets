@@ -43,7 +43,7 @@
 -- Author : Offer Shmuely
 -- Date: 2023-2025
 local app_name = "elrs_rf"
-local app_ver = "1.4"
+local app_ver = "1.5"
 
 -- CRSF available telemetry fields
 --[[
@@ -75,20 +75,40 @@ local RFMD_RATE_STR = 4
 local RFMD_MIN_RSSI = 5
 local RFMD_DESC = 6
 local RFMD_LIST = {
-    { 1, "LORA",   false, "25Hz"    , -123, "25Hz (LORA)" },
-    { 2, "LORA",   false, "50Hz"    , -115, "50Hz (LORA)" },
-    { 3, "LORA",   false, "100Hz"   , -117, "100Hz (LORA)" },
-    { 4, "LORA",   true,  "100HzFull",-112, "100Hz (LORA-full-res)" },
-    { 5, "LORA",   false, "150Hz"   , -112, "150Hz (LORA)" },
-    { 6, "LORA",   false, "200Hz"   , -112, "200Hz (LORA)" },
-    { 7, "LORA",   false, "250Hz"   , -108, "250Hz (LORA)" },
-    { 8, "LORA",   true,  "333HzFull",-105, "333Hz (LORA-full-res)" },
-    { 9, "LORA",   true,  "500Hz"   , -105, "500Hz (LORA)" },
-    { 10, "FLRC+", false, "D250"    , -104, "250Hz (FLRC x4-DVDA)" },
-    { 11, "FLRC+", false, "D500"    , -104, "500Hz (FLRC x2-DVDA)" },
-    { 12, "FLRC ", false, "F500"    , -104, "500Hz (FLRC)" },
-    { 13, "FLRC ", false, "F1000"   , -104, "1000Hz (FLRC)" },
-    { 14, "n/a"  , false, "n/a"     , -128, "[off-line]" },
+    -- ELRS 3.x: enum_rate = sequential index 1-13 (slowest→fastest)
+    { 1,  "LORA",   false, "25Hz",       -123, "25Hz (LORA)" },
+    { 2,  "LORA",   false, "50Hz",       -115, "50Hz (LORA)" },
+    { 3,  "LORA",   false, "100Hz",      -117, "100Hz (LORA)" },
+    { 4,  "LORA",   true,  "100HzFull",  -112, "100Hz (LORA-full-res)" },
+    { 5,  "LORA",   false, "150Hz",      -112, "150Hz (LORA)" },
+    { 6,  "LORA",   false, "200Hz",      -112, "200Hz (LORA)" },
+    { 7,  "LORA",   false, "250Hz",      -108, "250Hz (LORA)" },
+    { 8,  "LORA",   true,  "333HzFull",  -105, "333Hz (LORA-full-res)" },
+    { 9,  "LORA",   true,  "500Hz",      -105, "500Hz (LORA)" },
+    { 10, "FLRC+",  false, "D250",       -104, "250Hz (FLRC x4-DVDA)" },
+    { 11, "FLRC+",  false, "D500",       -104, "500Hz (FLRC x2-DVDA)" },
+    { 12, "FLRC ",  false, "F500",       -104, "500Hz (FLRC)" },
+    { 13, "FLRC ",  false, "F1000",      -104, "1000Hz (FLRC)" },
+    { 14, "n/a",    false, "n/a",        -128, "[off-line]" },  -- RFMD_NA
+
+    -- ELRS 4.x: enum_rate = multi-band enum (2.4GHz starts at 20)
+    [20] = { 20, "LORA",   false, "25Hz",      -123, "25Hz (LORA)" },
+    [21] = { 21, "LORA",   false, "50Hz",      -115, "50Hz (LORA)" },
+    [22] = { 22, "LORA",   false, "100Hz",     -117, "100Hz (LORA)" },
+    [23] = { 23, "LORA",   true,  "100HzFull", -112, "100Hz (LORA-full-res)" },
+    [24] = { 24, "LORA",   false, "150Hz",     -112, "150Hz (LORA)" },
+    [25] = { 25, "LORA",   false, "200Hz",     -112, "200Hz (LORA)" },
+    [27] = { 27, "LORA",   false, "250Hz",     -108, "250Hz (LORA)" },
+    [28] = { 28, "LORA",   true,  "333HzFull", -105, "333Hz (LORA-full-res)" },
+    [29] = { 29, "LORA",   true,  "500Hz",     -105, "500Hz (LORA)" },
+    [30] = { 30, "FLRC+",  false, "D250",      -104, "250Hz (FLRC x4-DVDA)" },
+    [31] = { 31, "FLRC+",  false, "D500",      -104, "500Hz (FLRC x2-DVDA)" },
+    [32] = { 32, "FLRC ",  false, "F500",      -104, "500Hz (FLRC)" },
+    [33] = { 33, "FLRC ",  false, "F1000",     -104, "1000Hz (FLRC)" },
+
+    -- ELRS 4.x LR1121 GemX (Gemini Xrossband = true dual 900+2.4GHz)
+    [100] = { 100, "GemX",  true, "GX100Hz8ch", -112, "100Hz 8CH (GemX Dual-Band)" },
+    [101] = { 101, "GemX",  true, "GX150Hz",    -112, "150Hz (GemX Dual-Band)" },
 }
 local RFMD_NA = 14
 local MAX_RSSI = -40
@@ -373,7 +393,7 @@ local function drawRfMode(wgt, Y)
     if wgt.tlm.rfmd == 0 then
         return Y
     end
-    local rfmd = RFMD_LIST[wgt.tlm.rfmd]
+    local rfmd = RFMD_LIST[wgt.tlm.rfmd] or RFMD_LIST[RFMD_NA]
     local txt = string.format("Rate: %s", rfmd[RFMD_DESC])
     lcd.drawText(5, Y, txt, TXT_SIZE + TXT_COL)
     return Y + TH
@@ -453,7 +473,7 @@ local function drawRssi(wgt, Y, id)
     --lcd.drawText(5, Y, string.format("rssi%d: %d dBm", id, rssi), TXT_SIZE + TXT_COL)
     lcd.drawText(5, Y, string.format("rssi%d:", id), TXT_SIZE + TXT_COL)
     --log("wgt.tlm.rfmd: %s", wgt.tlm.rfmd)
-    local min_allow_rssi = RFMD_LIST[wgt.tlm.rfmd][RFMD_MIN_RSSI]
+    local min_allow_rssi = (RFMD_LIST[wgt.tlm.rfmd] or RFMD_LIST[RFMD_NA])[RFMD_MIN_RSSI]
     --log("min_allow_rssi: %s", min_allow_rssi)
 
     --local fix_rssi = (rssi ~= nil) and math.min(rssi, MAX_RSSI) or nil
