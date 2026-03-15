@@ -39,6 +39,7 @@ local app_name = "BattAnalog"
 local app_ver = "1.9"
 
 -- table.insert(package.searchers or package.loaders, function(filepath)
+-- enable require
 table.insert(package.searchers, function(filepath)
     local f = loadScript(filepath, "btd")
     if f == nil then

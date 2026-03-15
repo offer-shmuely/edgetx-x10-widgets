@@ -133,7 +133,7 @@ local function update(wgt, options)
     wgt.rule = t_chunk(m_log, app_name, wgt.status.switch_name, wgt.status.motor_channel_name)
 
     log("Using trigger type: %s (%s)", wgt.triggerDesc, wgt.triggerFile)
-    log("info: %s", wgt.rule:info())
+    -- log("info: %s", wgt.rule:info())
 
     local override_min_flight_time = wgt.rule:override_min_flight_time()
     if (override_min_flight_time ~= nil) then
