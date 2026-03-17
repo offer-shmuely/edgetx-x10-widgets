@@ -29,7 +29,7 @@
 -- Author : Offer Shmuely
 -- Date: 2021-2025
 local app_name = "Value2"
-local app_ver = "0.15"
+local app_ver = "0.16"
 
 
 -- imports
