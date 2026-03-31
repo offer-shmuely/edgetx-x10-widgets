@@ -1,5 +1,5 @@
 local app_name = "Mixers"
-local app_ver = "1.0"
+local app_ver = "1.1"
 
 local M = {}
 
