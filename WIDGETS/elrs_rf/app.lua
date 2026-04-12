@@ -138,8 +138,8 @@ local dbgDx = 13
 local vcache -- valueId cache
 
 -- imports
-local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "btd")
-local LibWidgetToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "btd")
+local LibLogClass = assert(loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "btd"))
+local LibWidgetToolsClass = assert(loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "btd"))
 local m_log = LibLogClass(app_name, "/WIDGETS/" .. app_name)
 
 local function log(fmt, ...)
@@ -236,6 +236,11 @@ local function getModuleInfo(wgt)
             crossfireTelemetryPush(0x28, { 0x00, 0xEA }) -- frame_type::device_ping = 0x28, address::radio_transmitter = 0xEA,
             wgt.module_info.lastUpd = now
         end
+        return
+    end
+
+    if data == nil then
+        log("getModuleInfo() - invalid data length: %s", data and #data or "nil")
         return
     end
 
@@ -393,7 +398,7 @@ local function drawRfMode(wgt, Y)
     if wgt.tlm.rfmd == 0 then
         return Y
     end
-    local rfmd = RFMD_LIST[wgt.tlm.rfmd] or RFMD_LIST[RFMD_NA]
+    local rfmd = RFMD_LIST[wgt.tlm.rfmd]
     local txt = string.format("Rate: %s", rfmd[RFMD_DESC])
     lcd.drawText(5, Y, txt, TXT_SIZE + TXT_COL)
     return Y + TH
@@ -473,7 +478,7 @@ local function drawRssi(wgt, Y, id)
     --lcd.drawText(5, Y, string.format("rssi%d: %d dBm", id, rssi), TXT_SIZE + TXT_COL)
     lcd.drawText(5, Y, string.format("rssi%d:", id), TXT_SIZE + TXT_COL)
     --log("wgt.tlm.rfmd: %s", wgt.tlm.rfmd)
-    local min_allow_rssi = (RFMD_LIST[wgt.tlm.rfmd] or RFMD_LIST[RFMD_NA])[RFMD_MIN_RSSI]
+    local min_allow_rssi = RFMD_LIST[wgt.tlm.rfmd][RFMD_MIN_RSSI]
     --log("min_allow_rssi: %s", min_allow_rssi)
 
     --local fix_rssi = (rssi ~= nil) and math.min(rssi, MAX_RSSI) or nil
@@ -658,7 +663,7 @@ local function refresh(wgt, event, touchState)
 
     Y = drawRfMode(wgt, Y)
     Y = drawLq(wgt, Y)
-    Y = drawPower(wgt, Y, 0, 6, 6, wgt.tlm.tpwr, wgt.zw, wgt.zh) -- uses 1W as max
+    Y = drawPower(wgt, Y)
     Y = drawRssi(wgt, Y, 1)
     Y = drawRssi(wgt, Y, 2)
     Y = drawModuleName(wgt, Y)

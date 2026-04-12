@@ -346,6 +346,7 @@ end
 -- color for battery
 -- This function returns green at 100%, red bellow 30% and graduate in between
 local function getPercentColor(percent)
+    local r, g = 0, 0
     if percent < 30 then
         return lcd.RGB(0xff, 0, 0)
     else
@@ -358,6 +359,7 @@ end
 -- color for cell
 -- This function returns green at gvalue, red at rvalue and graduate in between
 local function getRangeColor(value, green_value, red_value)
+    local r, g = 0, 0
     local range = math.abs(green_value - red_value)
     if range == 0 then
         return lcd.RGB(0, 0xdf, 0)

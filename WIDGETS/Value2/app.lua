@@ -33,9 +33,9 @@ local app_ver = "0.16"
 
 
 -- imports
-local LibLogClass = loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "btd")
-local LibWidgetToolsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "btd")
-local UtilsSensorsClass = loadScript("/WIDGETS/" .. app_name .. "/lib_sensors.lua", "btd")
+local LibLogClass = assert(loadScript("/WIDGETS/" .. app_name .. "/lib_log.lua", "btd"))
+local LibWidgetToolsClass = assert(loadScript("/WIDGETS/" .. app_name .. "/lib_widget_tools.lua", "btd"))
+local UtilsSensorsClass = assert(loadScript("/WIDGETS/" .. app_name .. "/lib_sensors.lua", "btd"))
 
 local m_log = LibLogClass(app_name, "/WIDGETS/" .. app_name)
 
@@ -109,7 +109,7 @@ local function update(wgt, options)
 
         -- update max id
         local source_max_obj = getFieldInfo(base_source_name .. "+")
-        if source_min_obj ~= nil then
+        if source_max_obj ~= nil then
             wgt.source_max_id = source_max_obj.id
             -- log("source_max_id: %d", wgt.source_max_id)
         end
@@ -396,4 +396,4 @@ local function refresh(wgt, event, touchState)
     -- lcd.drawText(wgt.zone.x + wgt.zone.w, wgt.zone.y+20, string.format("isTypeSensor: %s", wgt.isTypeSensor), FS.FONT_6 + GREY + RIGHT) -- ???
 end
 
-return { name=app_name, options=options, translate=translate, create=create, update=update, background=background, refresh=refresh }
+return { name=app_name, create=create, update=update, background=background, refresh=refresh}

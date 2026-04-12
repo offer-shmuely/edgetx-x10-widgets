@@ -330,6 +330,7 @@ function M.getFontSize(wgt, txt, max_w, max_h, max_font_size)
         end
     end
 
+    local w, h, v_offset
     w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_16)
     if w <= max_w and h <= max_h then
         log("[%s] FONT_16 %dx%d", txt, w, h)
