@@ -68,7 +68,7 @@ function M.findSourceId(sourceNameList)
     for i = 200, 400 do
         local name = getSourceName(i)
         if name ~= nil then
-            -- workaround for bug in getFiledInfo()  -- ???? why?
+            -- workaround for bug in getFieldInfo()  -- ???? why?
             if string.byte(string.sub(name, 1, 1)) > 127 then name = string.sub(name, 2, -1) end
             if string.byte(string.sub(name, 1, 1)) > 127 then name = string.sub(name, 2, -1) end
 

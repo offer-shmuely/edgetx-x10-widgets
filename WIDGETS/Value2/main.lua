@@ -1,17 +1,21 @@
 local app_name = "Value2"
 
 local options = {
-    { "Source",      SOURCE, {"RQly", "VFR", "RSSI", "1Rss"} },
+    { "Source",      SOURCE, {"Curr", "RQly", "1RSS", "cell","VFAS","RxBt"} },
     { "TextColor",   COLOR,  YELLOW },
     { "Suffix",      STRING, "" },
-    { "Show_MinMax", BOOL,   1  }
+    { "Show_MinMax", BOOL,   1  },
+    { "background_enabled", BOOL, 0 },
+    { "background_color", COLOR, BLACK },
 }
 
 local function translate(name)
     local translations = {
         Source = "Source",
         TextColor = "Text Color",
-        Show_MinMax="Show Min / Max"
+        Show_MinMax="Show Min / Max",
+        background_enabled = "Background Enabled",
+        background_color = "Background Color"
     }
     return translations[name]
 end
@@ -26,4 +30,4 @@ local function update(wgt, options) return wgt._tool.update(wgt, options) end
 local function background(wgt)      return wgt._tool.background(wgt)      end
 local function refresh(wgt)         return wgt._tool.refresh(wgt)         end
 
-return {name=app_name, options=options, translate=translate, create=create, update=update, refresh=refresh, background=background, useLvgl=false}
+return {name=app_name, options=options, translate=translate, create=create, update=update, refresh=refresh, background=background, useLvgl=true}
