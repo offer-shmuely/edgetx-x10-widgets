@@ -55,7 +55,7 @@ local function translate(name)
         arm_switch_id="Arm Switch Position",
         motor_channel="Motor Channel",
         min_flight_duration = "Min flight duration (sec)",
-        use_gv8 = "Use GV8 as MSB",
+        use_gv8 = "count above 1000 (use GV8)",
         text_color = "Text color",
         enable_sounds = "Enable sounds",
         triggerType = "Type",
