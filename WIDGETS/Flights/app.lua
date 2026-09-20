@@ -183,6 +183,12 @@ local function migrateFlightCountStorage(wgt, had_prior_update, prev_use_gv8_msb
     end
 
     local gv8_current = model.getGlobalVariable(7, 0) or 0
+    if gv8_current < 0 then
+        gv8_current = 0
+    elseif gv8_current > MAX_GV_VALUE then
+        gv8_current = MAX_GV_VALUE
+    end
+
     if gv9_legacy > 999 and gv8_current == 0 then
         -- split previous GV9-only value into GV8+GV9
         local gv8_msb = math.min(math.floor(gv9_legacy / 1000), MAX_GV_VALUE)
