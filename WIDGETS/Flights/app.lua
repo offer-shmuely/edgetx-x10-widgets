@@ -60,7 +60,7 @@ local triggerTypeDefs = args[1]
 
 local app_name = "Flights"
 local app_ver = "2.2"
-local MAX_GV_VALUE = 1024
+local MAX_GV_VALUE = 1023
 
 local lvSCALE = lvgl.LCD_SCALE or 1
 local is800 = (LCD_W==800)
@@ -179,7 +179,7 @@ local function migrateFlightCountStorage(wgt, prev_use_gv8_msb)
     end
 
     local gv8_current = model.getGlobalVariable(7, 0) or 0
-    if gv9_legacy > 999 then
+    if gv9_legacy > 999 and gv8_current == 0 then
         -- split previous GV9-only value into GV8+GV9
         local gv8_msb = math.min(math.floor(gv9_legacy / 1000), MAX_GV_VALUE)
         local gv9_lsb = gv9_legacy % 1000
