@@ -131,10 +131,6 @@ local function getFlightCount(wgt)
         end
     end
 
-    if gv9_lsb > 999 then
-        gv9_lsb = 999
-    end
-
     -- local model_name = model.getInfo().name
     -- local num_flights = wgt.flightCountHWriter.getValue(model_name)
     return gv8_msb * 1000 + gv9_lsb
