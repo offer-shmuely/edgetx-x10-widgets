@@ -136,7 +136,12 @@ local function getFlightCount(wgt)
 
         -- backward compatibility for existing values saved only in GV9
         if gv8_msb == 0 and gv9_lsb > 999 then
-            return gv9_lsb
+            local legacy_count = math.min(gv9_lsb, MAX_SPLIT_COUNT)
+            local new_gv8_msb = math.floor(legacy_count / 1000)
+            local new_gv9_lsb = legacy_count % 1000
+            model.setGlobalVariable(7, 0, new_gv8_msb)
+            model.setGlobalVariable(8, 0, new_gv9_lsb)
+            return legacy_count
         end
 
         if gv9_lsb > 999 then
