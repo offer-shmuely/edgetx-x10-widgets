@@ -45,9 +45,9 @@ local options = {
     { "motor_channel"       , SOURCE, DEFAULT_MOTOR_CHANNEL_ID },
     { "text_color"          , COLOR, YELLOW},--, COLOR_THEME_PRIMARY2 },
     { "min_flight_duration" , VALUE, default_flight_starting_duration, -30, 120 },
-    { "use_gv8_msb"         , BOOL, 0},            -- 0=GV9 only (0-999), 1=GV8*1000+GV9
     { "enable_sounds"       , BOOL, 1},            -- 0=no sound, 1=play blip sound on increment & on flight end
     { "auto_debug"          , BOOL, 1},            -- show debug status on screen if widget is large enough
+    { "use_gv8"             , BOOL, 0},            -- 0=GV9 only (0-999), 1=GV8*1000+GV9
 }
 
 local function translate(name)
@@ -55,7 +55,7 @@ local function translate(name)
         arm_switch_id="Arm Switch Position",
         motor_channel="Motor Channel",
         min_flight_duration = "Min flight duration (sec)",
-        use_gv8_msb = "Use GV8 as MSB",
+        use_gv8 = "Use GV8 as MSB",
         text_color = "Text color",
         enable_sounds = "Enable sounds",
         triggerType = "Type",
