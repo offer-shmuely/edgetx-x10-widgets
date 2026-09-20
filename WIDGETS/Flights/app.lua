@@ -23,7 +23,8 @@
 -- Date: 2022-2024
 -- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
 -- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
--- warning: do NOT use this widget if model is using GV9!!!
+-- warning: do NOT use this widget if model is using GV9
+--          and (when option enabled) GV8
 -- history of flights is kept at /flights-history.csv
 
 -- widget assume the following:
@@ -32,6 +33,7 @@
 --   there is telemetry with one of the above [RSSI|RxBt|A1|A2|1RSS|2RSS|RQly]
 --   there is a safe switch (arm switch)
 --   global variable GV9 is free (i.e. not used)
+--   when "Use GV8 as MSB" option is enabled, GV8 should also be free
 
 -- state machine:
 --   ground --> flight-starting --> flight-on --> flight-ending --> ground
@@ -115,16 +117,46 @@ end
 --------------------------------------------------------------------------------------------------------
 -- get flight count
 local function getFlightCount(wgt)
-    -- get GV9 (index = 0) from Flight mode 0 (FM0)
-    local num_flights = model.getGlobalVariable(8, 0)
+    -- get GV9 (index = 8) from Flight mode 0 (FM0)
+    local gv9_lsb = model.getGlobalVariable(8, 0) or 0
+    if gv9_lsb < 0 then
+        gv9_lsb = 0
+    end
+
+    if wgt.options.use_gv8_msb == 1 then
+        -- get GV8 (index = 7) from Flight mode 0 (FM0)
+        local gv8_msb = model.getGlobalVariable(7, 0) or 0
+        if gv8_msb < 0 then
+            gv8_msb = 0
+        end
+
+        -- backward compatibility for existing values saved only in GV9
+        if gv8_msb == 0 and gv9_lsb > 999 then
+            return gv9_lsb
+        end
+
+        if gv9_lsb > 999 then
+            gv9_lsb = gv9_lsb % 1000
+        end
+        return gv8_msb * 1000 + gv9_lsb
+    end
 
     -- local model_name = model.getInfo().name
     -- local num_flights = wgt.flightCountHWriter.getValue(model_name)
-    return num_flights or 0
+    return math.min(gv9_lsb, 999)
 end
 
 local function setFlightCount(wgt, newCount)
-    model.setGlobalVariable(8, 0, newCount)
+    newCount = math.max(newCount or 0, 0)
+
+    if wgt.options.use_gv8_msb == 1 then
+        local gv8_msb = math.floor(newCount / 1000)
+        local gv9_lsb = newCount % 1000
+        model.setGlobalVariable(7, 0, gv8_msb)
+        model.setGlobalVariable(8, 0, gv9_lsb)
+    else
+        model.setGlobalVariable(8, 0, math.min(newCount, 999))
+    end
 
     -- local model_name = model.getInfo().name
     -- wgt.flightCountHWriter.setValue(model.getInfo().name, newCount)
