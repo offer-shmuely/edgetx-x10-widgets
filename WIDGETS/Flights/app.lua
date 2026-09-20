@@ -21,7 +21,7 @@
 -- Widget to count number of flights
 -- Offer Shmuely
 -- Date: 2022-2024
--- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicated that the model connected), and safe switch ON
+-- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicate that the model connected), and safe switch ON
 -- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
 -- warning: do NOT use this widget if model is using GV9
 --          and (when option enabled) GV8
@@ -60,6 +60,7 @@ local triggerTypeDefs = args[1]
 
 local app_name = "Flights"
 local app_ver = "2.2"
+local MAX_GV_VALUE = 1024
 
 local lvSCALE = lvgl.LCD_SCALE or 1
 local is800 = (LCD_W==800)
@@ -128,6 +129,8 @@ local function getFlightCount(wgt)
         local gv8_msb = model.getGlobalVariable(7, 0) or 0
         if gv8_msb < 0 then
             gv8_msb = 0
+        elseif gv8_msb > MAX_GV_VALUE then
+            gv8_msb = MAX_GV_VALUE
         end
 
         -- backward compatibility for existing values saved only in GV9
@@ -150,7 +153,7 @@ local function setFlightCount(wgt, newCount)
     newCount = math.max(newCount or 0, 0)
 
     if wgt.options.use_gv8_msb == 1 then
-        local gv8_msb = math.floor(newCount / 1000)
+        local gv8_msb = math.min(math.floor(newCount / 1000), MAX_GV_VALUE)
         local gv9_lsb = newCount % 1000
         model.setGlobalVariable(7, 0, gv8_msb)
         model.setGlobalVariable(8, 0, gv9_lsb)
@@ -162,6 +165,32 @@ local function setFlightCount(wgt, newCount)
     -- wgt.flightCountHWriter.setValue(model.getInfo().name, newCount)
 
     log("num_flights updated: " .. newCount)
+end
+
+local function migrateFlightCountStorage(wgt, prev_use_gv8_msb)
+    local curr_use_gv8_msb = wgt.options.use_gv8_msb
+    if prev_use_gv8_msb == 1 or curr_use_gv8_msb ~= 1 then
+        return
+    end
+
+    local gv9_legacy = model.getGlobalVariable(8, 0) or 0
+    if gv9_legacy < 0 then
+        gv9_legacy = 0
+    end
+
+    local gv8_current = model.getGlobalVariable(7, 0) or 0
+    if gv9_legacy > 999 then
+        -- split previous GV9-only value into GV8+GV9
+        local gv8_msb = math.min(math.floor(gv9_legacy / 1000), MAX_GV_VALUE)
+        local gv9_lsb = gv9_legacy % 1000
+        model.setGlobalVariable(7, 0, gv8_msb)
+        model.setGlobalVariable(8, 0, gv9_lsb)
+        log("Migrated GV9-only counter to GV8/GV9 split mode")
+    elseif gv8_current ~= 0 then
+        -- avoid using stale GV8 value when split mode is first enabled
+        model.setGlobalVariable(7, 0, 0)
+        log("Cleared stale GV8 value while enabling split mode")
+    end
 end
 
 local function doNewFlightTasks(wgt)
@@ -326,7 +355,9 @@ end
 local function update(wgt, options)
     if (wgt == nil) then return end
 
+    local prev_use_gv8_msb = (wgt.options and wgt.options.use_gv8_msb) or 0
     wgt.options = options
+    migrateFlightCountStorage(wgt, prev_use_gv8_msb)
     wgt.triggerDesc = triggerTypeDefs.info[wgt.options.triggerType].desc
     wgt.triggerFile = triggerTypeDefs.info[wgt.options.triggerType].file
     wgt.enable_sounds = wgt.options.enable_sounds
