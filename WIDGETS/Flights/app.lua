@@ -177,13 +177,6 @@ local function migrateFlightCountStorage(wgt, prev_use_gv8_msb)
         gv9_legacy = 0
     end
 
-    local gv8_current = model.getGlobalVariable(7, 0) or 0
-    if gv8_current < 0 then
-        gv8_current = 0
-    elseif gv8_current > MAX_GV_VALUE then
-        gv8_current = MAX_GV_VALUE
-    end
-
     if curr_use_gv8_msb ~= 1 then
         if prev_use_gv8_msb == 1 then
             model.setGlobalVariable(7, 0, 0)
@@ -199,10 +192,6 @@ local function migrateFlightCountStorage(wgt, prev_use_gv8_msb)
         model.setGlobalVariable(7, 0, gv8_msb)
         model.setGlobalVariable(8, 0, gv9_lsb)
         log("Migrated GV9-only counter to GV8/GV9 split mode")
-    elseif prev_use_gv8_msb == 0 and gv8_current ~= 0 then
-        -- split mode was just enabled, clear stale GV8 when legacy count is GV9-only
-        model.setGlobalVariable(7, 0, 0)
-        log("Cleared stale GV8 while enabling split mode")
     end
 end
 
