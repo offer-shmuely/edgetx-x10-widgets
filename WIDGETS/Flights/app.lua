@@ -179,6 +179,22 @@ local function migrateFlightCountStorage(wgt, prev_use_gv8_msb)
 
     if curr_use_gv8_msb ~= 1 then
         if prev_use_gv8_msb == 1 then
+            local gv9_lsb = model.getGlobalVariable(8, 0) or 0
+            if gv9_lsb < 0 then
+                gv9_lsb = 0
+            elseif gv9_lsb > 999 then
+                gv9_lsb = gv9_lsb % 1000
+            end
+
+            local gv8_msb = model.getGlobalVariable(7, 0) or 0
+            if gv8_msb < 0 then
+                gv8_msb = 0
+            elseif gv8_msb > MAX_GV_VALUE then
+                gv8_msb = MAX_GV_VALUE
+            end
+
+            local combined_count = gv8_msb * 1000 + gv9_lsb
+            model.setGlobalVariable(8, 0, math.min(combined_count, 999))
             model.setGlobalVariable(7, 0, 0)
         end
         return
