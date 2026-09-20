@@ -169,35 +169,6 @@ local function setFlightCount(wgt, newCount)
     log("num_flights updated: " .. newCount)
 end
 
-local function migrateFlightCountStorage(wgt)
-    local curr_use_gv8_msb = wgt.options.use_gv8_msb
-    if curr_use_gv8_msb ~= 1 then
-        return
-    end
-
-    local gv9_legacy = model.getGlobalVariable(8, 0) or 0
-    if gv9_legacy < 0 then
-        gv9_legacy = 0
-    end
-
-    local gv8_current = model.getGlobalVariable(7, 0) or 0
-    if gv8_current < 0 then
-        gv8_current = 0
-    elseif gv8_current > MAX_GV_VALUE then
-        gv8_current = MAX_GV_VALUE
-    end
-
-    if gv9_legacy > 999 and gv8_current == 0 then
-        -- split previous GV9-only value into GV8+GV9
-        gv9_legacy = math.min(gv9_legacy, MAX_SPLIT_COUNT)
-        local gv8_msb = math.floor(gv9_legacy / 1000)
-        local gv9_lsb = gv9_legacy % 1000
-        model.setGlobalVariable(7, 0, gv8_msb)
-        model.setGlobalVariable(8, 0, gv9_lsb)
-        log("Migrated GV9-only counter to GV8/GV9 split mode")
-    end
-end
-
 local function doNewFlightTasks(wgt)
     log("doNewFlightTasks()")
     local new_flight_count = wgt.status.last_flight_count + 1
@@ -361,7 +332,6 @@ local function update(wgt, options)
     if (wgt == nil) then return end
 
     wgt.options = options
-    migrateFlightCountStorage(wgt)
     wgt.triggerDesc = triggerTypeDefs.info[wgt.options.triggerType].desc
     wgt.triggerFile = triggerTypeDefs.info[wgt.options.triggerType].file
     wgt.enable_sounds = wgt.options.enable_sounds
