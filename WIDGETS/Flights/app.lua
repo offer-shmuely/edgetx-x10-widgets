@@ -160,6 +160,7 @@ local function setFlightCount(wgt, newCount)
         model.setGlobalVariable(7, 0, gv8_msb)
         model.setGlobalVariable(8, 0, gv9_lsb)
     else
+        model.setGlobalVariable(7, 0, 0)
         model.setGlobalVariable(8, 0, math.min(newCount, 999))
     end
 
@@ -169,11 +170,8 @@ local function setFlightCount(wgt, newCount)
     log("num_flights updated: " .. newCount)
 end
 
-local function migrateFlightCountStorage(wgt)
-    if wgt.options.use_gv8_msb ~= 1 then
-        return
-    end
-
+local function migrateFlightCountStorage(wgt, prev_use_gv8_msb)
+    local curr_use_gv8_msb = wgt.options.use_gv8_msb
     local gv9_legacy = model.getGlobalVariable(8, 0) or 0
     if gv9_legacy < 0 then
         gv9_legacy = 0
@@ -186,7 +184,14 @@ local function migrateFlightCountStorage(wgt)
         gv8_current = MAX_GV_VALUE
     end
 
-    if gv9_legacy > 999 and gv8_current == 0 then
+    if curr_use_gv8_msb ~= 1 then
+        if prev_use_gv8_msb == 1 then
+            model.setGlobalVariable(7, 0, 0)
+        end
+        return
+    end
+
+    if gv9_legacy > 999 then
         -- split previous GV9-only value into GV8+GV9
         gv9_legacy = math.min(gv9_legacy, MAX_SPLIT_COUNT)
         local gv8_msb = math.floor(gv9_legacy / 1000)
@@ -194,6 +199,10 @@ local function migrateFlightCountStorage(wgt)
         model.setGlobalVariable(7, 0, gv8_msb)
         model.setGlobalVariable(8, 0, gv9_lsb)
         log("Migrated GV9-only counter to GV8/GV9 split mode")
+    elseif prev_use_gv8_msb == 0 and gv8_current ~= 0 then
+        -- split mode was just enabled, clear stale GV8 when legacy count is GV9-only
+        model.setGlobalVariable(7, 0, 0)
+        log("Cleared stale GV8 while enabling split mode")
     end
 end
 
@@ -359,8 +368,9 @@ end
 local function update(wgt, options)
     if (wgt == nil) then return end
 
+    local prev_use_gv8_msb = (wgt.options and wgt.options.use_gv8_msb) or 0
     wgt.options = options
-    migrateFlightCountStorage(wgt)
+    migrateFlightCountStorage(wgt, prev_use_gv8_msb)
     wgt.triggerDesc = triggerTypeDefs.info[wgt.options.triggerType].desc
     wgt.triggerFile = triggerTypeDefs.info[wgt.options.triggerType].file
     wgt.enable_sounds = wgt.options.enable_sounds
