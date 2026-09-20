@@ -60,8 +60,6 @@ local triggerTypeDefs = args[1]
 
 local app_name = "Flights"
 local app_ver = "2.2"
-local MAX_GV_VALUE = 999
-
 local lvSCALE = lvgl.LCD_SCALE or 1
 local is800 = (LCD_W==800)
 
@@ -130,8 +128,6 @@ local function getFlightCount(wgt)
         gv8_msb = model.getGlobalVariable(7, 0) or 0
         if gv8_msb < 0 then
             gv8_msb = 0
-        elseif gv8_msb > MAX_GV_VALUE then
-            gv8_msb = MAX_GV_VALUE
         end
     end
 
@@ -146,27 +142,21 @@ end
 
 local function setFlightCount(wgt, newCount)
     newCount = math.max(newCount or 0, 0)
-    local persistedCount
 
     if wgt.options.use_gv8 == 1 then
         local gv8_msb = math.floor(newCount / 1000)
         local gv9_lsb = newCount % 1000
-        if gv8_msb > MAX_GV_VALUE then
-            gv8_msb = MAX_GV_VALUE
-            gv9_lsb = 999
-        end
         model.setGlobalVariable(7, 0, gv8_msb)
         model.setGlobalVariable(8, 0, gv9_lsb)
-        persistedCount = gv8_msb * 1000 + gv9_lsb
     else
-        persistedCount = math.min(newCount, 999)
-        model.setGlobalVariable(8, 0, persistedCount)
+        newCount = math.min(newCount, 999)
+        model.setGlobalVariable(8, 0, newCount)
     end
 
     -- local model_name = model.getInfo().name
     -- wgt.flightCountHWriter.setValue(model.getInfo().name, newCount)
 
-    log("num_flights updated: " .. persistedCount)
+    log("num_flights updated: " .. newCount)
 end
 
 local function doNewFlightTasks(wgt)
