@@ -116,7 +116,7 @@ end
 -- get flight count
 local function getFlightCount(wgt)
     -- get GV9 (index = 8) from Flight mode 0 (FM0)
-    local gv9_lsb = model.getGlobalVariable(8, 0) or 0
+    local gv9_lsb = model.getGlobalVariable(9-1, 0) or 0
     if gv9_lsb < 0 then
         gv9_lsb = 0
     end
@@ -124,7 +124,7 @@ local function getFlightCount(wgt)
     local gv8_msb = 0
     if wgt.options.use_gv8 == 1 then
         -- get GV8 (index = 7) from Flight mode 0 (FM0)
-        gv8_msb = model.getGlobalVariable(7, 0) or 0
+        gv8_msb = model.getGlobalVariable(8-1, 0) or 0
         if gv8_msb < 0 then
             gv8_msb = 0
         end
@@ -140,11 +140,11 @@ local function setFlightCount(wgt, newCount)
     if wgt.options.use_gv8 == 1 then
         local gv8_msb = math.floor(newCount / 1000)
         local gv9_lsb = newCount % 1000
-        model.setGlobalVariable(7, 0, gv8_msb)
-        model.setGlobalVariable(8, 0, gv9_lsb)
+        model.setGlobalVariable(8-1, 0, gv8_msb)
+        model.setGlobalVariable(9-1, 0, gv9_lsb)
     else
         newCount = math.min(newCount, 999)
-        model.setGlobalVariable(8, 0, newCount)
+        model.setGlobalVariable(9-1, 0, newCount)
     end
 
     -- local model_name = model.getInfo().name
