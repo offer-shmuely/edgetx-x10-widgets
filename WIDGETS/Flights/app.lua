@@ -32,7 +32,7 @@
 --   there is telemetry with one of the above [RSSI|RxBt|A1|A2|1RSS|2RSS|RQly]
 --   there is a safe switch (arm switch)
 --   global variable GV9 is free (i.e. not used)
---   when "Use GV8 as MSB" option is enabled, GV8 should also be free
+--   when "count above 1000 (use GV8)" option is enabled, GV8 should also be free
 
 -- state machine:
 --   ground --> flight-starting --> flight-on --> flight-ending --> ground
@@ -130,9 +130,8 @@ local function getFlightCount(wgt)
         end
     end
 
-    -- local model_name = model.getInfo().name
-    -- local num_flights = wgt.flightCountHWriter.getValue(model_name)
-    return gv8_msb * 1000 + gv9_lsb
+    local num_flights = gv8_msb * 1000 + gv9_lsb
+    return num_flights
 end
 
 local function setFlightCount(wgt, newCount)
