@@ -20,11 +20,10 @@
 
 -- Widget to count number of flights
 -- Offer Shmuely
--- Date: 2022-2024
+-- Date: 2022-2026
 -- flight considered successful: after 30sec the engine above 25%, and telemetry is active (to indicate that the model connected), and safe switch ON
 -- flight considered ended: after 8sec of battery disconnection (detected by no telemetry)
--- warning: do NOT use this widget if model is using GV9
---          and (when option enabled) GV8
+-- warning: do NOT use this widget if model is using GV9 or GV8
 -- history of flights is kept at /flights-history.csv
 
 -- widget assume the following:
@@ -59,7 +58,7 @@ local args = {...}
 local triggerTypeDefs = args[1]
 
 local app_name = "Flights"
-local app_ver = "2.2"
+local app_ver = "2.3"
 local lvSCALE = lvgl.LCD_SCALE or 1
 local is800 = (LCD_W==800)
 
