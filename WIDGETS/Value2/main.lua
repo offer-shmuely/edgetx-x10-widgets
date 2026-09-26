@@ -1,7 +1,7 @@
 local app_name = "Value2"
 
 local options = {
-    { "Source",      SOURCE, {"Curr", "RQly", "1RSS", "cell","VFAS","RxBt"} },
+    { "Source",      SOURCE, {"Curr", "RQly", "1RSS", "cell","VFAS","Volt", "RxBt"} },
     { "TextColor",   COLOR,  YELLOW },
     { "Suffix",      STRING, "" },
     { "Show_MinMax", BOOL,   1  },

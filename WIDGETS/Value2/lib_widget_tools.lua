@@ -131,6 +131,7 @@ function M.isTelemetryAvailableOld()
         if not tele_src then tele_src = getFieldInfo("VFR%") end
         if not tele_src then tele_src = getFieldInfo("VFR") end
         if not tele_src then tele_src = getFieldInfo("TRSS") end
+        if not tele_src then tele_src = getFieldInfo("Volt") end
         if not tele_src then tele_src = getFieldInfo("RxBt") end
         if not tele_src then tele_src = getFieldInfo("A1") end
 

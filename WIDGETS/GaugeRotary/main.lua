@@ -73,7 +73,7 @@ local FONT_6 = SMLSIZE -- 6px
 
 
 local lib_sensors = loadScript("/WIDGETS/" .. app_name .. "/lib_sensors.lua", "btd")(m_log,app_name)
-local DEFAULT_SOURCE = lib_sensors.findSourceId( {"RQLY", "VFR", "cell","cels","RSSI","RxBt"})
+local DEFAULT_SOURCE = lib_sensors.findSourceId( {"RQLY", "VFR", "cell","cels","RSSI","Volt", "RxBt"})
 
 local _options = {
     { "Source", SOURCE, DEFAULT_SOURCE }, -- RSSI
@@ -110,7 +110,7 @@ local function setAutoMinMax(wgt)
     local sourceName = wgt.tools.getSourceNameCleaned(wgt.options.Source)
     if (sourceName == nil) then return end
 
-    -- workaround for bug in getFiledInfo()
+    -- workaround for bug in getFieldInfo()
     if string.byte(string.sub(sourceName, 1, 1)) > 127 then
         sourceName = string.sub(sourceName, 2, -1) -- ???? why?
     end

@@ -2,7 +2,7 @@
 local app_name = "BattAnalog"
 
 local options = {
-    {"sensor",          SOURCE,     {"cell","VFAS","RxBt","A1", "A2"} },
+    {"sensor",          SOURCE,     {"cell","Volt", "VFAS","RxBt","A1", "A2"} },
     {"batt_type",       CHOICE, 1 , {"LiPo", "LiPo-HV (high voltage)", "Li-Ion", "LifePO4"} },
     {"cbCellCount",     CHOICE, 1 , {"Auto Detection", "1 cells","2 cells","3 cells","4 cells","5 cells","6 cells","7 cells","8 cells","9 cells","10 cells", "11 cells","12 cells","13 cells","14 cells"} },
     {"cbShowVoltage",   CHOICE, 1 , {"Single Cell (average)", "Total Voltage"} },

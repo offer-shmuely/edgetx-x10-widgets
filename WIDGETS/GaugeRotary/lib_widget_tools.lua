@@ -124,6 +124,7 @@ function M.isTelemetryAvailableOld()
         if not tele_src then tele_src = getFieldInfo("RQly") end
         if not tele_src then tele_src = getFieldInfo("VFR%") end
         if not tele_src then tele_src = getFieldInfo("TRSS") end
+        if not tele_src then tele_src = getFieldInfo("Volt") end
         if not tele_src then tele_src = getFieldInfo("RxBt") end
         if not tele_src then tele_src = getFieldInfo("A1") end
 
@@ -252,8 +253,8 @@ function M.isSensorExist(sensorName)
  end
 
 ---------------------------------------------------------------------------------------------------
--- workaround for bug in getFiledInfo()  -- ???? why?
-function M.cleanInvalidCharFromGetFiledInfo(sourceName)
+-- workaround for bug in getFieldInfo()  -- ???? why?
+function M.cleanInvalidCharFromGetFieldInfo(sourceName)
      if string.byte(string.sub(sourceName, 1, 1)) > 127 then
         sourceName = string.sub(sourceName, 2, -1)
     end
@@ -269,7 +270,7 @@ function M.getSourceNameCleaned(source)
     if (sourceName == nil) then
         return "N/A"
     end
-    local sourceName = M.cleanInvalidCharFromGetFiledInfo(sourceName)
+    local sourceName = M.cleanInvalidCharFromGetFieldInfo(sourceName)
     return sourceName
 end
 
@@ -318,7 +319,7 @@ end
 
 function M.getFontSize(wgt, txt, max_w, max_h, max_font_size)
     log("getFontSize() [%s] %dx%d", txt, max_w, max_h)
-    local maxFontIndex = M.getFontIndex(max_font_size, nil)
+    local maxFontIndex = M.getFontIndex(max_font_size or FS.FONT_38, nil)
 
     if M.getFontIndex(FONT_38, nil) <= maxFontIndex then
         local w, h, v_offset = M.lcdSizeTextFixed(txt, FONT_38)
